@@ -1,8 +1,5 @@
 use std::iter::Map;
-use std::collections::HashSet;
-use std::iter::FromIterator;
-use rand::{seq::SliceRandom, thread_rng};
-use rand::rngs::ThreadRng;
+use rand::{seq::SliceRandom};
 
 const BOARD_SIZE: usize = 25;
 
@@ -30,4 +27,9 @@ struct Game {
     board: [[Card; 5]; 5],
     players: Map<Team, Vec<Player>>,
     turn: Team,
+}
+
+fn generate_board_words(dictionary: Vec<String>) -> Vec<String> {
+    let mut rng = rand::thread_rng();
+    dictionary.choose_multiple(&mut rng, 25).cloned().collect()
 }
