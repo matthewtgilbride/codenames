@@ -22,7 +22,10 @@ struct CustomOutput {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    SimpleLogger::new().with_level(LevelFilter::Debug).init().unwrap();
+    SimpleLogger::new()
+        .with_level(LevelFilter::Debug)
+        .init()
+        .unwrap();
     lambda!(handler);
 
     Ok(())

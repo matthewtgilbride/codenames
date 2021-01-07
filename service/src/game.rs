@@ -1,28 +1,36 @@
-use std::iter::Map;
-use rand::{seq::SliceRandom};
-use std::collections::{HashSet, HashMap};
-use std::iter::FromIterator;
+use rand::seq::SliceRandom;
 use std::cell::Cell;
+use std::collections::{HashMap, HashSet};
+use std::iter::FromIterator;
+use std::iter::Map;
 
 const BOARD_SIZE: usize = 25;
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum Team {
     Red,
-    Blue
+    Blue,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum CardColor {
     Team(Team),
     Neutral,
-    Death
+    Death,
+}
+
+fn max_card_colors(card_color: CardColor) -> usize {
+    match card_color {
+        CardColor::Death => 1,
+        CardColor::Team(_) => 9,
+        _ => 8,
+    }
 }
 
 struct Card {
     covered: Cell<bool>,
     color: CardColor,
-    word: String
+    word: String,
 }
 
 struct Player {
@@ -31,7 +39,7 @@ struct Player {
 
 struct TeamMember {
     is_spy_master: bool,
-    player: Player
+    player: Player,
 }
 
 struct Game {
@@ -42,7 +50,7 @@ struct Game {
 
 fn generate_board_words(dictionary: HashSet<String>) -> Result<HashSet<String>, &'static str> {
     if dictionary.len() < (BOARD_SIZE + 1) {
-        return Err("dictionary must have at least 26 words")
+        return Err("dictionary must have at least 26 words");
     }
     let mut rng = rand::thread_rng();
     let as_vector: Vec<String> = dictionary.into_iter().collect();
@@ -56,6 +64,9 @@ fn random_color(available_colors: HashSet<CardColor>) -> CardColor {
     *as_vector.choose(&mut rng).unwrap_or(&CardColor::Neutral)
 }
 
-fn card_color_count(board: [Card; 25], color: CardColor) -> usize {
-    board.iter().filter(|card| card.color == color).count()
+fn card_color_count(partial_board: Vec<Card>, color: CardColor) -> usize {
+    partial_board
+        .iter()
+        .filter(|card| card.color == color)
+        .count()
 }
