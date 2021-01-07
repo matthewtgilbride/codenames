@@ -31,9 +31,12 @@ struct Game {
     turn: Team,
 }
 
-fn generate_board_words(dictionary: HashSet<String>) -> HashSet<String> {
+fn generate_board_words(dictionary: HashSet<String>) -> Result<HashSet<String>, &'static str> {
+    if dictionary.len() < (BOARD_SIZE + 1) {
+        return Err("dictionary must have at least 26 words")
+    }
     let mut rng = rand::thread_rng();
     let as_vector: Vec<String> = dictionary.into_iter().collect();
     let random_subset: Vec<String> = as_vector.choose_multiple(&mut rng, 25).cloned().collect();
-    HashSet::from_iter(random_subset.iter().cloned())
+    Ok(HashSet::from_iter(random_subset.iter().cloned()))
 }
