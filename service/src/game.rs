@@ -64,6 +64,11 @@ pub mod api {
     }
 
     pub fn generate_board(words: [String; 25]) -> Result<[Card; 25], &'static str> {
+        let first_team: Team = vec![Team::Blue, Team::Red]
+            .choose(&mut thread_rng())
+            .unwrap()
+            .clone();
+
         let mut board: Vec<Card> = Vec::new();
 
         words.iter().for_each(|word| {
@@ -71,7 +76,7 @@ pub mod api {
                 .to_vec()
                 .iter()
                 .filter(|card_color| {
-                    card_color_count(&board, card_color) < max_card_color(card_color)
+                    card_color_count(&board, card_color) < max_card_color(card_color, &first_team)
                 })
                 .cloned()
                 .collect();
@@ -107,11 +112,16 @@ pub mod api {
             .count()
     }
 
-    fn max_card_color(card_color: &CardColor) -> usize {
+    fn max_card_color(card_color: &CardColor, first_team: &Team) -> usize {
         match card_color {
+            CardColor::Team(team) => {
+                if team == first_team {
+                    return 9;
+                }
+                8
+            }
+            CardColor::Neutral => 7,
             CardColor::Death => 1,
-            CardColor::Team(_) => 9,
-            _ => 8,
         }
     }
 }
