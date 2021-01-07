@@ -8,20 +8,27 @@ use std::iter::Map;
 
 const BOARD_SIZE: usize = 25;
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 enum Team {
     Red,
     Blue,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 enum CardColor {
     Team(Team),
     Neutral,
     Death,
 }
 
-fn max_card_color(card_color: CardColor) -> usize {
+const ALL_CARD_COLORS: [CardColor; 4] = [
+    CardColor::Team(Team::Blue),
+    CardColor::Team(Team::Red),
+    CardColor::Neutral,
+    CardColor::Death,
+];
+
+fn max_card_color(card_color: &CardColor) -> usize {
     match card_color {
         CardColor::Death => 1,
         CardColor::Team(_) => 9,
@@ -29,6 +36,7 @@ fn max_card_color(card_color: CardColor) -> usize {
     }
 }
 
+#[derive(Debug)]
 struct Card {
     covered: Cell<bool>,
     color: CardColor,
@@ -70,15 +78,33 @@ fn random_color(available_colors: HashSet<CardColor>) -> CardColor {
     *as_vector.choose(&mut thread_rng()).unwrap()
 }
 
-fn card_color_count(partial_board: Vec<Card>, color: CardColor) -> usize {
+fn card_color_count(partial_board: &Vec<Card>, color: &CardColor) -> usize {
     partial_board
         .iter()
-        .filter(|card| card.color == color)
+        .filter(|card| card.color == *color)
         .count()
 }
 
 fn generate_board(dictionary: HashSet<String>) -> Result<[Card; 25], &'static str> {
     let words = generate_board_words(dictionary).unwrap();
     let mut board: Vec<Card> = Vec::new();
-    Err("not implemented")
+
+    words.iter().for_each(|word| {
+        let available_colors: HashSet<CardColor> = ALL_CARD_COLORS
+            .to_vec()
+            .iter()
+            .filter(|color| card_color_count(&board, color) < max_card_color(color))
+            .cloned()
+            .collect();
+
+        let color = random_color(available_colors);
+
+        board.push(Card {
+            covered: Cell::new(false),
+            color,
+            word: word.clone(),
+        })
+    });
+
+    Ok(board.try_into().unwrap())
 }
