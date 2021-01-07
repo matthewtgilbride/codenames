@@ -1,0 +1,17 @@
+[package]
+name = "service"
+version = "0.1.0"
+authors = ["Matthew T. Gilbride <mgilbride@chariotsolutions.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+lambda_runtime = "0.2.1"
+log = "0.4.11"
+serde = "1.0.118"
+serde_derive = "1.0.118"
+simple-error = "0.2.2"
+simple_logger = "1.11.0"
+rand = "0.8.1"
+
