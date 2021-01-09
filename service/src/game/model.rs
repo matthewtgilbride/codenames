@@ -16,7 +16,7 @@ pub enum CardColor {
     Death,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Card {
     pub covered: Cell<bool>,
     pub color: CardColor,

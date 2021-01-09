@@ -20,7 +20,7 @@ pub fn generate_board_words(dictionary: HashSet<String>) -> Result<[String; 25],
     Ok(random_subset.try_into().unwrap())
 }
 
-pub fn generate_board(words: [String; 25]) -> Result<[Card; 25], &'static str> {
+pub fn generate_board(words: [String; 25]) -> Result<([Card; 25], Team), &'static str> {
     let first_team: Team = vec![Team::Blue, Team::Red]
         .choose(&mut thread_rng())
         .unwrap()
@@ -47,7 +47,7 @@ pub fn generate_board(words: [String; 25]) -> Result<[Card; 25], &'static str> {
         })
     });
 
-    Ok(board.try_into().unwrap())
+    Ok((board.try_into().unwrap(), first_team))
 }
 
 fn random_color(available_colors: HashSet<CardColor>) -> CardColor {
@@ -85,11 +85,44 @@ fn max_card_color(card_color: &CardColor, first_team: &Team) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rand::distributions::Alphanumeric;
+    use rand::Rng;
+    use std::iter;
+    use std::iter::Repeat;
+
     #[test]
     fn test_max_card_color() {
         assert_eq!(9, max_card_color(&CardColor::Team(Team::Blue), &Team::Blue));
         assert_eq!(8, max_card_color(&CardColor::Team(Team::Red), &Team::Blue));
         assert_eq!(7, max_card_color(&CardColor::Neutral, &Team::Blue));
         assert_eq!(1, max_card_color(&CardColor::Death, &Team::Blue));
+    }
+
+    #[test]
+    fn test_generate_board() {
+        let result = generate_board(generate_board_words(rand_dictionary(50)).unwrap());
+        let (board, first_team) = result.unwrap();
+        let as_vec = board.to_vec();
+        let death_count = card_color_count(&as_vec, &CardColor::Death);
+        let neutral_count = card_color_count(&as_vec, &CardColor::Neutral);
+        let blue_count = card_color_count(&as_vec, &CardColor::Team(Team::Blue));
+        let red_count = card_color_count(&as_vec, &CardColor::Team(Team::Red));
+        assert_eq!(1, death_count);
+        assert_eq!(7, neutral_count);
+        assert_eq!(9, if first_team == Team::Blue { blue_count } else { red_count });
+        assert_eq!(8, if first_team == Team::Blue { red_count } else { blue_count });
+    }
+
+    fn rand_dictionary(size: usize) -> HashSet<String> {
+        iter::repeat(0)
+            .take(size)
+            .map(|_| {
+                thread_rng()
+                    .sample_iter(&Alphanumeric)
+                    .take(30)
+                    .map(char::from)
+                    .collect()
+            })
+            .collect()
     }
 }
