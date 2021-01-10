@@ -50,6 +50,6 @@ mod tests {
             },
         ];
 
-        Game::new(board, turn, players)
+        Game::new("test".to_string(), board, turn, players).unwrap()
     }
 }

@@ -41,7 +41,6 @@ pub fn generate_board(words: [String; 25]) -> Result<([Card; 25], Team), &'stati
         let color = random_color(available_colors);
 
         board.push(Card {
-            covered: false,
             color,
             word: word.clone(),
         })

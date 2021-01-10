@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub const BOARD_SIZE: usize = 25;
 
@@ -17,7 +17,6 @@ pub enum CardColor {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Card {
-    pub covered: bool,
     pub color: CardColor,
     pub word: String,
 }
@@ -37,6 +36,7 @@ pub struct Guess {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Game {
+    pub name: String,
     pub board: [Card; 25],
     pub turn: Team,
     pub players: Vec<Player>,
@@ -44,20 +44,39 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(board: [Card; 25], turn: Team, players: Vec<Player>) -> Game {
-        Game {
+    pub fn new(
+        name: String,
+        board: [Card; 25],
+        turn: Team,
+        players: Vec<Player>,
+    ) -> Result<Game, String> {
+        let unique_players: HashSet<String> = players
+            .iter()
+            .map(|Player { name, .. }| name.clone())
+            .collect();
+        if unique_players.len() < players.len() {
+            return Err("player names must be unique".to_string());
+        }
+        Ok(Game {
+            name,
             board,
             turn,
             players,
             guesses: Vec::new(),
-        }
+        })
     }
 
-    pub fn add_player(self, player: Player) -> Game {
-        Game {
-            players: [&[player], &self.players[..]].concat(),
-            ..self.clone()
-        }
+    pub fn add_player(self, player: Player) -> Result<Game, String> {
+        self.players
+            .iter()
+            .find(|Player { name, .. }| *name == player.name)
+            .map(|_| Err("player names must be unique".to_string()))
+            .unwrap_or_else(|| {
+                Ok(Game {
+                    players: [&[player], &self.players[..]].concat(),
+                    ..self.clone()
+                })
+            })
     }
 
     pub fn remove_player(self, player: Player) -> Game {
@@ -65,18 +84,24 @@ impl Game {
             players: self
                 .players
                 .iter()
-                .filter(|&p| p != &player)
+                .filter(|Player { name, .. }| *name != player.name)
                 .cloned()
                 .collect(),
             ..self.clone()
         }
     }
 
-    pub fn add_guess(self, guess: Guess) -> Game {
-        Game {
-            guesses: [&[guess], &self.guesses[..]].concat(),
-            ..self.clone()
-        }
+    pub fn guess(self, guess: Guess) -> Result<Game, String> {
+        self.guesses
+            .iter()
+            .find(|Guess { board_index, .. }| *board_index == guess.board_index)
+            .map(|_| Err("card has already been guessed".to_string()))
+            .unwrap_or_else(|| {
+                Ok(Game {
+                    guesses: [&[guess], &self.guesses[..]].concat(),
+                    ..self.clone()
+                })
+            })
     }
 
     pub fn undo_guess(self) -> Game {
@@ -100,7 +125,7 @@ mod tests {
             team: Team::Blue,
             name: "quz".to_string(),
             is_spy_master: false,
-        });
+        }).unwrap();
 
         assert_eq!(game_clone.players.len() + 1, updated_game.players.len())
     }
