@@ -5,9 +5,9 @@ use std::cell::Cell;
 use std::collections::HashSet;
 use std::convert::TryInto;
 
-pub fn generate_board_words(dictionary: HashSet<String>) -> Result<[String; 25], &'static str> {
+pub fn generate_board_words(dictionary: HashSet<String>) -> Result<[String; 25], String> {
     if dictionary.len() < (BOARD_SIZE + 1) {
-        return Err("dictionary must have at least 26 words");
+        return Err("dictionary must have at least 26 words".to_string());
     }
 
     let as_vector: Vec<String> = dictionary.into_iter().collect();
@@ -20,7 +20,7 @@ pub fn generate_board_words(dictionary: HashSet<String>) -> Result<[String; 25],
     Ok(random_subset.try_into().unwrap())
 }
 
-pub fn generate_board(words: [String; 25]) -> Result<([Card; 25], Team), &'static str> {
+pub fn generate_board(words: [String; 25]) -> Result<([Card; 25], Team), String> {
     let first_team: Team = vec![Team::Blue, Team::Red]
         .choose(&mut thread_rng())
         .unwrap()

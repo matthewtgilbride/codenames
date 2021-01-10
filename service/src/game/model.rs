@@ -66,7 +66,7 @@ impl Game {
         })
     }
 
-    pub fn add_player(self, player: Player) -> Result<Game, String> {
+    pub fn join(self, player: Player) -> Result<Game, String> {
         self.players
             .iter()
             .find(|Player { name, .. }| *name == player.name)
@@ -79,12 +79,12 @@ impl Game {
             })
     }
 
-    pub fn remove_player(self, player: Player) -> Game {
+    pub fn leave(self, player_name: &str) -> Game {
         Game {
             players: self
                 .players
                 .iter()
-                .filter(|Player { name, .. }| *name != player.name)
+                .filter(|Player { name, .. }| *name != player_name)
                 .cloned()
                 .collect(),
             ..self.clone()
@@ -118,27 +118,25 @@ mod tests {
     use crate::game::tests::rand_game;
 
     #[test]
-    fn add_player() {
+    fn join() {
         let game = rand_game();
         let game_clone = game.clone();
-        let updated_game = game.add_player(Player {
-            team: Team::Blue,
-            name: "quz".to_string(),
-            is_spy_master: false,
-        }).unwrap();
+        let updated_game = game
+            .join(Player {
+                team: Team::Blue,
+                name: "quz".to_string(),
+                is_spy_master: false,
+            })
+            .unwrap();
 
         assert_eq!(game_clone.players.len() + 1, updated_game.players.len())
     }
 
     #[test]
-    fn remove_player() {
+    fn leave() {
         let game = rand_game();
         let game_clone = game.clone();
-        let updated_game = game.remove_player(Player {
-            team: Team::Blue,
-            name: "foo".to_string(),
-            is_spy_master: true,
-        });
+        let updated_game = game.leave("foo");
 
         assert_eq!(game_clone.players.len() - 1, updated_game.players.len())
     }
