@@ -41,7 +41,7 @@ pub fn generate_board(words: [String; 25]) -> Result<([Card; 25], Team), &'stati
         let color = random_color(available_colors);
 
         board.push(Card {
-            covered: Cell::new(false),
+            covered: false,
             color,
             word: word.clone(),
         })
@@ -85,22 +85,29 @@ fn max_card_color(card_color: &CardColor, first_team: &Team) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::game::tests::rand_dictionary;
     use rand::distributions::Alphanumeric;
     use rand::Rng;
     use std::iter;
     use std::iter::Repeat;
 
     #[test]
-    fn test_max_card_color() {
-        assert_eq!(9, max_card_color(&CardColor::Team(Team::Blue), &Team::Blue));
-        assert_eq!(8, max_card_color(&CardColor::Team(Team::Red), &Team::Blue));
-        assert_eq!(7, max_card_color(&CardColor::Neutral, &Team::Blue));
-        assert_eq!(1, max_card_color(&CardColor::Death, &Team::Blue));
+    fn max_card_color() {
+        assert_eq!(
+            9,
+            super::max_card_color(&CardColor::Team(Team::Blue), &Team::Blue)
+        );
+        assert_eq!(
+            8,
+            super::max_card_color(&CardColor::Team(Team::Red), &Team::Blue)
+        );
+        assert_eq!(7, super::max_card_color(&CardColor::Neutral, &Team::Blue));
+        assert_eq!(1, super::max_card_color(&CardColor::Death, &Team::Blue));
     }
 
     #[test]
-    fn test_generate_board() {
-        let result = generate_board(generate_board_words(rand_dictionary(50)).unwrap());
+    fn generate_board() {
+        let result = super::generate_board(generate_board_words(rand_dictionary(50)).unwrap());
         let (board, first_team) = result.unwrap();
         let as_vec = board.to_vec();
         let death_count = card_color_count(&as_vec, &CardColor::Death);
@@ -109,20 +116,21 @@ mod tests {
         let red_count = card_color_count(&as_vec, &CardColor::Team(Team::Red));
         assert_eq!(1, death_count);
         assert_eq!(7, neutral_count);
-        assert_eq!(9, if first_team == Team::Blue { blue_count } else { red_count });
-        assert_eq!(8, if first_team == Team::Blue { red_count } else { blue_count });
-    }
-
-    fn rand_dictionary(size: usize) -> HashSet<String> {
-        iter::repeat(0)
-            .take(size)
-            .map(|_| {
-                thread_rng()
-                    .sample_iter(&Alphanumeric)
-                    .take(30)
-                    .map(char::from)
-                    .collect()
-            })
-            .collect()
+        assert_eq!(
+            9,
+            if first_team == Team::Blue {
+                blue_count
+            } else {
+                red_count
+            }
+        );
+        assert_eq!(
+            8,
+            if first_team == Team::Blue {
+                red_count
+            } else {
+                blue_count
+            }
+        );
     }
 }
