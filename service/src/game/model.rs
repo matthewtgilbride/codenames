@@ -1,40 +1,42 @@
+use serde::{Deserialize, Serialize};
+use serde_json;
 use std::collections::{HashMap, HashSet};
 
 pub const BOARD_SIZE: usize = 25;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Team {
     Blue,
     Red,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CardColor {
     Team(Team),
     Neutral,
     Death,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Card {
     pub color: CardColor,
     pub word: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Player {
     pub team: Team,
     pub name: String,
     pub is_spy_master: bool,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Guess {
     pub team: Team,
     pub board_index: usize,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Game {
     pub name: String,
     pub board: [Card; 25],
@@ -139,5 +141,13 @@ mod tests {
         let updated_game = game.leave("foo");
 
         assert_eq!(game_clone.players.len() - 1, updated_game.players.len())
+    }
+
+    #[test]
+    fn serialize() {
+        let game = rand_game();
+        let j = serde_json::to_string(&game).unwrap();
+
+        println!("{}", j);
     }
 }

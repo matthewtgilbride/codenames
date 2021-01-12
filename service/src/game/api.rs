@@ -5,21 +5,6 @@ use std::cell::Cell;
 use std::collections::HashSet;
 use std::convert::TryInto;
 
-pub fn generate_board_words(dictionary: HashSet<String>) -> Result<[String; 25], String> {
-    if dictionary.len() < (BOARD_SIZE + 1) {
-        return Err("dictionary must have at least 26 words".to_string());
-    }
-
-    let as_vector: Vec<String> = dictionary.into_iter().collect();
-
-    let random_subset: Vec<String> = as_vector
-        .choose_multiple(&mut thread_rng(), 25)
-        .cloned()
-        .collect();
-
-    Ok(random_subset.try_into().unwrap())
-}
-
 pub fn generate_board(words: [String; 25]) -> Result<([Card; 25], Team), String> {
     let first_team: Team = vec![Team::Blue, Team::Red]
         .choose(&mut thread_rng())
@@ -47,6 +32,21 @@ pub fn generate_board(words: [String; 25]) -> Result<([Card; 25], Team), String>
     });
 
     Ok((board.try_into().unwrap(), first_team))
+}
+
+pub fn generate_board_words(dictionary: HashSet<String>) -> Result<[String; 25], String> {
+    if dictionary.len() < (BOARD_SIZE + 1) {
+        return Err("dictionary must have at least 26 words".to_string());
+    }
+
+    let as_vector: Vec<String> = dictionary.into_iter().collect();
+
+    let random_subset: Vec<String> = as_vector
+        .choose_multiple(&mut thread_rng(), 25)
+        .cloned()
+        .collect();
+
+    Ok(random_subset.try_into().unwrap())
 }
 
 fn random_color(available_colors: HashSet<CardColor>) -> CardColor {
