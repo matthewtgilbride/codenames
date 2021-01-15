@@ -131,7 +131,15 @@ mod tests {
             })
             .unwrap();
 
-        assert_eq!(game_clone.players.len() + 1, updated_game.players.len())
+        assert_eq!(game_clone.players.len() + 1, updated_game.players.len());
+
+        let failed_update = updated_game.join(Player {
+            team: Team::Red,
+            name: "quz".to_string(),
+            is_spy_master: true,
+        });
+
+        assert!(failed_update.is_err())
     }
 
     #[test]
@@ -149,5 +157,26 @@ mod tests {
         let j = serde_json::to_string(&game).unwrap();
 
         println!("{}", j);
+    }
+
+    #[test]
+    fn guess() {
+        let game: Game = rand_game();
+        let game_clone = game.clone();
+        let updated_game = game
+            .guess(Guess {
+                team: Team::Blue,
+                board_index: 0,
+            })
+            .unwrap();
+
+        assert_eq!(game_clone.guesses.len() + 1, updated_game.guesses.len());
+
+        let failed_update = updated_game.guess(Guess {
+            team: Team::Blue,
+            board_index: 0,
+        });
+
+        assert!(failed_update.is_err())
     }
 }
