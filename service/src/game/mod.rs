@@ -1,4 +1,5 @@
 pub mod api;
+pub mod dictionary;
 pub mod model;
 
 #[cfg(test)]
