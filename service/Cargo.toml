@@ -13,6 +13,7 @@ rand = "0.8.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_derive = "1.0.118"
 serde_json = "1.0"
+uuid = { version = "0.8", features = ["v4"] }
 
 # wasmcloud
 wapc-guest = "0.4.0"

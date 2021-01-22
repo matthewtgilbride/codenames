@@ -22,19 +22,14 @@ fn health(_h: core::HealthCheckRequest) -> HandlerResult<core::HealthCheckRespon
 }
 
 fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {
-    if msg.path.starts_with("/game/new") {
-        return new_game(msg)
+    if msg.path.starts_with("/game") {
+        if msg.method == "POST" {
+            return game::routes::new_game(msg);
+        } else if msg.method == "PUT" {
+            if msg.path.contains("/join/") {
+                return game::routes::join_game(msg);
+            }
+        }
     }
     Ok(http::Response::not_found())
-}
-
-fn new_game(msg: http::Request) -> HandlerResult<http::Response> {
-    let dict = game::dictionary::get_dictionary(DictionaryType::Default)?;
-    let words = game::api::generate_board_words(dict)?;
-    let (board, first_team) = game::api::generate_board(words)?;
-    let key = "test".to_string();
-    let game = game::model::Game::new(key, board, first_team, Vec::new())?;
-    let json = json!(game);
-    // let _ = kv::default().add(key.clone(), json!(game))?; TODO: put json in kv store?
-    Ok(http::Response::json(json, 200, "OK"))
 }
