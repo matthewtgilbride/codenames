@@ -22,12 +22,17 @@ fn health(_h: core::HealthCheckRequest) -> HandlerResult<core::HealthCheckRespon
 }
 
 fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {
+    if msg.path == "/" {
+        return game::routes::random_game_name(msg);
+    }
     if msg.path.starts_with("/game") {
         if msg.method == "POST" {
             return game::routes::new_game(msg);
         } else if msg.method == "PUT" {
-            if msg.path.contains("/join/") {
+            if msg.path.ends_with("/join") {
                 return game::routes::join_game(msg);
+            } else if msg.path.ends_with("/guess") {
+                return game::routes::guess(msg);
             }
         }
     }

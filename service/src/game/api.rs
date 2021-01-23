@@ -49,6 +49,25 @@ pub fn generate_board_words(dictionary: HashSet<String>) -> Result<[String; 25],
     Ok(random_subset.try_into().unwrap())
 }
 
+pub fn generate_game_name(dictionary: HashSet<String>) -> Result<String, String> {
+    if dictionary.len() < (BOARD_SIZE + 1) {
+        return Err("dictionary must have at least 26 words".to_string());
+    }
+
+    let as_vector: Vec<String> = dictionary.into_iter().collect();
+
+    let random_subset: Vec<String> = as_vector
+        .choose_multiple(&mut thread_rng(), 2)
+        .cloned()
+        .collect();
+
+    Ok(format!(
+        "{}-{}",
+        random_subset.get(0).unwrap(),
+        random_subset.get(1).unwrap()
+    ))
+}
+
 fn random_color(available_colors: HashSet<CardColor>) -> CardColor {
     let as_vector: Vec<CardColor> = available_colors.into_iter().collect();
     *as_vector.choose(&mut thread_rng()).unwrap()

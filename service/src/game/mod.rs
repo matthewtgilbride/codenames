@@ -52,6 +52,9 @@ mod tests {
             },
         ];
 
-        Game::new("test".to_string(), board, turn, players).unwrap()
+        players.iter().fold(
+            Game::new("test".to_string(), board, turn).unwrap(),
+            |game, p| game.join(p.clone()).unwrap(),
+        )
     }
 }

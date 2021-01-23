@@ -46,24 +46,12 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(
-        name: String,
-        board: [Card; 25],
-        turn: Team,
-        players: Vec<Player>,
-    ) -> Result<Game, String> {
-        let unique_players: HashSet<String> = players
-            .iter()
-            .map(|Player { name, .. }| name.clone())
-            .collect();
-        if unique_players.len() < players.len() {
-            return Err("player names must be unique".to_string());
-        }
+    pub fn new(name: String, board: [Card; 25], turn: Team) -> Result<Game, String> {
         Ok(Game {
             name,
             board,
             turn,
-            players,
+            players: Vec::new(),
             guesses: Vec::new(),
         })
     }
