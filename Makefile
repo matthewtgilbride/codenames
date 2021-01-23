@@ -1,10 +1,10 @@
 service-build:
-	cd service && cargo build
+	$(MAKE) -C service build
 
 service-format:
-	cd service && cargo fmt
+	$(MAKE) -C service format
 
 service-test:
-	cd service && cargo test
+	$(MAKE) -C service test
 
 service-check: service-build service-format service-test

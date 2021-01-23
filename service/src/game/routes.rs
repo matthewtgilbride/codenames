@@ -3,7 +3,7 @@ extern crate wapc_guest as guest;
 use crate::game;
 use crate::game::dictionary::DictionaryType;
 
-use crate::game::model::{Player, Team, Game};
+use crate::game::model::{Game, Player, Team};
 use actor_http_server as http;
 use actor_keyvalue as kv;
 use guest::prelude::*;
@@ -46,7 +46,9 @@ pub fn join_game(msg: http::Request) -> HandlerResult<http::Response> {
         |k| {
             let game_json = kv::default().get(k.clone())?;
 
-            if !game_json.exists { return Ok(http::Response::not_found()); }
+            if !game_json.exists {
+                return Ok(http::Response::not_found());
+            }
 
             let game: Game = serde_json::from_str(game_json.value.as_str())?;
 
@@ -55,6 +57,6 @@ pub fn join_game(msg: http::Request) -> HandlerResult<http::Response> {
             let _ = kv::default().set(k, json.to_string(), 0);
 
             Ok(http::Response::ok())
-        }
+        },
     )
 }
