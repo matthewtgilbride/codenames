@@ -1,9 +1,24 @@
-use super::model::*;
-use rand::seq::SliceRandom;
-use rand::thread_rng;
 use std::cell::Cell;
 use std::collections::HashSet;
 use std::convert::TryInto;
+
+use rand::seq::SliceRandom;
+use rand::thread_rng;
+
+use super::model::*;
+
+pub fn get_dictionary(
+    _dictionary_type: DictionaryType,
+) -> Result<HashSet<String>, std::str::Utf8Error> {
+    // todo: pass dict type to select from a set of available dictionaries
+    Ok(
+        std::str::from_utf8(include_bytes!("../resources/dictionary/default.txt"))?
+            .split("\n")
+            .into_iter()
+            .map(|s| s.to_string())
+            .collect(),
+    )
+}
 
 pub fn generate_board(words: [String; 25]) -> Result<([Card; 25], Team), String> {
     let first_team: Team = vec![Team::Blue, Team::Red]
@@ -102,12 +117,15 @@ fn max_card_color(card_color: &CardColor, first_team: &Team) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::game::tests::rand_dictionary;
-    use rand::distributions::Alphanumeric;
-    use rand::Rng;
     use std::iter;
     use std::iter::Repeat;
+
+    use rand::distributions::Alphanumeric;
+    use rand::Rng;
+
+    use crate::game::tests::rand_dictionary;
+
+    use super::*;
 
     #[test]
     fn max_card_color() {

@@ -1,8 +1,13 @@
-use serde::{Deserialize, Serialize};
-use serde_json;
 use std::collections::{HashMap, HashSet};
 
+use serde::{Deserialize, Serialize};
+use serde_json;
+
 pub const BOARD_SIZE: usize = 25;
+
+pub enum DictionaryType {
+    Default,
+}
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Team {
@@ -104,8 +109,9 @@ impl Game {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::game::tests::rand_game;
+
+    use super::*;
 
     #[test]
     fn join() {

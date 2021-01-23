@@ -1,6 +1,5 @@
-pub mod api;
-pub mod dictionary;
-pub mod model;
+mod api;
+mod model;
 pub mod routes;
 
 #[cfg(test)]
