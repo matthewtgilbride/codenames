@@ -4,7 +4,7 @@ use actor_keyvalue as kv;
 use guest::prelude::*;
 
 mod game;
-use game::routes;
+use game::routes as game_routes;
 
 #[macro_use]
 extern crate serde_json;
@@ -23,16 +23,24 @@ fn health(_h: core::HealthCheckRequest) -> HandlerResult<core::HealthCheckRespon
 
 fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {
     if msg.path == "/" {
-        return routes::random_game_name(msg);
+        return game_routes::random_name(msg);
     }
     if msg.path.starts_with("/game") {
+        if msg.method == "GET" {
+            return game_routes::get(msg);
+        }
         if msg.method == "POST" {
-            return routes::new_game(msg);
-        } else if msg.method == "PUT" {
+            return game_routes::new(msg);
+        }
+        if msg.method == "PUT" {
             if msg.path.ends_with("/join") {
-                return routes::join_game(msg);
-            } else if msg.path.ends_with("/guess") {
-                return routes::guess(msg);
+                return game_routes::join(msg);
+            }
+            if msg.path.ends_with("/guess") {
+                return game_routes::guess(msg);
+            }
+            if msg.path.ends_with("/end-turn") {
+                return game_routes::end_turn(msg);
             }
         }
     }

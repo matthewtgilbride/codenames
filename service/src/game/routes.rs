@@ -13,14 +13,14 @@ struct NewGameRequest {
     name: String,
 }
 
-pub fn random_game_name(msg: http::Request) -> HandlerResult<http::Response> {
+pub fn random_name(msg: http::Request) -> HandlerResult<http::Response> {
     let dict = api::get_dictionary(DictionaryType::Default)?;
     let name = api::generate_game_name(dict)?;
     let json = json!(NewGameRequest { name });
     Ok(http::Response::json(json, 200, "OK"))
 }
 
-pub fn new_game(msg: http::Request) -> HandlerResult<http::Response> {
+pub fn new(msg: http::Request) -> HandlerResult<http::Response> {
     let body: NewGameRequest = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
 
     let dict = api::get_dictionary(DictionaryType::Default)?;
@@ -36,7 +36,26 @@ pub fn new_game(msg: http::Request) -> HandlerResult<http::Response> {
     Ok(http::Response::json(json, 200, "OK"))
 }
 
-pub fn join_game(msg: http::Request) -> HandlerResult<http::Response> {
+pub fn get(msg: http::Request) -> HandlerResult<http::Response> {
+    let game_key = get_game_key(msg.path);
+    game_key.map_or_else(
+        || Ok(http::Response::not_found()),
+        |k| {
+            let game_json = kv::default().get(k.clone())?;
+
+            if !game_json.exists {
+                return Ok(http::Response::not_found());
+            }
+
+            let game: Game = serde_json::from_str(game_json.value.as_str())?;
+            let json = json!(game);
+
+            Ok(http::Response::json(game, 200, "OK"))
+        },
+    )
+}
+
+pub fn join(msg: http::Request) -> HandlerResult<http::Response> {
     let player: Player = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
 
     let game_key = get_game_key(msg.path);
@@ -109,6 +128,28 @@ pub fn guess(msg: http::Request) -> HandlerResult<http::Response> {
                         Ok(http::Response::ok())
                     },
                 )
+        },
+    )
+}
+
+pub fn end_turn(msg: http::Request) -> HandlerResult<http::Response> {
+    let game_key = get_game_key(msg.path);
+    game_key.map_or_else(
+        || Ok(http::Response::not_found()),
+        |k| {
+            let game_json = kv::default().get(k.clone())?;
+
+            if !game_json.exists {
+                return Ok(http::Response::not_found());
+            }
+
+            let game: Game = serde_json::from_str(game_json.value.as_str())?;
+
+            let updated_game = game.end_turn();
+            let json = json!(updated_game);
+            let _ = kv::default().set(k, json.to_string(), 0);
+
+            Ok(http::Response::ok())
         },
     )
 }

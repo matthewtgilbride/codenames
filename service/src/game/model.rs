@@ -74,6 +74,16 @@ impl Game {
             })
     }
 
+    pub fn end_turn(self) -> Game {
+        Game {
+            turn: match self.turn {
+                Team::Blue => Team::Red,
+                _ => Team::Blue,
+            },
+            ..self.clone()
+        }
+    }
+
     pub fn leave(self, player_name: &str) -> Game {
         Game {
             players: self
