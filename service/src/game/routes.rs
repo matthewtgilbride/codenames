@@ -125,12 +125,45 @@ fn with_game_or_not_found(
 fn get_game_key(path: String) -> Option<String> {
     path.split("/")
         .into_iter()
+        .find(|&path_part| !is_path_segment(path_part.to_string()) && path_part.len() > 0)
         .map(|s| s.to_string())
-        .find(|path_part| {
-            vec!["game", "join", "guess", "end-turn"]
-                .iter()
-                .cloned()
-                .find(|s| s == path_part)
-                .is_none()
-        })
+}
+
+fn is_path_segment(part: String) -> bool {
+    ["game", "join", "guess", "end-turn"]
+        .iter()
+        .cloned()
+        .find(|s| s == &part)
+        .is_some()
+}
+
+#[cfg(test)]
+mod is_path_segment {
+    #[test]
+    fn truthy() {
+        assert!(super::is_path_segment("game".to_string()))
+    }
+
+    #[test]
+    fn falsy() {
+        assert!(!super::is_path_segment("foo".to_string()))
+    }
+}
+
+#[cfg(test)]
+mod get_game_key {
+    #[test]
+    fn valid_url() {
+        let key = "aaaa-aaaa-aaaa-aaaa";
+        let path = format!("/game/{}/join", key);
+        let result = super::get_game_key(path);
+        assert_eq!(key, result.unwrap())
+    }
+
+    #[test]
+    fn invalid_url() {
+        let path = "/game/join".to_string();
+        let result = super::get_game_key(path);
+        assert!(result.is_none())
+    }
 }
