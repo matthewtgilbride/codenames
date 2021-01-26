@@ -29,12 +29,7 @@ pub fn new(msg: http::Request) -> HandlerResult<http::Response> {
     let (board, first_team) = api::generate_board(words)?;
 
     let game = Game::new(body.name, board, first_team)?;
-    let json = json!(game);
-
-    let key = Uuid::new_v4().to_string();
-    let _ = kv::default().set(key, json.to_string(), 0)?;
-
-    Ok(http::Response::json(json, 200, "OK"))
+    save_and_respond(Uuid::new_v4().to_string(), game, true)
 }
 
 pub fn get(msg: http::Request) -> HandlerResult<http::Response> {
@@ -48,10 +43,7 @@ pub fn join(msg: http::Request) -> HandlerResult<http::Response> {
     let player: Player = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
     with_game_or_not_found(msg, |key, game| {
         let updated_game = game.join(player.clone())?;
-        let json = json!(updated_game);
-        let _ = kv::default().set(key, json.to_string(), 0);
-
-        Ok(http::Response::ok())
+        save_and_respond(key, updated_game, false)
     })
 }
 
@@ -83,11 +75,8 @@ pub fn guess(msg: http::Request) -> HandlerResult<http::Response> {
                     let updated_game = game.clone().guess(Guess {
                         team: game.turn,
                         board_index: guess.board_index,
-                    });
-                    let json = json!(updated_game);
-                    let _ = kv::default().set(key, json.to_string(), 0);
-
-                    Ok(http::Response::ok())
+                    })?;
+                    save_and_respond(key, updated_game, false)
                 },
             )
     })
@@ -96,10 +85,16 @@ pub fn guess(msg: http::Request) -> HandlerResult<http::Response> {
 pub fn end_turn(msg: http::Request) -> HandlerResult<http::Response> {
     with_game_or_not_found(msg, |key, game| {
         let updated_game = game.end_turn();
-        let json = json!(updated_game);
-        let _ = kv::default().set(key, json.to_string(), 0);
+        save_and_respond(key, updated_game, false)
+    })
+}
 
-        Ok(http::Response::ok())
+fn save_and_respond(key: String, game: Game, with_payload: bool) -> HandlerResult<http::Response> {
+    let json = json!(game);
+    let _ = kv::default().set(key, json.to_string(), 0);
+    Ok(match with_payload {
+        true => http::Response::json(game, 200, "OK"),
+        false => http::Response::ok(),
     })
 }
 
