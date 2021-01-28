@@ -1,6 +1,6 @@
 use crate::game::api::{generate_board, generate_board_words, generate_game_name, get_dictionary};
 use crate::game::dao;
-use crate::game::dao::RedisDao;
+use crate::game::dao::{RedisDao, DAO};
 use crate::game::model::{DictionaryType, Game, NewGameRequest};
 use std::error::Error;
 use std::str::Utf8Error;
@@ -19,10 +19,10 @@ pub fn new(request: NewGameRequest) -> Result<Game, String> {
     Ok(Game::new(request.name, board, first_team)?)
 }
 
-pub fn get(key: String) -> Result<Game, Box<dyn Error>> {
-    RedisDao::get(key)
+pub fn get(mut dao: Box<dyn DAO>, key: String) -> Result<Game, Box<dyn Error>> {
+    dao.get(key)
 }
 
-pub fn save(key: String, game: Game) -> Result<(), Box<dyn Error>> {
-    RedisDao::set(key, game)
+pub fn save(mut dao: Box<dyn DAO>, key: String, game: Game) -> Result<(), Box<dyn Error>> {
+    dao.set(key, game)
 }
