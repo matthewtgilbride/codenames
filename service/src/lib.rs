@@ -1,15 +1,14 @@
-use actor_core as core;
-use actor_http_server as http;
-use actor_keyvalue as kv;
-use guest::prelude::*;
-
-mod game;
-use game::routes as game_routes;
-
 #[macro_use]
 extern crate serde_json;
-
 extern crate wapc_guest as guest;
+
+use actor_core as core;
+use actor_http_server as http;
+use guest::prelude::*;
+
+use game::routes as game_routes;
+
+mod game;
 
 #[no_mangle]
 pub fn wapc_init() {

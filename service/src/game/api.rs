@@ -1,4 +1,3 @@
-use std::cell::Cell;
 use std::collections::HashSet;
 use std::convert::TryInto;
 
@@ -117,12 +116,6 @@ fn max_card_color(card_color: &CardColor, first_team: &Team) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use std::iter;
-    use std::iter::Repeat;
-
-    use rand::distributions::Alphanumeric;
-    use rand::Rng;
-
     use crate::game::tests::rand_dictionary;
 
     use super::*;

@@ -1,14 +1,12 @@
 extern crate wapc_guest as guest;
 
 use actor_http_server as http;
-use actor_http_server::Response;
 use actor_keyvalue as kv;
 use guest::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::game::api;
-use crate::game::model::{DictionaryType, Game, Guess, NewGameRequest, Player, Team};
+use crate::game::model::{Game, Guess, NewGameRequest, Player};
 use crate::game::service;
 
 pub fn random_name(_: http::Request) -> HandlerResult<http::Response> {
@@ -23,10 +21,7 @@ pub fn new(msg: http::Request) -> HandlerResult<http::Response> {
 }
 
 pub fn get(msg: http::Request) -> HandlerResult<http::Response> {
-    with_game_or_not_found(msg, |_, game| {
-        let json = json!(game);
-        Ok(http::Response::json(game, 200, "OK"))
-    })
+    with_game_or_not_found(msg, |_, game| Ok(http::Response::json(game, 200, "OK")))
 }
 
 pub fn join(msg: http::Request) -> HandlerResult<http::Response> {
@@ -61,7 +56,7 @@ pub fn guess(msg: http::Request) -> HandlerResult<http::Response> {
             )
             .map_or_else(
                 || Ok(http::Response::bad_request()),
-                |player| {
+                |_| {
                     let updated_game = game.clone().guess(Guess {
                         team: game.turn,
                         board_index: guess.board_index,

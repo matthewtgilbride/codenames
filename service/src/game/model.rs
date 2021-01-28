@@ -1,9 +1,4 @@
-use std::collections::{HashMap, HashSet};
-
-use redis::streams::StreamPendingReply::Data;
-use redis::{FromRedisValue, RedisResult, Value};
 use serde::{Deserialize, Serialize};
-use serde_json;
 
 pub const BOARD_SIZE: usize = 25;
 
@@ -191,3 +186,5 @@ mod tests {
 pub struct NewGameRequest {
     pub name: String,
 }
+
+pub type StandardResult<T> = std::result::Result<T, Box<dyn std::error::Error + Sync + Send>>;
