@@ -1,5 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
+use redis::streams::StreamPendingReply::Data;
+use redis::{FromRedisValue, RedisResult, Value};
 use serde::{Deserialize, Serialize};
 use serde_json;
 
@@ -183,4 +185,9 @@ mod tests {
 
         assert!(failed_update.is_err())
     }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct NewGameRequest {
+    pub name: String,
 }

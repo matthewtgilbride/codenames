@@ -1,7 +1,5 @@
 extern crate wapc_guest as guest;
 
-use crate::game::api;
-use crate::game::model::{DictionaryType, Game, Guess, Player, Team};
 use actor_http_server as http;
 use actor_http_server::Response;
 use actor_keyvalue as kv;
@@ -9,26 +7,18 @@ use guest::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug)]
-struct NewGameRequest {
-    name: String,
-}
+use crate::game::api;
+use crate::game::model::{DictionaryType, Game, Guess, NewGameRequest, Player, Team};
+use crate::game::service;
 
-pub fn random_name(msg: http::Request) -> HandlerResult<http::Response> {
-    let dict = api::get_dictionary(DictionaryType::Default)?;
-    let name = api::generate_game_name(dict)?;
-    let json = json!(NewGameRequest { name });
+pub fn random_name(_: http::Request) -> HandlerResult<http::Response> {
+    let json = json!(service::random_name()?);
     Ok(http::Response::json(json, 200, "OK"))
 }
 
 pub fn new(msg: http::Request) -> HandlerResult<http::Response> {
     let body: NewGameRequest = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
-
-    let dict = api::get_dictionary(DictionaryType::Default)?;
-    let words = api::generate_board_words(dict)?;
-    let (board, first_team) = api::generate_board(words)?;
-
-    let game = Game::new(body.name, board, first_team)?;
+    let game = service::new(body)?;
     save_and_respond(Uuid::new_v4().to_string(), game, true)
 }
 
