@@ -1,106 +1,98 @@
 extern crate wapc_guest as guest;
 
 use actor_http_server as http;
-use actor_keyvalue as kv;
 use guest::prelude::*;
-use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::game::model::{Game, Guess, GuessRequest, NewGameRequest, Player};
-use crate::game::service;
+use crate::game::model::{Game, Guess, GuessRequest, NewGameRequest, Player, StandardResult};
 use crate::game::service::Service;
 
 pub struct Routes {
-    pub service: Service,
+    service: Service,
 }
 
 impl Routes {
+    pub fn new(service: Service) -> Routes {
+        Routes { service }
+    }
+
     pub fn random_name(&self, _: http::Request) -> HandlerResult<http::Response> {
         let json = json!(Service::random_name()?);
         Ok(http::Response::json(json, 200, "OK"))
     }
 
-    pub fn new(&self, msg: http::Request) -> HandlerResult<http::Response> {
+    pub fn new_game(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
         let body: NewGameRequest = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
-        let game = Service::new(body)?;
-        save_and_respond(Uuid::new_v4().to_string(), game, true)
+        let game = Service::new_game(body)?;
+        self.save_and_respond(Uuid::new_v4().to_string(), game, true)
     }
 
-    pub fn get(msg: http::Request) -> HandlerResult<http::Response> {
-        with_game_or_not_found(msg, |_, game| Ok(http::Response::json(game, 200, "OK")))
+    pub fn get(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
+        let (_, game) = self.get_existing_game_by_key(msg)?;
+        Ok(http::Response::json(game, 200, "OK"))
     }
 
-    pub fn join(msg: http::Request) -> HandlerResult<http::Response> {
+    pub fn join(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
         let player: Player = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
-        with_game_or_not_found(msg, |key, game| {
-            let updated_game = game.join(player.clone())?;
-            save_and_respond(key, updated_game, false)
-        })
+        let (key, game) = self.get_existing_game_by_key(msg)?;
+        let updated_game = game.join(player.clone())?;
+        self.save_and_respond(key, updated_game, false)
     }
 
-    pub fn guess(msg: http::Request) -> HandlerResult<http::Response> {
+    pub fn guess(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
         let guess: GuessRequest = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
-        with_game_or_not_found(msg, |key, game| {
-            game.players
-                .iter()
-                .cloned()
-                .find(
-                    |Player {
-                         name,
-                         is_spy_master,
-                         team,
-                         ..
-                     }| {
-                        *name == guess.player_name && *is_spy_master == false && *team == game.turn
-                    },
-                )
-                .map_or_else(
-                    || Ok(http::Response::bad_request()),
-                    |_| {
-                        let updated_game = game.clone().guess(Guess {
-                            team: game.turn,
-                            board_index: guess.board_index,
-                        })?;
-                        save_and_respond(key, updated_game, false)
-                    },
-                )
-        })
-    }
-
-    pub fn end_turn(msg: http::Request) -> HandlerResult<http::Response> {
-        with_game_or_not_found(msg, |key, game| {
-            let updated_game = game.end_turn();
-            save_and_respond(key, updated_game, false)
-        })
-    }
-}
-
-fn save_and_respond(key: String, game: Game, with_payload: bool) -> HandlerResult<http::Response> {
-    let json = json!(game);
-    let _ = kv::default().set(key, json.to_string(), 0);
-    Ok(match with_payload {
-        true => http::Response::json(game, 200, "OK"),
-        false => http::Response::ok(),
-    })
-}
-
-fn with_game_or_not_found(
-    msg: http::Request,
-    game_fn: impl Fn(String, Game) -> HandlerResult<http::Response>,
-) -> HandlerResult<http::Response> {
-    let game_key = get_game_key(msg.path);
-    game_key.map_or_else(
-        || Ok(http::Response::not_found()),
-        |key| {
-            kv::default().get(key.clone()).map_or_else(
-                |_| Ok(http::Response::not_found()),
-                |game_json| {
-                    let game: Game = serde_json::from_str(game_json.value.as_str())?;
-                    game_fn(key, game)
+        let (key, game) = self.get_existing_game_by_key(msg)?;
+        game.players
+            .iter()
+            .cloned()
+            .find(
+                |Player {
+                     name,
+                     is_spy_master,
+                     team,
+                     ..
+                 }| {
+                    *name == guess.player_name && *is_spy_master == false && *team == game.turn
                 },
             )
-        },
-    )
+            .map_or_else(
+                || Ok(http::Response::bad_request()),
+                |_| {
+                    let updated_game = game.clone().guess(Guess {
+                        team: game.turn,
+                        board_index: guess.board_index,
+                    })?;
+                    self.save_and_respond(key, updated_game, false)
+                },
+            )
+    }
+
+    pub fn end_turn(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
+        let (key, game) = self.get_existing_game_by_key(msg)?;
+        let updated_game = game.end_turn();
+        self.save_and_respond(key, updated_game, false)
+    }
+
+    fn get_existing_game_by_key(&mut self, msg: http::Request) -> StandardResult<(String, Game)> {
+        let game_key = get_game_key(msg.path);
+        game_key.map_or_else(
+            || Err("game key could not be found in path".into()),
+            |key| self.service.get(key.clone()).map(|game| (key, game)),
+        )
+    }
+
+    fn save_and_respond(
+        &mut self,
+        key: String,
+        game: Game,
+        with_payload: bool,
+    ) -> HandlerResult<http::Response> {
+        let _ = self.service.save(key, game.clone())?;
+        Ok(match with_payload {
+            true => http::Response::json(game, 200, "OK"),
+            false => http::Response::ok(),
+        })
+    }
 }
 
 fn get_game_key(path: String) -> Option<String> {

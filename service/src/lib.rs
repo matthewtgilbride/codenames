@@ -24,27 +24,27 @@ fn health(_h: core::HealthCheckRequest) -> HandlerResult<core::HealthCheckRespon
 
 fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {
     let dao = Box::new(RedisDao::new()?);
-    let service = Service { dao };
-    let routes = Routes { service };
+    let service = Service::new(dao);
+    let mut routes = Routes::new(service);
     if msg.path == "/" {
         return routes.random_name(msg);
     }
     if msg.path.starts_with("/game") {
         if msg.method == "GET" {
-            return Routes::get(msg);
+            return routes.get(msg);
         }
         if msg.method == "POST" {
-            return routes.new(msg);
+            return routes.new_game(msg);
         }
         if msg.method == "PUT" {
             if msg.path.ends_with("/join") {
-                return Routes::join(msg);
+                return routes.join(msg);
             }
             if msg.path.ends_with("/guess") {
-                return Routes::guess(msg);
+                return routes.guess(msg);
             }
             if msg.path.ends_with("/end-turn") {
-                return Routes::end_turn(msg);
+                return routes.end_turn(msg);
             }
         }
     }

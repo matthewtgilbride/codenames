@@ -3,17 +3,21 @@ use crate::game::dao::DAO;
 use crate::game::model::{DictionaryType, Game, NewGameRequest, StandardResult};
 
 pub struct Service {
-    pub dao: Box<dyn DAO>,
+    dao: Box<dyn DAO>,
 }
 
 impl Service {
+    pub fn new(dao: Box<dyn DAO>) -> Service {
+        Service { dao }
+    }
+
     pub fn random_name() -> StandardResult<NewGameRequest> {
         let dict = get_dictionary(DictionaryType::Default)?;
         let name = generate_game_name(dict)?;
         Ok(NewGameRequest { name })
     }
 
-    pub fn new(request: NewGameRequest) -> StandardResult<Game> {
+    pub fn new_game(request: NewGameRequest) -> StandardResult<Game> {
         let dict = get_dictionary(DictionaryType::Default)?;
         let words = generate_board_words(dict)?;
         let (board, first_team) = generate_board(words)?;
