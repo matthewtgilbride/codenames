@@ -1,8 +1,8 @@
 mod api;
-mod dao;
+pub mod dao;
 mod model;
 pub mod routes;
-mod service;
+pub mod service;
 
 #[cfg(test)]
 mod tests {

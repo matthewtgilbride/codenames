@@ -6,7 +6,9 @@ use actor_core as core;
 use actor_http_server as http;
 use guest::prelude::*;
 
-use game::routes as game_routes;
+use crate::game::dao::RedisDao;
+use crate::game::routes::Routes;
+use crate::game::service::Service;
 
 mod game;
 
@@ -21,25 +23,28 @@ fn health(_h: core::HealthCheckRequest) -> HandlerResult<core::HealthCheckRespon
 }
 
 fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {
+    let dao = Box::new(RedisDao::new()?);
+    let service = Service { dao };
+    let routes = Routes { service };
     if msg.path == "/" {
-        return game_routes::random_name(msg);
+        return routes.random_name(msg);
     }
     if msg.path.starts_with("/game") {
         if msg.method == "GET" {
-            return game_routes::get(msg);
+            return Routes::get(msg);
         }
         if msg.method == "POST" {
-            return game_routes::new(msg);
+            return routes.new(msg);
         }
         if msg.method == "PUT" {
             if msg.path.ends_with("/join") {
-                return game_routes::join(msg);
+                return Routes::join(msg);
             }
             if msg.path.ends_with("/guess") {
-                return game_routes::guess(msg);
+                return Routes::guess(msg);
             }
             if msg.path.ends_with("/end-turn") {
-                return game_routes::end_turn(msg);
+                return Routes::end_turn(msg);
             }
         }
     }

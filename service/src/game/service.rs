@@ -2,24 +2,30 @@ use crate::game::api::{generate_board, generate_board_words, generate_game_name,
 use crate::game::dao::DAO;
 use crate::game::model::{DictionaryType, Game, NewGameRequest, StandardResult};
 
-pub fn random_name() -> StandardResult<NewGameRequest> {
-    let dict = get_dictionary(DictionaryType::Default)?;
-    let name = generate_game_name(dict)?;
-    Ok(NewGameRequest { name })
+pub struct Service {
+    pub dao: Box<dyn DAO>,
 }
 
-pub fn new(request: NewGameRequest) -> StandardResult<Game> {
-    let dict = get_dictionary(DictionaryType::Default)?;
-    let words = generate_board_words(dict)?;
-    let (board, first_team) = generate_board(words)?;
+impl Service {
+    pub fn random_name() -> StandardResult<NewGameRequest> {
+        let dict = get_dictionary(DictionaryType::Default)?;
+        let name = generate_game_name(dict)?;
+        Ok(NewGameRequest { name })
+    }
 
-    Ok(Game::new(request.name, board, first_team)?)
-}
+    pub fn new(request: NewGameRequest) -> StandardResult<Game> {
+        let dict = get_dictionary(DictionaryType::Default)?;
+        let words = generate_board_words(dict)?;
+        let (board, first_team) = generate_board(words)?;
 
-pub fn get(mut dao: Box<dyn DAO>, key: String) -> StandardResult<Game> {
-    dao.get(key)
-}
+        Ok(Game::new(request.name, board, first_team)?)
+    }
 
-pub fn save(mut dao: Box<dyn DAO>, key: String, game: Game) -> StandardResult<()> {
-    dao.set(key, game)
+    pub fn get(&mut self, key: String) -> StandardResult<Game> {
+        self.dao.get(key)
+    }
+
+    pub fn save(&mut self, key: String, game: Game) -> StandardResult<()> {
+        self.dao.set(key, game)
+    }
 }

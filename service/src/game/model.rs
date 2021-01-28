@@ -187,4 +187,10 @@ pub struct NewGameRequest {
     pub name: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GuessRequest {
+    pub player_name: String,
+    pub board_index: usize,
+}
+
 pub type StandardResult<T> = std::result::Result<T, Box<dyn std::error::Error + Sync + Send>>;
