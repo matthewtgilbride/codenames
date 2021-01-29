@@ -4,7 +4,7 @@ use actor_http_server as http;
 use guest::prelude::*;
 use uuid::Uuid;
 
-use crate::game::model::{Game, Guess, GuessRequest, NewGameRequest, Player};
+use crate::game::model::{Game, GuessRequest, NewGameRequest, Player};
 use crate::game::service::Service;
 use crate::model::StandardResult;
 
@@ -50,29 +50,8 @@ impl Routes {
     pub fn guess(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
         let guess: GuessRequest = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
         let (key, game) = self.get_existing_game_by_key(msg)?;
-        game.players
-            .iter()
-            .cloned()
-            .find(
-                |Player {
-                     name,
-                     is_spy_master,
-                     team,
-                     ..
-                 }| {
-                    *name == guess.player_name && *is_spy_master == false && *team == game.turn
-                },
-            )
-            .map_or_else(
-                || Ok(http::Response::bad_request()),
-                |_| {
-                    let updated_game = game.clone().guess(Guess {
-                        team: game.turn,
-                        board_index: guess.board_index,
-                    })?;
-                    self.save_and_respond(key, updated_game, false)
-                },
-            )
+        let updated_game = Service::guess(guess, game)?;
+        self.save_and_respond(key, updated_game, false)
     }
 
     pub fn undo_guess(&mut self, msg: http::Request) -> HandlerResult<http::Response> {

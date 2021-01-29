@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::game::board::model::Board;
+use crate::model::StandardResult;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Team {
@@ -17,7 +18,6 @@ pub struct Player {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Guess {
-    pub team: Team,
     pub board_index: usize,
 }
 
@@ -31,7 +31,7 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(name: String, board: Board, turn: Team) -> Result<Game, String> {
+    pub fn new(name: String, board: Board, turn: Team) -> StandardResult<Game> {
         Ok(Game {
             name,
             board,
@@ -41,11 +41,11 @@ impl Game {
         })
     }
 
-    pub fn join(self, player: Player) -> Result<Game, String> {
+    pub fn join(self, player: Player) -> StandardResult<Game> {
         self.players
             .iter()
             .find(|Player { name, .. }| *name == player.name)
-            .map(|_| Err("player names must be unique".to_string()))
+            .map(|_| Err("player names must be unique".into()))
             .unwrap_or_else(|| {
                 Ok(Game {
                     players: [&[player], &self.players[..]].concat(),
@@ -76,11 +76,11 @@ impl Game {
         }
     }
 
-    pub fn guess(self, guess: Guess) -> Result<Game, String> {
+    pub fn guess(self, guess: Guess) -> StandardResult<Game> {
         self.guesses
             .iter()
             .find(|Guess { board_index, .. }| *board_index == guess.board_index)
-            .map(|_| Err("card has already been guessed".to_string()))
+            .map(|_| Err("card has already been guessed".into()))
             .unwrap_or_else(|| {
                 Ok(Game {
                     guesses: [&[guess], &self.guesses[..]].concat(),
@@ -147,19 +147,11 @@ mod tests {
     fn guess() {
         let game: Game = rand_game();
         let game_clone = game.clone();
-        let updated_game = game
-            .guess(Guess {
-                team: Team::Blue,
-                board_index: 0,
-            })
-            .unwrap();
+        let updated_game = game.guess(Guess { board_index: 0 }).unwrap();
 
         assert_eq!(game_clone.guesses.len() + 1, updated_game.guesses.len());
 
-        let failed_update = updated_game.guess(Guess {
-            team: Team::Blue,
-            board_index: 0,
-        });
+        let failed_update = updated_game.guess(Guess { board_index: 0 });
 
         assert!(failed_update.is_err())
     }
