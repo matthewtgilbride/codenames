@@ -1,5 +1,5 @@
 mod api;
-mod board;
+pub mod board;
 mod card;
 pub mod dao;
 mod model;
@@ -8,12 +8,14 @@ pub mod service;
 
 #[cfg(test)]
 mod tests {
-    use crate::game::api::{generate_board, generate_board_words};
-    use crate::game::model::{Game, Player, Team};
-    use rand::distributions::Alphanumeric;
-    use rand::{thread_rng, Rng};
     use std::collections::HashSet;
     use std::iter;
+
+    use rand::distributions::Alphanumeric;
+    use rand::{thread_rng, Rng};
+
+    use crate::game::api::{generate_board, generate_board_words};
+    use crate::game::model::{Game, Player, Team};
 
     pub fn rand_dictionary(size: usize) -> HashSet<String> {
         iter::repeat(0)

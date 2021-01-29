@@ -35,7 +35,7 @@ pub trait WordGenerator {
     fn random_pair(&self, dictionary: HashSet<String>) -> StandardResult<(String, String)>;
 }
 
-struct WordGeneratorRand {}
+pub struct WordGeneratorRand {}
 
 impl WordGenerator for WordGeneratorRand {
     fn random_set(&self, dictionary: HashSet<String>) -> StandardResult<[String; 25]> {

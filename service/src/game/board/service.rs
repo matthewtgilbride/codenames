@@ -1,29 +1,21 @@
-use crate::dictionary::service::Service as DictionaryService;
 use crate::game::card::model::{Card, CardColor, ALL_CARD_COLORS};
 use crate::game::model::Team;
 use std::collections::HashSet;
 
-use rand::seq::SliceRandom;
-use rand::thread_rng;
-use crate::model::StandardResult;
 use crate::game::board::model::Board;
 use crate::game::board::util::{card_color_count, max_card_color};
+use crate::model::StandardResult;
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 use std::convert::TryInto;
 
 pub struct Service {
-    dictionary_service: DictionaryService,
     generator: Box<dyn BoardGenerator>,
 }
 
 impl Service {
-    pub fn new(
-        dictionary_service: DictionaryService,
-        generator: Box<dyn BoardGenerator>,
-    ) -> Service {
-        Service {
-            dictionary_service,
-            generator,
-        }
+    pub fn new(generator: Box<dyn BoardGenerator>) -> Service {
+        Service { generator }
     }
 
     pub fn new_board(&self, words: [String; 25]) -> StandardResult<(Board, Team)> {
@@ -32,14 +24,12 @@ impl Service {
 }
 
 pub trait BoardGenerator {
-    fn random_team(&self) -> Team;
-    fn random_color(&self, available_colors: HashSet<CardColor>) -> CardColor;
     fn random_board(&self, words: [String; 25]) -> StandardResult<(Board, Team)>;
 }
 
-struct BoardGeneratorRand {}
+pub struct BoardGeneratorRand {}
 
-impl BoardGenerator for BoardGeneratorRand {
+impl BoardGeneratorRand {
     fn random_team(&self) -> Team {
         vec![Team::Blue, Team::Red]
             .choose(&mut thread_rng())
@@ -51,7 +41,9 @@ impl BoardGenerator for BoardGeneratorRand {
         let as_vector: Vec<CardColor> = available_colors.into_iter().collect();
         *as_vector.choose(&mut thread_rng()).unwrap()
     }
+}
 
+impl BoardGenerator for BoardGeneratorRand {
     fn random_board(&self, words: [String; 25]) -> StandardResult<(Board, Team)> {
         let first_team = self.random_team();
 

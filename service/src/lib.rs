@@ -6,6 +6,8 @@ use actor_core as core;
 use actor_http_server as http;
 use guest::prelude::*;
 
+use crate::dictionary::service::{Service as DictionaryService, WordGeneratorRand};
+use crate::game::board::service::{BoardGeneratorRand, Service as BoardService};
 use crate::game::dao::RedisDao;
 use crate::game::routes::Routes;
 use crate::game::service::Service;
@@ -25,9 +27,18 @@ fn health(_h: core::HealthCheckRequest) -> HandlerResult<core::HealthCheckRespon
 }
 
 fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {
+    let word_generator = Box::new(WordGeneratorRand {});
+    let dictionary_service = DictionaryService::new(word_generator)?;
+
+    let game_generator = Box::new(BoardGeneratorRand {});
+    let board_service = BoardService::new(game_generator);
+
     let dao = Box::new(RedisDao::new()?);
-    let service = Service::new(dao);
+
+    let service = Service::new(board_service, dictionary_service, dao);
+
     let mut routes = Routes::new(service);
+
     if msg.path == "/" {
         return routes.random_name(msg);
     }
