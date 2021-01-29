@@ -125,22 +125,19 @@ fn is_path_segment(part: String) -> bool {
 }
 
 #[cfg(test)]
-mod is_path_segment {
+mod tests {
     #[test]
-    fn truthy() {
+    fn is_path_segment_true() {
         assert!(super::is_path_segment("game".to_string()))
     }
 
     #[test]
-    fn falsy() {
+    fn is_path_segment_false() {
         assert!(!super::is_path_segment("foo".to_string()))
     }
-}
 
-#[cfg(test)]
-mod get_game_key {
     #[test]
-    fn valid_url() {
+    fn get_game_key_valid_url() {
         let key = "aaaa-aaaa-aaaa-aaaa";
         let path = format!("/game/{}/join", key);
         let result = super::get_game_key(path);
@@ -148,7 +145,7 @@ mod get_game_key {
     }
 
     #[test]
-    fn invalid_url() {
+    fn get_game_key_invalid_url() {
         let path = "/game/join".to_string();
         let result = super::get_game_key(path);
         assert!(result.is_none())

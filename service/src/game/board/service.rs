@@ -70,3 +70,47 @@ impl BoardGenerator for BoardGeneratorRand {
         Ok((board.try_into().unwrap(), first_team))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::dictionary::service::{Service as DictionaryService, WordGeneratorRand};
+    use crate::game::board::service::{BoardGeneratorRand, Service};
+    use crate::game::board::util::card_color_count;
+    use crate::game::card::model::CardColor;
+    use crate::game::model::Team;
+
+    #[test]
+    fn new_board() {
+        let test_dictionary_service =
+            DictionaryService::new(Box::new(WordGeneratorRand {})).unwrap();
+        let test_service = Service::new(Box::new(BoardGeneratorRand {}));
+
+        let (board, first_team) = test_service
+            .new_board(test_dictionary_service.new_word_set().unwrap())
+            .unwrap();
+
+        let as_vec = board.to_vec();
+        let death_count = card_color_count(&as_vec, &CardColor::Death);
+        let neutral_count = card_color_count(&as_vec, &CardColor::Neutral);
+        let blue_count = card_color_count(&as_vec, &CardColor::Team(Team::Blue));
+        let red_count = card_color_count(&as_vec, &CardColor::Team(Team::Red));
+        assert_eq!(1, death_count);
+        assert_eq!(7, neutral_count);
+        assert_eq!(
+            9,
+            if first_team == Team::Blue {
+                blue_count
+            } else {
+                red_count
+            }
+        );
+        assert_eq!(
+            8,
+            if first_team == Team::Blue {
+                red_count
+            } else {
+                blue_count
+            }
+        );
+    }
+}
