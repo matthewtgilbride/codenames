@@ -4,8 +4,9 @@ use actor_http_server as http;
 use guest::prelude::*;
 use uuid::Uuid;
 
-use crate::game::model::{Game, Guess, GuessRequest, NewGameRequest, Player, StandardResult};
+use crate::game::model::{Game, Guess, GuessRequest, NewGameRequest, Player};
 use crate::game::service::Service;
+use crate::model::StandardResult;
 
 pub struct Routes {
     service: Service,
@@ -17,13 +18,13 @@ impl Routes {
     }
 
     pub fn random_name(&self, _: http::Request) -> HandlerResult<http::Response> {
-        let json = json!(Service::random_name()?);
+        let json = json!(self.service.random_name()?);
         Ok(http::Response::json(json, 200, "OK"))
     }
 
     pub fn new_game(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
         let body: NewGameRequest = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
-        let game = Service::new_game(body)?;
+        let game = self.service.new_game(body)?;
         self.save_and_respond(Uuid::new_v4().to_string(), game, true)
     }
 

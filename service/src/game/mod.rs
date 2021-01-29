@@ -1,4 +1,6 @@
 mod api;
+mod board;
+mod card;
 pub mod dao;
 mod model;
 pub mod routes;

@@ -1,6 +1,7 @@
 extern crate redis;
 
-use crate::game::model::{Game, StandardResult};
+use crate::game::model::Game;
+use crate::model::StandardResult;
 
 use self::redis::{Commands, Connection};
 

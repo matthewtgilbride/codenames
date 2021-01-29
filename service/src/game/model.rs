@@ -1,28 +1,11 @@
 use serde::{Deserialize, Serialize};
 
-pub const BOARD_SIZE: usize = 25;
-
-pub enum DictionaryType {
-    Default,
-}
+use crate::game::board::model::Board;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Team {
     Blue,
     Red,
-}
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum CardColor {
-    Team(Team),
-    Neutral,
-    Death,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct Card {
-    pub color: CardColor,
-    pub word: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -41,14 +24,14 @@ pub struct Guess {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Game {
     pub name: String,
-    pub board: [Card; 25],
+    pub board: Board,
     pub turn: Team,
     pub players: Vec<Player>,
     pub guesses: Vec<Guess>,
 }
 
 impl Game {
-    pub fn new(name: String, board: [Card; 25], turn: Team) -> Result<Game, String> {
+    pub fn new(name: String, board: Board, turn: Team) -> Result<Game, String> {
         Ok(Game {
             name,
             board,
@@ -192,5 +175,3 @@ pub struct GuessRequest {
     pub player_name: String,
     pub board_index: usize,
 }
-
-pub type StandardResult<T> = std::result::Result<T, Box<dyn std::error::Error + Sync + Send>>;

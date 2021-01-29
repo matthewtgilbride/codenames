@@ -10,7 +10,9 @@ use crate::game::dao::RedisDao;
 use crate::game::routes::Routes;
 use crate::game::service::Service;
 
+mod dictionary;
 mod game;
+mod model;
 
 #[no_mangle]
 pub fn wapc_init() {

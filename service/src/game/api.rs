@@ -4,20 +4,12 @@ use std::convert::TryInto;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-use super::model::*;
+use crate::dictionary::model::DictionaryType;
+use crate::game::board::model::BOARD_SIZE;
+use crate::game::board::util::{card_color_count, max_card_color};
+use crate::game::card::model::{Card, CardColor, ALL_CARD_COLORS};
 
-pub fn get_dictionary(
-    _dictionary_type: DictionaryType,
-) -> Result<HashSet<String>, std::str::Utf8Error> {
-    // todo: pass dict type to select from a set of available dictionaries
-    Ok(
-        std::str::from_utf8(include_bytes!("../resources/dictionary/default.txt"))?
-            .split("\n")
-            .into_iter()
-            .map(|s| s.to_string())
-            .collect(),
-    )
-}
+use super::model::*;
 
 pub fn generate_board(words: [String; 25]) -> Result<([Card; 25], Team), String> {
     let first_team: Team = vec![Team::Blue, Team::Red]
@@ -87,35 +79,9 @@ fn random_color(available_colors: HashSet<CardColor>) -> CardColor {
     *as_vector.choose(&mut thread_rng()).unwrap()
 }
 
-const ALL_CARD_COLORS: [CardColor; 4] = [
-    CardColor::Team(Team::Blue),
-    CardColor::Team(Team::Red),
-    CardColor::Neutral,
-    CardColor::Death,
-];
-
-fn card_color_count(partial_board: &Vec<Card>, color: &CardColor) -> usize {
-    partial_board
-        .iter()
-        .filter(|card| card.color == *color)
-        .count()
-}
-
-fn max_card_color(card_color: &CardColor, first_team: &Team) -> usize {
-    match card_color {
-        CardColor::Team(team) => {
-            if team == first_team {
-                return 9;
-            }
-            8
-        }
-        CardColor::Neutral => 7,
-        CardColor::Death => 1,
-    }
-}
-
 #[cfg(test)]
 mod tests {
+    use crate::game::board::util::card_color_count;
     use crate::game::tests::rand_dictionary;
 
     use super::*;
