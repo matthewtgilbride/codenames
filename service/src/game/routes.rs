@@ -40,6 +40,13 @@ impl Routes {
         self.save_and_respond(key, updated_game, false)
     }
 
+    pub fn leave(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
+        let player: Player = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
+        let (key, game) = self.get_existing_game_by_key(msg)?;
+        let updated_game = game.leave(player.name.as_str());
+        self.save_and_respond(key, updated_game, false)
+    }
+
     pub fn guess(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
         let guess: GuessRequest = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
         let (key, game) = self.get_existing_game_by_key(msg)?;
@@ -66,6 +73,12 @@ impl Routes {
                     self.save_and_respond(key, updated_game, false)
                 },
             )
+    }
+
+    pub fn undo_guess(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
+        let (key, game) = self.get_existing_game_by_key(msg)?;
+        let updated_game = game.undo_guess();
+        self.save_and_respond(key, updated_game, true)
     }
 
     pub fn end_turn(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
@@ -104,7 +117,7 @@ fn get_game_key(path: String) -> Option<String> {
 }
 
 fn is_path_segment(part: String) -> bool {
-    ["game", "join", "guess", "end-turn"]
+    ["game", "join", "leave", "guess", "undo", "end-turn"]
         .iter()
         .cloned()
         .find(|s| s == &part)

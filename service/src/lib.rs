@@ -53,8 +53,14 @@ fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {
             if msg.path.ends_with("/join") {
                 return routes.join(msg);
             }
+            if msg.path.ends_with("/leave") {
+                return routes.leave(msg);
+            }
             if msg.path.ends_with("/guess") {
                 return routes.guess(msg);
+            }
+            if msg.path.ends_with("/guess/undo") {
+                return routes.undo_guess(msg);
             }
             if msg.path.ends_with("/end-turn") {
                 return routes.end_turn(msg);
