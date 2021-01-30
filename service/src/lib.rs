@@ -6,15 +6,17 @@ use actor_core as core;
 use actor_http_server as http;
 use guest::prelude::*;
 
+use wasm_routes::WasmRoutes;
+
 use crate::dictionary::service::WordGeneratorRand;
 use crate::game::board::service::BoardGeneratorRand;
 use crate::game::dao::RedisDao;
-use crate::game::routes::Routes;
 use crate::game::service::Service;
 
 mod dictionary;
 mod game;
 mod model;
+pub mod wasm_routes;
 
 #[no_mangle]
 pub fn wapc_init() {
@@ -33,7 +35,7 @@ fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {
 
     let service = Service::new(word_generator, board_generator, dao)?;
 
-    let mut routes = Routes::new(service);
+    let mut routes = WasmRoutes::new(service);
 
     if msg.path == "/" {
         return routes.random_name(msg);

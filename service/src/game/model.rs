@@ -1,10 +1,11 @@
-use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::fmt;
+use std::fmt::Formatter;
+
+use serde::{Deserialize, Serialize};
 
 use crate::game::board::model::Board;
 use crate::model::UniqueError;
-use std::fmt::Formatter;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Team {

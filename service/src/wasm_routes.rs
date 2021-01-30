@@ -8,13 +8,13 @@ use crate::game::model::{Game, GuessRequest, NewGameRequest, Player};
 use crate::game::service::Service;
 use crate::model::StdResult;
 
-pub struct Routes {
+pub struct WasmRoutes {
     service: Service,
 }
 
-impl Routes {
-    pub fn new(service: Service) -> Routes {
-        Routes { service }
+impl WasmRoutes {
+    pub fn new(service: Service) -> WasmRoutes {
+        WasmRoutes { service }
     }
 
     pub fn random_name(&self, _: http::Request) -> HandlerResult<http::Response> {

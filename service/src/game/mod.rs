@@ -1,8 +1,7 @@
 pub mod board;
 mod card;
 pub mod dao;
-mod model;
-pub mod routes;
+pub mod model;
 pub mod service;
 
 #[cfg(test)]
