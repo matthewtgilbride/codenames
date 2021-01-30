@@ -2,7 +2,7 @@ use std::fmt;
 
 use serde::__private::Formatter;
 
-pub type StandardResult<T> = std::result::Result<T, Box<dyn std::error::Error + Sync + Send>>;
+pub type StdResult<T> = std::result::Result<T, Box<dyn std::error::Error + Sync + Send>>;
 
 #[derive(Debug)]
 pub struct UniqueError {

@@ -8,7 +8,7 @@ use crate::game::board::model::Board;
 use crate::game::board::util::{card_color_count, max_card_color};
 use crate::game::card::model::{Card, CardColor, ALL_CARD_COLORS};
 use crate::game::model::Team;
-use crate::model::StandardResult;
+use crate::model::StdResult;
 
 pub struct Service {
     generator: Box<dyn BoardGenerator>,
@@ -19,13 +19,13 @@ impl Service {
         Service { generator }
     }
 
-    pub fn new_board(&self, words: [String; 25]) -> StandardResult<(Board, Team)> {
+    pub fn new_board(&self, words: [String; 25]) -> StdResult<(Board, Team)> {
         self.generator.random_board(words)
     }
 }
 
 pub trait BoardGenerator {
-    fn random_board(&self, words: [String; 25]) -> StandardResult<(Board, Team)>;
+    fn random_board(&self, words: [String; 25]) -> StdResult<(Board, Team)>;
 }
 
 pub struct BoardGeneratorRand;
@@ -45,7 +45,7 @@ impl BoardGeneratorRand {
 }
 
 impl BoardGenerator for BoardGeneratorRand {
-    fn random_board(&self, words: [String; 25]) -> StandardResult<(Board, Team)> {
+    fn random_board(&self, words: [String; 25]) -> StdResult<(Board, Team)> {
         let first_team = self.random_team();
 
         let mut board: Vec<Card> = Vec::new();

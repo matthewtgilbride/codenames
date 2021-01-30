@@ -12,16 +12,16 @@ mod tests {
     use crate::game::dao::DAO;
     use crate::game::model::{Game, Player, Team};
     use crate::game::service::Service;
-    use crate::model::StandardResult;
+    use crate::model::StdResult;
 
     struct DaoStub;
 
     impl DAO for DaoStub {
-        fn get(&mut self, _: String) -> StandardResult<Game> {
+        fn get(&mut self, _: String) -> StdResult<Game> {
             unimplemented!()
         }
 
-        fn set(&mut self, _: String, _: Game) -> StandardResult<()> {
+        fn set(&mut self, _: String, _: Game) -> StdResult<()> {
             unimplemented!()
         }
     }

@@ -2,7 +2,7 @@ use crate::dictionary::service::{Service as DictionaryService, WordGenerator};
 use crate::game::board::service::{BoardGenerator, Service as BoardService};
 use crate::game::dao::DAO;
 use crate::game::model::{Game, Guess, GuessRequest, NewGameRequest, Player};
-use crate::model::StandardResult;
+use crate::model::StdResult;
 
 pub struct Service {
     board_service: BoardService,
@@ -15,7 +15,7 @@ impl Service {
         word_generator: Box<dyn WordGenerator>,
         board_generator: Box<dyn BoardGenerator>,
         dao: Box<dyn DAO>,
-    ) -> StandardResult<Service> {
+    ) -> StdResult<Service> {
         let dictionary_service = DictionaryService::new(word_generator)?;
         let board_service = BoardService::new(board_generator);
         Ok(Service {
@@ -25,21 +25,21 @@ impl Service {
         })
     }
 
-    pub fn random_name(&self) -> StandardResult<NewGameRequest> {
+    pub fn random_name(&self) -> StdResult<NewGameRequest> {
         let (first_name, last_name) = self.dictionary_service.new_word_pair()?;
         Ok(NewGameRequest {
             name: format!("{}-{}", first_name, last_name),
         })
     }
 
-    pub fn new_game(&self, request: NewGameRequest) -> StandardResult<Game> {
+    pub fn new_game(&self, request: NewGameRequest) -> StdResult<Game> {
         let words = self.dictionary_service.new_word_set()?;
         let (board, first_team) = self.board_service.new_board(words)?;
 
-        Ok(Game::new(request.name, board, first_team)?)
+        Ok(Game::new(request.name, board, first_team))
     }
 
-    pub fn guess(guess: GuessRequest, game: Game) -> StandardResult<Game> {
+    pub fn guess(guess: GuessRequest, game: Game) -> StdResult<Game> {
         game.players
             .iter()
             .cloned()
@@ -58,15 +58,15 @@ impl Service {
                 |_|
                     game.clone().guess(Guess {
                         board_index: guess.board_index,
-                    }),
+                    }).map_err(|_| "duplicate guess".into()),
             )
     }
 
-    pub fn get(&mut self, key: String) -> StandardResult<Game> {
+    pub fn get(&mut self, key: String) -> StdResult<Game> {
         self.dao.get(key)
     }
 
-    pub fn save(&mut self, key: String, game: Game) -> StandardResult<()> {
+    pub fn save(&mut self, key: String, game: Game) -> StdResult<()> {
         self.dao.set(key, game)
     }
 }

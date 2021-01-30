@@ -3,7 +3,7 @@ use std::error::Error;
 use std::fmt;
 
 use crate::game::board::model::Board;
-use crate::model::{StandardResult, UniqueError};
+use crate::model::UniqueError;
 use std::fmt::Formatter;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -33,18 +33,20 @@ pub struct Game {
     pub guesses: Vec<Guess>,
 }
 
+pub type GameResult = Result<Game, GameError>;
+
 impl Game {
-    pub fn new(name: String, board: Board, turn: Team) -> StandardResult<Game> {
-        Ok(Game {
+    pub fn new(name: String, board: Board, turn: Team) -> Game {
+        Game {
             name,
             board,
             turn,
             players: Vec::new(),
             guesses: Vec::new(),
-        })
+        }
     }
 
-    pub fn join(self, player: Player) -> StandardResult<Game> {
+    pub fn join(self, player: Player) -> GameResult {
         self.players
             .iter()
             .find(|Player { name, .. }| *name == player.name)
@@ -79,7 +81,7 @@ impl Game {
         }
     }
 
-    pub fn guess(self, guess: Guess) -> StandardResult<Game> {
+    pub fn guess(self, guess: Guess) -> GameResult {
         self.guesses
             .iter()
             .find(|Guess { board_index, .. }| *board_index == guess.board_index)
@@ -101,7 +103,7 @@ impl Game {
 }
 
 #[derive(Debug)]
-enum GameError {
+pub enum GameError {
     PlayerName(UniqueError),
     Guess(UniqueError),
 }

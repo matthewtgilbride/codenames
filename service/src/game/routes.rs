@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use crate::game::model::{Game, GuessRequest, NewGameRequest, Player};
 use crate::game::service::Service;
-use crate::model::StandardResult;
+use crate::model::StdResult;
 
 pub struct Routes {
     service: Service,
@@ -66,7 +66,7 @@ impl Routes {
         self.save_and_respond(key, updated_game, false)
     }
 
-    fn get_existing_game_by_key(&mut self, msg: http::Request) -> StandardResult<(String, Game)> {
+    fn get_existing_game_by_key(&mut self, msg: http::Request) -> StdResult<(String, Game)> {
         let game_key = get_game_key(msg.path);
         game_key.map_or_else(
             || Err("game key could not be found in path".into()),

@@ -6,7 +6,7 @@ use rand::thread_rng;
 
 use crate::dictionary::model::{DictionaryType, MINIMUM_DICTIONARY_SIZE};
 use crate::dictionary::util::get_dictionary_words;
-use crate::model::StandardResult;
+use crate::model::StdResult;
 
 pub struct Service {
     words: HashSet<String>,
@@ -14,31 +14,31 @@ pub struct Service {
 }
 
 impl Service {
-    pub fn new(generator: Box<dyn WordGenerator>) -> StandardResult<Service> {
+    pub fn new(generator: Box<dyn WordGenerator>) -> StdResult<Service> {
         let words = get_dictionary_words(DictionaryType::Default)?;
         Ok(Service { words, generator })
     }
 
-    pub fn new_word_set(&self) -> StandardResult<[String; 25]> {
+    pub fn new_word_set(&self) -> StdResult<[String; 25]> {
         self.generator
             .random_set(self.words.iter().cloned().collect())
     }
 
-    pub fn new_word_pair(&self) -> StandardResult<(String, String)> {
+    pub fn new_word_pair(&self) -> StdResult<(String, String)> {
         self.generator
             .random_pair(self.words.iter().cloned().collect())
     }
 }
 
 pub trait WordGenerator {
-    fn random_set(&self, dictionary: HashSet<String>) -> StandardResult<[String; 25]>;
-    fn random_pair(&self, dictionary: HashSet<String>) -> StandardResult<(String, String)>;
+    fn random_set(&self, dictionary: HashSet<String>) -> StdResult<[String; 25]>;
+    fn random_pair(&self, dictionary: HashSet<String>) -> StdResult<(String, String)>;
 }
 
 pub struct WordGeneratorRand;
 
 impl WordGenerator for WordGeneratorRand {
-    fn random_set(&self, dictionary: HashSet<String>) -> StandardResult<[String; 25]> {
+    fn random_set(&self, dictionary: HashSet<String>) -> StdResult<[String; 25]> {
         if dictionary.len() < (MINIMUM_DICTIONARY_SIZE + 1) {
             return Err("dictionary must have at least 26 words".into());
         }
@@ -53,7 +53,7 @@ impl WordGenerator for WordGeneratorRand {
         Ok(random_subset.try_into().unwrap())
     }
 
-    fn random_pair(&self, dictionary: HashSet<String>) -> StandardResult<(String, String)> {
+    fn random_pair(&self, dictionary: HashSet<String>) -> StdResult<(String, String)> {
         if dictionary.len() < (MINIMUM_DICTIONARY_SIZE + 1) {
             return Err("dictionary must have at least 26 words".into());
         }
