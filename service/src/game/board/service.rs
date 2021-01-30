@@ -1,13 +1,14 @@
-use crate::game::card::model::{Card, CardColor, ALL_CARD_COLORS};
-use crate::game::model::Team;
 use std::collections::HashSet;
+use std::convert::TryInto;
+
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 
 use crate::game::board::model::Board;
 use crate::game::board::util::{card_color_count, max_card_color};
+use crate::game::card::model::{Card, CardColor, ALL_CARD_COLORS};
+use crate::game::model::Team;
 use crate::model::StandardResult;
-use rand::seq::SliceRandom;
-use rand::thread_rng;
-use std::convert::TryInto;
 
 pub struct Service {
     generator: Box<dyn BoardGenerator>,
@@ -27,7 +28,7 @@ pub trait BoardGenerator {
     fn random_board(&self, words: [String; 25]) -> StandardResult<(Board, Team)>;
 }
 
-pub struct BoardGeneratorRand {}
+pub struct BoardGeneratorRand;
 
 impl BoardGeneratorRand {
     fn random_team(&self) -> Team {

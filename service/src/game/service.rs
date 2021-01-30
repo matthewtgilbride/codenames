@@ -1,5 +1,5 @@
-use crate::dictionary::service::Service as DictionaryService;
-use crate::game::board::service::Service as BoardService;
+use crate::dictionary::service::{Service as DictionaryService, WordGenerator};
+use crate::game::board::service::{BoardGenerator, Service as BoardService};
 use crate::game::dao::DAO;
 use crate::game::model::{Game, Guess, GuessRequest, NewGameRequest, Player};
 use crate::model::StandardResult;
@@ -12,15 +12,17 @@ pub struct Service {
 
 impl Service {
     pub fn new(
-        board_service: BoardService,
-        dictionary_service: DictionaryService,
+        word_generator: Box<dyn WordGenerator>,
+        board_generator: Box<dyn BoardGenerator>,
         dao: Box<dyn DAO>,
-    ) -> Service {
-        Service {
+    ) -> StandardResult<Service> {
+        let dictionary_service = DictionaryService::new(word_generator)?;
+        let board_service = BoardService::new(board_generator);
+        Ok(Service {
             board_service,
             dictionary_service,
             dao,
-        }
+        })
     }
 
     pub fn random_name(&self) -> StandardResult<NewGameRequest> {

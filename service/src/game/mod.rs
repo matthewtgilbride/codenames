@@ -7,14 +7,14 @@ pub mod service;
 
 #[cfg(test)]
 mod tests {
-    use crate::dictionary::service::{Service as DictionaryService, WordGeneratorRand};
-    use crate::game::board::service::{BoardGeneratorRand, Service as BoardService};
+    use crate::dictionary::service::WordGeneratorRand;
+    use crate::game::board::service::BoardGeneratorRand;
     use crate::game::dao::DAO;
     use crate::game::model::{Game, Player, Team};
     use crate::game::service::Service;
     use crate::model::StandardResult;
 
-    struct DaoStub {}
+    struct DaoStub;
 
     impl DAO for DaoStub {
         fn get(&mut self, _: String) -> StandardResult<Game> {
@@ -28,14 +28,10 @@ mod tests {
 
     pub fn rand_game() -> Game {
         let word_generator = Box::new(WordGeneratorRand {});
-        let dictionary_service = DictionaryService::new(word_generator).unwrap();
-
-        let game_generator = Box::new(BoardGeneratorRand {});
-        let board_service = BoardService::new(game_generator);
-
+        let board_generator = Box::new(BoardGeneratorRand {});
         let dao = Box::new(DaoStub {});
 
-        let test_game_service = Service::new(board_service, dictionary_service, dao);
+        let test_game_service = Service::new(word_generator, board_generator, dao).unwrap();
 
         let game = test_game_service
             .new_game(test_game_service.random_name().unwrap())
