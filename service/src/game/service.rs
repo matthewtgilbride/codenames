@@ -58,8 +58,7 @@ impl Service {
                 |_|
                     game.clone().guess(Guess {
                         board_index: guess.board_index,
-                    })
-
+                    }),
             )
     }
 

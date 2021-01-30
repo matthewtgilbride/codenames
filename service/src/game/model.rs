@@ -1,7 +1,10 @@
 use serde::{Deserialize, Serialize};
+use std::error::Error;
+use std::fmt;
 
 use crate::game::board::model::Board;
-use crate::model::StandardResult;
+use crate::model::{StandardResult, UniqueError};
+use std::fmt::Formatter;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Team {
@@ -45,7 +48,7 @@ impl Game {
         self.players
             .iter()
             .find(|Player { name, .. }| *name == player.name)
-            .map(|_| Err("player names must be unique".into()))
+            .map(|p| Err(GameError::player_name(p.clone()).into()))
             .unwrap_or_else(|| {
                 Ok(Game {
                     players: [&[player], &self.players[..]].concat(),
@@ -80,7 +83,7 @@ impl Game {
         self.guesses
             .iter()
             .find(|Guess { board_index, .. }| *board_index == guess.board_index)
-            .map(|_| Err("card has already been guessed".into()))
+            .map(|g| Err(GameError::guess(g.clone()).into()))
             .unwrap_or_else(|| {
                 Ok(Game {
                     guesses: [&[guess], &self.guesses[..]].concat(),
@@ -96,6 +99,43 @@ impl Game {
         }
     }
 }
+
+#[derive(Debug)]
+enum GameError {
+    PlayerName(UniqueError),
+    Guess(UniqueError),
+}
+
+impl GameError {
+    fn entity_name() -> String {
+        "Game".to_string()
+    }
+    pub fn player_name(player: Player) -> GameError {
+        GameError::PlayerName(UniqueError::new(
+            GameError::entity_name(),
+            "player.name".to_string(),
+            player.name,
+        ))
+    }
+    pub fn guess(guess: Guess) -> GameError {
+        GameError::Guess(UniqueError::new(
+            GameError::entity_name(),
+            "guess.board_index".to_string(),
+            guess.board_index.to_string(),
+        ))
+    }
+}
+
+impl fmt::Display for GameError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            GameError::PlayerName(u) => u.fmt(f),
+            GameError::Guess(u) => u.fmt(f),
+        }
+    }
+}
+
+impl Error for GameError {}
 
 #[cfg(test)]
 mod tests {
