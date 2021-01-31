@@ -4,29 +4,12 @@ use std::convert::TryInto;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-use crate::game::board::model::Board;
-use crate::game::board::util::{card_color_count, max_card_color};
-use crate::game::card::model::{Card, CardColor, ALL_CARD_COLORS};
-use crate::game::model::Team;
-use crate::model::StdResult;
-
-pub struct Service {
-    generator: Box<dyn BoardGenerator>,
-}
-
-impl Service {
-    pub fn new(generator: Box<dyn BoardGenerator>) -> Service {
-        Service { generator }
-    }
-
-    pub fn new_board(&self, words: [String; 25]) -> StdResult<(Board, Team)> {
-        self.generator.random_board(words)
-    }
-}
-
-pub trait BoardGenerator {
-    fn random_board(&self, words: [String; 25]) -> StdResult<(Board, Team)>;
-}
+use domain::game::board::model::Board;
+use domain::game::board::service::BoardGenerator;
+use domain::game::board::util::{card_color_count, max_card_color};
+use domain::game::card::model::{Card, CardColor, ALL_CARD_COLORS};
+use domain::game::model::Team;
+use domain::StdResult;
 
 pub struct BoardGeneratorRand;
 
@@ -74,11 +57,14 @@ impl BoardGenerator for BoardGeneratorRand {
 
 #[cfg(test)]
 mod tests {
-    use crate::dictionary::service::{Service as DictionaryService, WordGeneratorRand};
-    use crate::game::board::service::{BoardGeneratorRand, Service};
-    use crate::game::board::util::card_color_count;
-    use crate::game::card::model::CardColor;
-    use crate::game::model::Team;
+    use domain::dictionary::service::Service as DictionaryService;
+    use domain::game::board::service::Service;
+    use domain::game::board::util::card_color_count;
+    use domain::game::card::model::CardColor;
+    use domain::game::model::Team;
+
+    use crate::dictionary::service::WordGeneratorRand;
+    use crate::game::board::service::BoardGeneratorRand;
 
     #[test]
     fn new_board() {

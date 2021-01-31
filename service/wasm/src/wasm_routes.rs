@@ -1,12 +1,11 @@
 extern crate wapc_guest as guest;
 
 use actor_http_server as http;
+use domain::game::model::{Game, GuessRequest, NewGameRequest, Player};
+use domain::game::service::Service;
+use domain::StdResult;
 use guest::prelude::*;
 use uuid::Uuid;
-
-use crate::game::model::{Game, GuessRequest, NewGameRequest, Player};
-use crate::game::service::Service;
-use crate::model::StdResult;
 
 pub struct WasmRoutes {
     service: Service,

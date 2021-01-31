@@ -1,17 +1,16 @@
-pub mod board;
-mod card;
-pub mod dao;
-pub mod model;
-pub mod service;
+mod board;
+mod dao;
+mod model;
 
 #[cfg(test)]
 mod tests {
+    use domain::game::dao::DAO;
+    use domain::game::model::{Game, Player, Team};
+    use domain::game::service::Service;
+    use domain::StdResult;
+
     use crate::dictionary::service::WordGeneratorRand;
     use crate::game::board::service::BoardGeneratorRand;
-    use crate::game::dao::DAO;
-    use crate::game::model::{Game, Player, Team};
-    use crate::game::service::Service;
-    use crate::model::StdResult;
 
     struct DaoStub;
 

@@ -2,7 +2,7 @@ use crate::dictionary::service::{Service as DictionaryService, WordGenerator};
 use crate::game::board::service::{BoardGenerator, Service as BoardService};
 use crate::game::dao::DAO;
 use crate::game::model::{Game, Guess, GuessRequest, NewGameRequest, Player};
-use crate::model::StdResult;
+use crate::StdResult;
 
 pub struct Service {
     board_service: BoardService,

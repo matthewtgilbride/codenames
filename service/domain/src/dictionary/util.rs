@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use crate::dictionary::model::DictionaryType;
-use crate::model::StdResult;
+use crate::StdResult;
 
 pub fn get_dictionary_words(_dictionary_type: DictionaryType) -> StdResult<HashSet<String>> {
     // todo: pass dict type to select from a set of available dictionaries

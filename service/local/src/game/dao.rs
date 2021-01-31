@@ -1,14 +1,9 @@
-extern crate redis;
+use redis::Commands;
+use redis::Connection;
 
-use crate::game::model::Game;
-use crate::model::StdResult;
-
-use self::redis::{Commands, Connection};
-
-pub trait DAO {
-    fn get(&mut self, key: String) -> StdResult<Game>;
-    fn set(&mut self, key: String, game: Game) -> StdResult<()>;
-}
+use domain::game::dao::DAO;
+use domain::game::model::Game;
+use domain::StdResult;
 
 pub struct RedisDao {
     con: Connection,

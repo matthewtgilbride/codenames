@@ -2,21 +2,52 @@
 extern crate serde_json;
 extern crate wapc_guest as guest;
 
+use crate::wasm_routes::WasmRoutes;
 use actor_core as core;
 use actor_http_server as http;
+use domain::dictionary::service::WordGenerator;
+use domain::game::board::service::BoardGenerator;
+use domain::game::card::model::Card;
+use domain::game::dao::DAO;
+use domain::game::model::{Game, Team};
+use domain::game::service::Service;
+use domain::StdResult;
 use guest::prelude::*;
+use std::collections::hash_map::RandomState;
+use std::collections::HashSet;
 
-use wasm_routes::WasmRoutes;
+// use wasm_routes::WasmRoutes;
 
-use crate::dictionary::service::WordGeneratorRand;
-use crate::game::board::service::BoardGeneratorRand;
-use crate::game::dao::RedisDao;
-use crate::game::service::Service;
+mod wasm_routes;
 
-mod dictionary;
-mod game;
-mod model;
-pub mod wasm_routes;
+struct WordStub;
+impl WordGenerator for WordStub {
+    fn random_set(&self, _: HashSet<String, RandomState>) -> StdResult<[String; 25]> {
+        unimplemented!()
+    }
+
+    fn random_pair(&self, _: HashSet<String, RandomState>) -> StdResult<(String, String)> {
+        unimplemented!()
+    }
+}
+
+struct BoardStub;
+impl BoardGenerator for BoardStub {
+    fn random_board(&self, _: [String; 25]) -> StdResult<([Card; 25], Team)> {
+        unimplemented!()
+    }
+}
+
+struct DaoStub;
+impl DAO for DaoStub {
+    fn get(&mut self, _: String) -> StdResult<Game> {
+        unimplemented!()
+    }
+
+    fn set(&mut self, _: String, _: Game) -> StdResult<()> {
+        unimplemented!()
+    }
+}
 
 #[no_mangle]
 pub fn wapc_init() {
@@ -29,9 +60,9 @@ fn health(_h: core::HealthCheckRequest) -> HandlerResult<core::HealthCheckRespon
 }
 
 fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {
-    let word_generator = Box::new(WordGeneratorRand {});
-    let board_generator = Box::new(BoardGeneratorRand {});
-    let dao = Box::new(RedisDao::new()?);
+    let word_generator = Box::new(WordStub);
+    let board_generator = Box::new(BoardStub);
+    let dao = Box::new(DaoStub);
 
     let service = Service::new(word_generator, board_generator, dao)?;
 

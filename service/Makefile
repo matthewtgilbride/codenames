@@ -1,13 +1,14 @@
 build:
-	cargo build --target wasm32-wasi
+	cargo build
+	cargo build -p wasm --target wasm32-wasi
 
 format:
 	cargo fmt
 
 test:
-	cargo test
+	cargo test --all
 
-check: build format test
+check: build-m1 format test
 
 gen-account-key:
 	nk gen account -o json | jq -r .seed > account.nk
