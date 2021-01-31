@@ -1,22 +1,15 @@
 #[macro_use]
 extern crate serde_json;
 
-use actix_web::{App, HttpServer};
+use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 
-use codenames_domain::game::service::Service;
-
-use crate::actix_routes::random_name;
 use crate::dictionary::service::WordGeneratorRand;
 use crate::game::board::service::BoardGeneratorRand;
 use crate::game::dao::RedisDao;
+use codenames_domain::game::service::Service;
 
-mod actix_routes;
 mod dictionary;
 mod game;
-
-struct AppState {
-    service: String,
-}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -24,16 +17,15 @@ async fn main() -> std::io::Result<()> {
     let board_generator = Box::new(BoardGeneratorRand);
     let dao = Box::new(RedisDao::new().unwrap());
 
-    let _service = Service::new(word_generator, board_generator, dao).unwrap();
+    let service = Service::new(word_generator, board_generator, dao).unwrap();
 
-    HttpServer::new(|| {
-        App::new()
-            .data(AppState {
-                service: String::from("foo"),
-            })
-            .service(random_name)
-    })
-    .bind("127.0.0.1:8080")?
-    .run()
-    .await
+    HttpServer::new(move || App::new().data(service.clone()).service(random_name))
+        .bind("127.0.0.1:8080")?
+        .run()
+        .await
+}
+
+#[get("/")]
+pub async fn random_name(data: web::Data<Service>) -> impl Responder {
+    HttpResponse::Ok().json(&data.random_name().unwrap())
 }

@@ -8,6 +8,7 @@ use codenames_domain::dictionary::model::MINIMUM_DICTIONARY_SIZE;
 use codenames_domain::dictionary::service::WordGenerator;
 use codenames_domain::StdResult;
 
+#[derive(Clone)]
 pub struct WordGeneratorRand;
 
 impl WordGenerator for WordGeneratorRand {

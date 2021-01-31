@@ -12,6 +12,7 @@ mod tests {
     use crate::dictionary::service::WordGeneratorRand;
     use crate::game::board::service::BoardGeneratorRand;
 
+    #[derive(Clone)]
     struct DaoStub;
 
     impl DAO for DaoStub {

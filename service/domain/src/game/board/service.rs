@@ -1,13 +1,15 @@
 use crate::game::board::model::Board;
 use crate::game::model::Team;
 use crate::StdResult;
+use dyn_clone::DynClone;
 
+#[derive(Clone)]
 pub struct Service {
-    generator: Box<dyn BoardGenerator + Send + Sync>,
+    generator: Box<dyn BoardGenerator>,
 }
 
 impl Service {
-    pub fn new(generator: Box<dyn BoardGenerator + Send + Sync>) -> Service {
+    pub fn new(generator: Box<dyn BoardGenerator>) -> Service {
         Service { generator }
     }
 
@@ -16,6 +18,8 @@ impl Service {
     }
 }
 
-pub trait BoardGenerator {
+pub trait BoardGenerator: DynClone + Send + Sync {
     fn random_board(&self, words: [String; 25]) -> StdResult<(Board, Team)>;
 }
+
+dyn_clone::clone_trait_object!(BoardGenerator);

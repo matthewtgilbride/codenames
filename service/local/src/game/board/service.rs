@@ -11,6 +11,7 @@ use codenames_domain::game::card::model::{Card, CardColor, ALL_CARD_COLORS};
 use codenames_domain::game::model::Team;
 use codenames_domain::StdResult;
 
+#[derive(Clone)]
 pub struct BoardGeneratorRand;
 
 impl BoardGeneratorRand {

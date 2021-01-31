@@ -3,14 +3,16 @@ use std::collections::HashSet;
 use crate::dictionary::model::DictionaryType;
 use crate::dictionary::util::get_dictionary_words;
 use crate::StdResult;
+use dyn_clone::DynClone;
 
+#[derive(Clone)]
 pub struct Service {
     words: HashSet<String>,
-    generator: Box<dyn WordGenerator + Send + Sync>,
+    generator: Box<dyn WordGenerator>,
 }
 
 impl Service {
-    pub fn new(generator: Box<dyn WordGenerator + Send + Sync>) -> StdResult<Service> {
+    pub fn new(generator: Box<dyn WordGenerator>) -> StdResult<Service> {
         let words = get_dictionary_words(DictionaryType::Default)?;
         Ok(Service { words, generator })
     }
@@ -26,7 +28,9 @@ impl Service {
     }
 }
 
-pub trait WordGenerator {
+pub trait WordGenerator: DynClone + Send + Sync {
     fn random_set(&self, dictionary: HashSet<String>) -> StdResult<[String; 25]>;
     fn random_pair(&self, dictionary: HashSet<String>) -> StdResult<(String, String)>;
 }
+
+dyn_clone::clone_trait_object!(WordGenerator);

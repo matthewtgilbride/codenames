@@ -4,16 +4,17 @@ use crate::game::dao::DAO;
 use crate::game::model::{Game, Guess, GuessRequest, NewGameRequest, Player};
 use crate::StdResult;
 
+#[derive(Clone)]
 pub struct Service {
     board_service: BoardService,
     dictionary_service: DictionaryService,
-    dao: Box<dyn DAO + Send + Sync>,
+    dao: Box<dyn DAO>,
 }
 
 impl Service {
     pub fn new(
-        word_generator: Box<dyn WordGenerator + Send + Sync>,
-        board_generator: Box<dyn BoardGenerator + Send + Sync>,
+        word_generator: Box<dyn WordGenerator>,
+        board_generator: Box<dyn BoardGenerator>,
         dao: Box<dyn DAO + Send + Sync>,
     ) -> StdResult<Service> {
         let dictionary_service = DictionaryService::new(word_generator)?;

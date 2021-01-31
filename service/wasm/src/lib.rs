@@ -23,6 +23,7 @@ use crate::wasm_routes::WasmRoutes;
 
 mod wasm_routes;
 
+#[derive(Clone)]
 struct WordStub;
 
 impl WordGenerator for WordStub {
@@ -35,6 +36,7 @@ impl WordGenerator for WordStub {
     }
 }
 
+#[derive(Clone)]
 struct BoardStub;
 
 impl BoardGenerator for BoardStub {
@@ -43,6 +45,7 @@ impl BoardGenerator for BoardStub {
     }
 }
 
+#[derive(Clone)]
 struct DaoStub;
 
 impl DAO for DaoStub {

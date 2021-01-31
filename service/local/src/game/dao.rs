@@ -9,6 +9,12 @@ pub struct RedisDao {
     con: Connection,
 }
 
+impl Clone for RedisDao {
+    fn clone(&self) -> Self {
+        RedisDao::new().unwrap()
+    }
+}
+
 impl RedisDao {
     pub fn new() -> StdResult<RedisDao> {
         let client = redis::Client::open("redis://127.0.0.1/")?;
