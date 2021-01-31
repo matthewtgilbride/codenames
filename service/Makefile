@@ -1,6 +1,6 @@
 build:
 	cargo build
-	cargo build -p wasm --target wasm32-wasi
+	cargo build -p wasm --target wasm32-unknown-unknown
 
 format:
 	cargo fmt

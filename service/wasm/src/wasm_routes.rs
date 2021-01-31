@@ -5,7 +5,6 @@ use domain::game::model::{Game, GuessRequest, NewGameRequest, Player};
 use domain::game::service::Service;
 use domain::StdResult;
 use guest::prelude::*;
-use uuid::Uuid;
 
 pub struct WasmRoutes {
     service: Service,
@@ -24,7 +23,7 @@ impl WasmRoutes {
     pub fn new_game(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
         let body: NewGameRequest = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
         let game = self.service.new_game(body)?;
-        self.save_and_respond(Uuid::new_v4().to_string(), game, true)
+        self.save_and_respond(game.name.clone(), game, true)
     }
 
     pub fn get(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
