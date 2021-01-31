@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use domain::game::model::{Game, Guess, Player, Team};
+    use codenames_domain::game::model::{Game, Guess, Player, Team};
 
     use crate::game::tests::rand_game;
 

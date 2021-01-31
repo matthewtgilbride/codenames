@@ -6,11 +6,11 @@ use crate::StdResult;
 
 pub struct Service {
     words: HashSet<String>,
-    generator: Box<dyn WordGenerator>,
+    generator: Box<dyn WordGenerator + Send + Sync>,
 }
 
 impl Service {
-    pub fn new(generator: Box<dyn WordGenerator>) -> StdResult<Service> {
+    pub fn new(generator: Box<dyn WordGenerator + Send + Sync>) -> StdResult<Service> {
         let words = get_dictionary_words(DictionaryType::Default)?;
         Ok(Service { words, generator })
     }

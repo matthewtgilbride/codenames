@@ -2,25 +2,29 @@
 extern crate serde_json;
 extern crate wapc_guest as guest;
 
-use crate::wasm_routes::WasmRoutes;
-use actor_core as core;
-use actor_http_server as http;
-use domain::dictionary::service::WordGenerator;
-use domain::game::board::service::BoardGenerator;
-use domain::game::card::model::Card;
-use domain::game::dao::DAO;
-use domain::game::model::{Game, Team};
-use domain::game::service::Service;
-use domain::StdResult;
-use guest::prelude::*;
 use std::collections::hash_map::RandomState;
 use std::collections::HashSet;
+
+use actor_core as core;
+use actor_http_server as http;
+use guest::prelude::*;
+
+use codenames_domain::dictionary::service::WordGenerator;
+use codenames_domain::game::board::service::BoardGenerator;
+use codenames_domain::game::card::model::Card;
+use codenames_domain::game::dao::DAO;
+use codenames_domain::game::model::{Game, Team};
+use codenames_domain::game::service::Service;
+use codenames_domain::StdResult;
+
+use crate::wasm_routes::WasmRoutes;
 
 // use wasm_routes::WasmRoutes;
 
 mod wasm_routes;
 
 struct WordStub;
+
 impl WordGenerator for WordStub {
     fn random_set(&self, _: HashSet<String, RandomState>) -> StdResult<[String; 25]> {
         unimplemented!()
@@ -32,6 +36,7 @@ impl WordGenerator for WordStub {
 }
 
 struct BoardStub;
+
 impl BoardGenerator for BoardStub {
     fn random_board(&self, _: [String; 25]) -> StdResult<([Card; 25], Team)> {
         unimplemented!()
@@ -39,6 +44,7 @@ impl BoardGenerator for BoardStub {
 }
 
 struct DaoStub;
+
 impl DAO for DaoStub {
     fn get(&mut self, _: String) -> StdResult<Game> {
         unimplemented!()

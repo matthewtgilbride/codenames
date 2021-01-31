@@ -1,13 +1,13 @@
-mod board;
-mod dao;
-mod model;
+pub mod board;
+pub mod dao;
+pub mod model;
 
 #[cfg(test)]
 mod tests {
-    use domain::game::dao::DAO;
-    use domain::game::model::{Game, Player, Team};
-    use domain::game::service::Service;
-    use domain::StdResult;
+    use codenames_domain::game::dao::DAO;
+    use codenames_domain::game::model::{Game, Player, Team};
+    use codenames_domain::game::service::Service;
+    use codenames_domain::StdResult;
 
     use crate::dictionary::service::WordGeneratorRand;
     use crate::game::board::service::BoardGeneratorRand;

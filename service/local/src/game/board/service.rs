@@ -4,12 +4,12 @@ use std::convert::TryInto;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-use domain::game::board::model::Board;
-use domain::game::board::service::BoardGenerator;
-use domain::game::board::util::{card_color_count, max_card_color};
-use domain::game::card::model::{Card, CardColor, ALL_CARD_COLORS};
-use domain::game::model::Team;
-use domain::StdResult;
+use codenames_domain::game::board::model::Board;
+use codenames_domain::game::board::service::BoardGenerator;
+use codenames_domain::game::board::util::{card_color_count, max_card_color};
+use codenames_domain::game::card::model::{Card, CardColor, ALL_CARD_COLORS};
+use codenames_domain::game::model::Team;
+use codenames_domain::StdResult;
 
 pub struct BoardGeneratorRand;
 
@@ -57,11 +57,11 @@ impl BoardGenerator for BoardGeneratorRand {
 
 #[cfg(test)]
 mod tests {
-    use domain::dictionary::service::Service as DictionaryService;
-    use domain::game::board::service::Service;
-    use domain::game::board::util::card_color_count;
-    use domain::game::card::model::CardColor;
-    use domain::game::model::Team;
+    use codenames_domain::dictionary::service::Service as DictionaryService;
+    use codenames_domain::game::board::service::Service;
+    use codenames_domain::game::board::util::card_color_count;
+    use codenames_domain::game::card::model::CardColor;
+    use codenames_domain::game::model::Team;
 
     use crate::dictionary::service::WordGeneratorRand;
     use crate::game::board::service::BoardGeneratorRand;

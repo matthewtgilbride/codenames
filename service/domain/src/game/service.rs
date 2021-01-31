@@ -7,14 +7,14 @@ use crate::StdResult;
 pub struct Service {
     board_service: BoardService,
     dictionary_service: DictionaryService,
-    dao: Box<dyn DAO>,
+    dao: Box<dyn DAO + Send + Sync>,
 }
 
 impl Service {
     pub fn new(
-        word_generator: Box<dyn WordGenerator>,
-        board_generator: Box<dyn BoardGenerator>,
-        dao: Box<dyn DAO>,
+        word_generator: Box<dyn WordGenerator + Send + Sync>,
+        board_generator: Box<dyn BoardGenerator + Send + Sync>,
+        dao: Box<dyn DAO + Send + Sync>,
     ) -> StdResult<Service> {
         let dictionary_service = DictionaryService::new(word_generator)?;
         let board_service = BoardService::new(board_generator);

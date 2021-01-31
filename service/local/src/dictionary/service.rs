@@ -4,9 +4,9 @@ use std::convert::TryInto;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-use domain::dictionary::model::MINIMUM_DICTIONARY_SIZE;
-use domain::dictionary::service::WordGenerator;
-use domain::StdResult;
+use codenames_domain::dictionary::model::MINIMUM_DICTIONARY_SIZE;
+use codenames_domain::dictionary::service::WordGenerator;
+use codenames_domain::StdResult;
 
 pub struct WordGeneratorRand;
 

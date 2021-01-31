@@ -1,5 +1,5 @@
 [package]
-name = "domain"
+name = "codenames-domain"
 version = "0.1.0"
 authors = ["Matthew T. Gilbride <mgilbride@chariotsolutions.com>"]
 edition = "2018"

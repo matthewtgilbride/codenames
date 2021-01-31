@@ -1,9 +1,9 @@
 use redis::Commands;
 use redis::Connection;
 
-use domain::game::dao::DAO;
-use domain::game::model::Game;
-use domain::StdResult;
+use codenames_domain::game::dao::DAO;
+use codenames_domain::game::model::Game;
+use codenames_domain::StdResult;
 
 pub struct RedisDao {
     con: Connection,

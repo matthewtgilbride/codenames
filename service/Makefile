@@ -1,6 +1,6 @@
 build:
 	cargo build
-	cargo build -p wasm --target wasm32-unknown-unknown
+	cargo build -p codenames-wasm --target wasm32-unknown-unknown
 
 format:
 	cargo fmt
@@ -8,7 +8,7 @@ format:
 test:
 	cargo test --all
 
-check: build-m1 format test
+check: build format test
 
 gen-account-key:
 	nk gen account -o json | jq -r .seed > account.nk

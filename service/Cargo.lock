@@ -482,6 +482,42 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "codenames-domain"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_derive",
+ "serde_json",
+]
+
+[[package]]
+name = "codenames-local"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "codenames-domain",
+ "rand 0.8.3",
+ "redis",
+ "serde",
+ "serde_derive",
+ "serde_json",
+]
+
+[[package]]
+name = "codenames-wasm"
+version = "0.1.0"
+dependencies = [
+ "actor-core",
+ "actor-http-server",
+ "actor-keyvalue",
+ "codenames-domain",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "wapc-guest",
+]
+
+[[package]]
 name = "combine"
 version = "4.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -554,15 +590,6 @@ name = "discard"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "212d0f5754cb6769937f4501cc0e67f4f4483c8d2c3e1e922ee9edbe4ab4c7c0"
-
-[[package]]
-name = "domain"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_derive",
- "serde_json",
-]
 
 [[package]]
 name = "dtoa"
@@ -933,19 +960,6 @@ name = "linked-hash-map"
 version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7fb9b38af92608140b86b693604b9ffcc5824240a484d1ecd4795bacb2fe88f3"
-
-[[package]]
-name = "local"
-version = "0.1.0"
-dependencies = [
- "actix-web",
- "domain",
- "rand 0.8.3",
- "redis",
- "serde",
- "serde_derive",
- "serde_json",
-]
 
 [[package]]
 name = "lock_api"
@@ -1865,20 +1879,6 @@ name = "wasi"
 version = "0.10.1+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "93c6c3420963c5c64bca373b25e77acb562081b9bb4dd5bb864187742186cea9"
-
-[[package]]
-name = "wasm"
-version = "0.1.0"
-dependencies = [
- "actor-core",
- "actor-http-server",
- "actor-keyvalue",
- "domain",
- "serde",
- "serde_derive",
- "serde_json",
- "wapc-guest",
-]
 
 [[package]]
 name = "wasm-bindgen"
