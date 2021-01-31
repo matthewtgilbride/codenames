@@ -1,7 +1,8 @@
+use dyn_clone::DynClone;
+
 use crate::game::board::model::Board;
 use crate::game::model::Team;
 use crate::StdResult;
-use dyn_clone::DynClone;
 
 #[derive(Clone)]
 pub struct Service {

@@ -1,6 +1,7 @@
 pub mod board;
 pub mod dao;
 pub mod model;
+pub mod routes;
 
 #[cfg(test)]
 mod tests {

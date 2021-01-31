@@ -1,9 +1,10 @@
 use std::collections::HashSet;
 
+use dyn_clone::DynClone;
+
 use crate::dictionary::model::DictionaryType;
 use crate::dictionary::util::get_dictionary_words;
 use crate::StdResult;
-use dyn_clone::DynClone;
 
 #[derive(Clone)]
 pub struct Service {

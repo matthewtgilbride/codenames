@@ -7,7 +7,7 @@ use rand::thread_rng;
 use codenames_domain::game::board::model::Board;
 use codenames_domain::game::board::service::BoardGenerator;
 use codenames_domain::game::board::util::{card_color_count, max_card_color};
-use codenames_domain::game::card::model::{Card, CardColor, ALL_CARD_COLORS};
+use codenames_domain::game::card::model::{ALL_CARD_COLORS, Card, CardColor};
 use codenames_domain::game::model::Team;
 use codenames_domain::StdResult;
 
