@@ -140,7 +140,7 @@ impl fmt::Display for GameError {
 
 impl Error for GameError {}
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NewGameRequest {
     pub name: String,
 }
