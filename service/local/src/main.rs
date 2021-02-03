@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate serde_json;
 
-use actix_web::{App, get, HttpResponse, HttpServer, Responder, web};
+use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 
 use codenames_domain::game::service::Service;
 
@@ -32,7 +32,7 @@ async fn main() -> std::io::Result<()> {
                 AppData {
                     service: service.clone(),
                 }
-                    .clone(),
+                .clone(),
             )
             .service(random_name)
             .service(
@@ -46,9 +46,9 @@ async fn main() -> std::io::Result<()> {
                     .service(end_turn),
             )
     })
-        .bind("127.0.0.1:8080")?
-        .run()
-        .await
+    .bind("127.0.0.1:8080")?
+    .run()
+    .await
 }
 
 #[get("/")]

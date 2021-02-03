@@ -37,10 +37,27 @@ impl Service {
         let words = self.dictionary_service.new_word_set()?;
         let (board, first_team) = self.board_service.new_board(words)?;
 
-        Ok(Game::new(request.name, board, first_team))
+        let game = Game::new(request.name, board, first_team);
+        let _ = &self.clone().save(game.clone())?;
+
+        Ok(game.clone())
     }
 
-    pub fn guess(guess: GuessRequest, game: Game) -> StdResult<Game> {
+    pub fn join(&self, key: String, player: Player) -> StdResult<Game> {
+        let game = &self.clone().get(key)?;
+        let updated_game = game.clone().join(player)?;
+        Ok(updated_game.clone())
+    }
+
+    pub fn leave(&self, key: String, player: Player) -> StdResult<Game> {
+        let game = &self.clone().get(key)?;
+        let updated_game = game.clone().leave(player.name.as_str());
+        let _ = &self.clone().save(updated_game.clone())?;
+        Ok(updated_game.clone())
+    }
+
+    pub fn guess(&self, key: String, guess: GuessRequest) -> StdResult<Game> {
+        let game = &self.clone().get(key)?;
         game.players
             .iter()
             .cloned()
@@ -56,18 +73,36 @@ impl Service {
             )
             .map_or_else(
                 || Err("guess must be made by a valid player in the game (by name), on the team that matches the game's current turn, who is not a spy master".into()),
-                |_|
-                    game.clone().guess(Guess {
+                |_| {
+                    let updated_game = game.clone().guess(Guess {
                         board_index: guess.board_index,
-                    }).map_err(|_| "duplicate guess".into()),
+                    })?;
+                    let _ = &self.clone().save(updated_game.clone())?;
+                    Ok(updated_game.clone())
+                },
             )
     }
 
-    pub fn get(&mut self, key: String) -> StdResult<Game> {
-        self.dao.get(key)
+    pub fn undo_guess(&self, key: String) -> StdResult<Game> {
+        let game = &self.clone().get(key)?;
+        let updated_game = game.clone().undo_guess();
+        let _ = &self.clone().save(updated_game.clone())?;
+        Ok(updated_game.clone())
     }
 
-    pub fn save(&mut self, key: String, game: Game) -> StdResult<()> {
+    pub fn end_turn(&self, key: String) -> StdResult<Game> {
+        let game = &self.clone().get(key)?;
+        let updated_game = game.clone().end_turn();
+        let _ = &self.clone().save(updated_game.clone())?;
+        Ok(updated_game.clone())
+    }
+
+    pub fn get(&mut self, key: String) -> StdResult<Game> {
+        self.dao.get(key.to_lowercase())
+    }
+
+    fn save(&mut self, game: Game) -> StdResult<()> {
+        let key = game.name.to_lowercase();
         self.dao.set(key, game)
     }
 }

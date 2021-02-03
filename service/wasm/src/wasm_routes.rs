@@ -24,7 +24,7 @@ impl WasmRoutes {
     pub fn new_game(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
         let body: NewGameRequest = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
         let game = self.service.new_game(body)?;
-        self.save_and_respond(game.name.clone(), game, true)
+        Ok(http::Response::json(game, 200, "OK"))
     }
 
     pub fn get(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
@@ -34,35 +34,35 @@ impl WasmRoutes {
 
     pub fn join(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
         let player: Player = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
-        let (key, game) = self.get_existing_game_by_key(msg)?;
-        let updated_game = game.join(player.clone())?;
-        self.save_and_respond(key, updated_game, false)
+        let (key, _) = self.get_existing_game_by_key(msg)?;
+        let updated_game = self.service.join(key, player)?;
+        Ok(http::Response::json(updated_game, 200, "OK"))
     }
 
     pub fn leave(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
         let player: Player = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
-        let (key, game) = self.get_existing_game_by_key(msg)?;
-        let updated_game = game.leave(player.name.as_str());
-        self.save_and_respond(key, updated_game, false)
+        let (key, _) = self.get_existing_game_by_key(msg)?;
+        let updated_game = self.service.leave(key, player)?;
+        Ok(http::Response::json(updated_game, 200, "OK"))
     }
 
     pub fn guess(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
         let guess: GuessRequest = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
-        let (key, game) = self.get_existing_game_by_key(msg)?;
-        let updated_game = Service::guess(guess, game)?;
-        self.save_and_respond(key, updated_game, false)
+        let (key, _) = self.get_existing_game_by_key(msg)?;
+        let updated_game = self.service.guess(key, guess)?;
+        Ok(http::Response::json(updated_game, 200, "OK"))
     }
 
     pub fn undo_guess(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
-        let (key, game) = self.get_existing_game_by_key(msg)?;
-        let updated_game = game.undo_guess();
-        self.save_and_respond(key, updated_game, true)
+        let (key, _) = self.get_existing_game_by_key(msg)?;
+        let updated_game = self.service.undo_guess(key)?;
+        Ok(http::Response::json(updated_game, 200, "OK"))
     }
 
     pub fn end_turn(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
-        let (key, game) = self.get_existing_game_by_key(msg)?;
-        let updated_game = game.end_turn();
-        self.save_and_respond(key, updated_game, false)
+        let (key, _) = self.get_existing_game_by_key(msg)?;
+        let updated_game = self.service.end_turn(key)?;
+        Ok(http::Response::json(updated_game, 200, "OK"))
     }
 
     fn get_existing_game_by_key(&mut self, msg: http::Request) -> StdResult<(String, Game)> {
@@ -71,19 +71,6 @@ impl WasmRoutes {
             || Err("game key could not be found in path".into()),
             |key| self.service.get(key.clone()).map(|game| (key, game)),
         )
-    }
-
-    fn save_and_respond(
-        &mut self,
-        key: String,
-        game: Game,
-        with_payload: bool,
-    ) -> HandlerResult<http::Response> {
-        let _ = self.service.save(key, game.clone())?;
-        Ok(match with_payload {
-            true => http::Response::json(game, 200, "OK"),
-            false => http::Response::ok(),
-        })
     }
 }
 

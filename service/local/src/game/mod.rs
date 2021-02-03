@@ -22,7 +22,7 @@ mod tests {
         }
 
         fn set(&mut self, _: String, _: Game) -> StdResult<()> {
-            unimplemented!()
+            Ok(())
         }
     }
 
