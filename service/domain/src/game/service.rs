@@ -46,6 +46,7 @@ impl Service {
     pub fn join(&self, key: String, player: Player) -> ServiceResult<Game> {
         let game = &self.clone().get(key)?;
         let updated_game = game.clone().join(player)?;
+        let _ = &self.clone().save(updated_game.clone())?;
         Ok(updated_game.clone())
     }
 
