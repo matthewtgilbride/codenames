@@ -1,7 +1,7 @@
 use redis::Commands;
 use redis::Connection;
 
-use codenames_domain::game::dao::DAO;
+use codenames_domain::game::dao::{DaoError, DaoResult, DAO};
 use codenames_domain::game::model::Game;
 use codenames_domain::StdResult;
 
@@ -24,14 +24,17 @@ impl RedisDao {
 }
 
 impl DAO for RedisDao {
-    fn get(&mut self, key: String) -> StdResult<Game> {
-        let result: String = self.con.get(key)?;
-        serde_json::from_str(result.as_str()).map_err(|e| e.into())
+    fn get(&mut self, key: String) -> DaoResult<Game> {
+        let result: String = self
+            .con
+            .get(key)
+            .map_err(|e| DaoError::Unknown(e.to_string()))?;
+        serde_json::from_str(result.as_str()).map_err(|e| DaoError::Unknown(e.to_string()))
     }
 
-    fn set(&mut self, key: String, game: Game) -> StdResult<()> {
+    fn set(&mut self, key: String, game: Game) -> DaoResult<()> {
         self.con
             .set(key, json!(game).to_string())
-            .map_err(|e| e.into())
+            .map_err(|e| DaoError::Unknown(e.to_string()))
     }
 }

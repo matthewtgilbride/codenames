@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use codenames_domain::game::model::{Game, Guess, Player, Team};
+    use codenames_domain::game::model::{Game, GuessRequest, Player, Team};
 
     use crate::game::tests::rand_game;
 
@@ -48,11 +48,27 @@ mod tests {
     fn guess() {
         let game: Game = rand_game();
         let game_clone = game.clone();
-        let updated_game = game.guess(Guess { board_index: 0 }).unwrap();
+
+        let player_name = game
+            .players
+            .iter()
+            .find(|p| p.team == game.turn)
+            .unwrap()
+            .clone()
+            .name;
+        let updated_game = game
+            .guess(GuessRequest {
+                board_index: 0,
+                player_name: player_name.clone(),
+            })
+            .unwrap();
 
         assert_eq!(game_clone.guesses.len() + 1, updated_game.guesses.len());
 
-        let failed_update = updated_game.guess(Guess { board_index: 0 });
+        let failed_update = updated_game.guess(GuessRequest {
+            board_index: 0,
+            player_name: player_name.clone(),
+        });
 
         assert!(failed_update.is_err())
     }

@@ -6,13 +6,13 @@ use rand::thread_rng;
 
 use codenames_domain::dictionary::model::MINIMUM_DICTIONARY_SIZE;
 use codenames_domain::dictionary::service::WordGenerator;
-use codenames_domain::StdResult;
+use codenames_domain::ServiceResult;
 
 #[derive(Clone)]
 pub struct WordGeneratorRand;
 
 impl WordGenerator for WordGeneratorRand {
-    fn random_set(&self, dictionary: HashSet<String>) -> StdResult<[String; 25]> {
+    fn random_set(&self, dictionary: HashSet<String>) -> ServiceResult<[String; 25]> {
         if dictionary.len() < (MINIMUM_DICTIONARY_SIZE + 1) {
             return Err("dictionary must have at least 26 words".into());
         }
@@ -27,7 +27,7 @@ impl WordGenerator for WordGeneratorRand {
         Ok(random_subset.try_into().unwrap())
     }
 
-    fn random_pair(&self, dictionary: HashSet<String>) -> StdResult<(String, String)> {
+    fn random_pair(&self, dictionary: HashSet<String>) -> ServiceResult<(String, String)> {
         if dictionary.len() < (MINIMUM_DICTIONARY_SIZE + 1) {
             return Err("dictionary must have at least 26 words".into());
         }

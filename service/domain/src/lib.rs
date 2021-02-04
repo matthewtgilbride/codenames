@@ -1,5 +1,9 @@
+use std::error::Error;
 use std::fmt;
 use std::fmt::Formatter;
+
+use crate::game::dao::DaoError;
+use crate::game::model::GameError;
 
 pub mod dictionary;
 pub mod game;
@@ -32,3 +36,50 @@ impl fmt::Display for UniqueError {
         ))
     }
 }
+
+#[derive(Debug)]
+pub enum ServiceError {
+    BadRequest(String),
+    NotFound(String),
+    Unknown(String),
+}
+
+impl fmt::Display for ServiceError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let msg = match &self {
+            ServiceError::BadRequest(msg) => format!("Bad Request: {}", msg),
+            ServiceError::NotFound(msg) => format!("Not Found: {}", msg),
+            ServiceError::Unknown(msg) => format!("Unknown: {}", msg),
+        };
+        write!(f, "{}", format!("Service Error: {}", msg))
+    }
+}
+
+impl From<GameError> for ServiceError {
+    fn from(game_error: GameError) -> Self {
+        match game_error {
+            GameError::UniquePlayerName(ue) => ServiceError::BadRequest(ue.to_string()),
+            GameError::UniqueGuess(ue) => ServiceError::BadRequest(ue.to_string()),
+            e => ServiceError::BadRequest(e.to_string()),
+        }
+    }
+}
+
+impl From<DaoError> for ServiceError {
+    fn from(dao_error: DaoError) -> Self {
+        match dao_error {
+            DaoError::NotFound(msg) => ServiceError::NotFound(msg),
+            DaoError::Unknown(msg) => ServiceError::Unknown(msg),
+        }
+    }
+}
+
+impl From<&str> for ServiceError {
+    fn from(unknown: &str) -> Self {
+        Self::Unknown(unknown.to_string())
+    }
+}
+
+impl Error for ServiceError {}
+
+pub type ServiceResult<T> = Result<T, ServiceError>;

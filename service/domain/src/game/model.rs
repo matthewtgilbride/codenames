@@ -5,6 +5,7 @@ use std::fmt::Formatter;
 use serde::{Deserialize, Serialize};
 
 use crate::game::board::model::Board;
+use crate::game::model::GameError::InvalidGuess;
 use crate::UniqueError;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -51,7 +52,7 @@ impl Game {
         self.players
             .iter()
             .find(|Player { name, .. }| *name == player.name)
-            .map(|p| Err(GameError::player_name(p.clone()).into()))
+            .map(|p| Err(GameError::unique_player(p.clone()).into()))
             .unwrap_or_else(|| {
                 Ok(Game {
                     players: [&[player], &self.players[..]].concat(),
@@ -82,17 +83,45 @@ impl Game {
         }
     }
 
-    pub fn guess(self, guess: Guess) -> GameResult {
-        self.guesses
+    pub fn guess(self, guess_request: GuessRequest) -> GameResult {
+        let foo = self
+            .players
             .iter()
-            .find(|Guess { board_index, .. }| *board_index == guess.board_index)
-            .map(|g| Err(GameError::guess(g.clone()).into()))
-            .unwrap_or_else(|| {
-                Ok(Game {
-                    guesses: [&[guess], &self.guesses[..]].concat(),
-                    ..self.clone()
-                })
-            })
+            .cloned()
+            .find(
+                |Player {
+                     name,
+                     is_spy_master,
+                     team,
+                     ..
+                 }| {
+                    *name == guess_request.player_name
+                        && *is_spy_master == false
+                        && *team == self.turn
+                },
+            )
+            .map_or_else(
+                || Err(InvalidGuess),
+                |_| {
+                    self.guesses
+                        .iter()
+                        .find(|Guess { board_index, .. }| *board_index == guess_request.board_index)
+                        .map(|g| Err(GameError::unique_guess(g.clone())))
+                        .unwrap_or_else(|| {
+                            Ok(Game {
+                                guesses: [
+                                    &[Guess {
+                                        board_index: guess_request.board_index,
+                                    }],
+                                    &self.guesses[..],
+                                ]
+                                .concat(),
+                                ..self.clone()
+                            })
+                        })
+                },
+            );
+        foo
     }
 
     pub fn undo_guess(self) -> Game {
@@ -105,23 +134,24 @@ impl Game {
 
 #[derive(Debug)]
 pub enum GameError {
-    PlayerName(UniqueError),
-    Guess(UniqueError),
+    UniquePlayerName(UniqueError),
+    UniqueGuess(UniqueError),
+    InvalidGuess,
 }
 
 impl GameError {
     fn entity_name() -> String {
         "Game".to_string()
     }
-    pub fn player_name(player: Player) -> GameError {
-        GameError::PlayerName(UniqueError::new(
+    pub fn unique_player(player: Player) -> GameError {
+        GameError::UniquePlayerName(UniqueError::new(
             GameError::entity_name(),
             "player.name".to_string(),
             player.name,
         ))
     }
-    pub fn guess(guess: Guess) -> GameError {
-        GameError::Guess(UniqueError::new(
+    pub fn unique_guess(guess: Guess) -> GameError {
+        GameError::UniqueGuess(UniqueError::new(
             GameError::entity_name(),
             "guess.board_index".to_string(),
             guess.board_index.to_string(),
@@ -132,8 +162,9 @@ impl GameError {
 impl fmt::Display for GameError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            GameError::PlayerName(u) => u.fmt(f),
-            GameError::Guess(u) => u.fmt(f),
+            GameError::UniquePlayerName(u) => u.fmt(f),
+            GameError::UniqueGuess(u) => u.fmt(f),
+            GameError::InvalidGuess => write!(f, "guess must be made by a valid player in the game (by name), on the team that matches the game's current turn, who is not a spy master")
         }
     }
 }

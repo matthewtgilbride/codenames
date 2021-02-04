@@ -5,7 +5,7 @@ use guest::prelude::*;
 
 use codenames_domain::game::model::{Game, GuessRequest, NewGameRequest, Player};
 use codenames_domain::game::service::Service;
-use codenames_domain::StdResult;
+use codenames_domain::ServiceResult;
 
 pub struct WasmRoutes {
     service: Service,
@@ -65,7 +65,7 @@ impl WasmRoutes {
         Ok(http::Response::json(updated_game, 200, "OK"))
     }
 
-    fn get_existing_game_by_key(&mut self, msg: http::Request) -> StdResult<(String, Game)> {
+    fn get_existing_game_by_key(&mut self, msg: http::Request) -> ServiceResult<(String, Game)> {
         let game_key = get_game_key(msg.path);
         game_key.map_or_else(
             || Err("game key could not be found in path".into()),

@@ -9,7 +9,7 @@ use codenames_domain::game::board::service::BoardGenerator;
 use codenames_domain::game::board::util::{card_color_count, max_card_color};
 use codenames_domain::game::card::model::{Card, CardColor, ALL_CARD_COLORS};
 use codenames_domain::game::model::Team;
-use codenames_domain::StdResult;
+use codenames_domain::ServiceResult;
 
 #[derive(Clone)]
 pub struct BoardGeneratorRand;
@@ -29,7 +29,7 @@ impl BoardGeneratorRand {
 }
 
 impl BoardGenerator for BoardGeneratorRand {
-    fn random_board(&self, words: [String; 25]) -> StdResult<(Board, Team)> {
+    fn random_board(&self, words: [String; 25]) -> ServiceResult<(Board, Team)> {
         let first_team = self.random_team();
 
         let mut board: Vec<Card> = Vec::new();

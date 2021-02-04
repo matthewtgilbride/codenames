@@ -5,10 +5,9 @@ pub mod routes;
 
 #[cfg(test)]
 mod tests {
-    use codenames_domain::game::dao::DAO;
+    use codenames_domain::game::dao::{DaoResult, DAO};
     use codenames_domain::game::model::{Game, Player, Team};
     use codenames_domain::game::service::Service;
-    use codenames_domain::StdResult;
 
     use crate::dictionary::service::WordGeneratorRand;
     use crate::game::board::service::BoardGeneratorRand;
@@ -17,11 +16,11 @@ mod tests {
     struct DaoStub;
 
     impl DAO for DaoStub {
-        fn get(&mut self, _: String) -> StdResult<Game> {
+        fn get(&mut self, _: String) -> DaoResult<Game> {
             unimplemented!()
         }
 
-        fn set(&mut self, _: String, _: Game) -> StdResult<()> {
+        fn set(&mut self, _: String, _: Game) -> DaoResult<()> {
             Ok(())
         }
     }
