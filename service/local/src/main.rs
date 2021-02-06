@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate serde_json;
+extern crate env_logger;
 
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 
@@ -9,6 +10,7 @@ use crate::dictionary::service::WordGeneratorRand;
 use crate::game::board::service::BoardGeneratorRand;
 use crate::game::dao::RedisDao;
 use crate::game::routes::{end_turn, get_game, guess, join_game, leave_game, new_game, undo_guess};
+use actix_web::middleware::Logger;
 
 mod dictionary;
 mod game;
@@ -20,6 +22,9 @@ pub struct AppData {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    std::env::set_var("RUST_LOG", "info");
+    env_logger::init();
+
     let word_generator = Box::new(WordGeneratorRand);
     let board_generator = Box::new(BoardGeneratorRand);
     let dao = Box::new(RedisDao::new().unwrap());
@@ -28,6 +33,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            .wrap(Logger::default())
             .data(
                 AppData {
                     service: service.clone(),

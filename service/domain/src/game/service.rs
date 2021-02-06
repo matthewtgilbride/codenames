@@ -1,3 +1,5 @@
+use log::{info, warn};
+
 use crate::dictionary::service::{Service as DictionaryService, WordGenerator};
 use crate::game::board::service::{BoardGenerator, Service as BoardService};
 use crate::game::dao::DAO;
@@ -79,11 +81,17 @@ impl Service {
     }
 
     pub fn get(&mut self, key: String) -> ServiceResult<Game> {
-        self.dao.get(key.to_lowercase()).map_err(|e| e.into())
+        self.dao.get(key.to_lowercase()).map_err(|e| {
+            info!("{}", e);
+            e.into()
+        })
     }
 
     fn save(&mut self, game: Game) -> ServiceResult<()> {
         let key = game.name.to_lowercase();
-        self.dao.set(key, game).map_err(|e| e.into())
+        self.dao.set(key, game).map_err(|e| {
+            warn!("{}", e);
+            e.into()
+        })
     }
 }

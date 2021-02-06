@@ -2,6 +2,7 @@ use std::error::Error;
 use std::fmt;
 use std::fmt::Formatter;
 
+use log::info;
 use serde::{Deserialize, Serialize};
 
 use crate::game::board::model::Board;
@@ -52,7 +53,11 @@ impl Game {
         self.players
             .iter()
             .find(|Player { name, .. }| *name == player.name)
-            .map(|p| Err(GameError::unique_player(p.clone()).into()))
+            .map(|p| {
+                let error = GameError::unique_player(p.clone());
+                info!("{}", error);
+                Err(error)
+            })
             .unwrap_or_else(|| {
                 Ok(Game {
                     players: [&[player], &self.players[..]].concat(),
@@ -101,12 +106,19 @@ impl Game {
                 },
             )
             .map_or_else(
-                || Err(InvalidGuess),
+                || {
+                    info!("{}", InvalidGuess);
+                    Err(InvalidGuess)
+                },
                 |_| {
                     self.guesses
                         .iter()
                         .find(|Guess { board_index, .. }| *board_index == guess_request.board_index)
-                        .map(|g| Err(GameError::unique_guess(g.clone())))
+                        .map(|g| {
+                            let error = GameError::unique_guess(g.clone());
+                            info!("{}", error);
+                            Err(error)
+                        })
                         .unwrap_or_else(|| {
                             Ok(Game {
                                 guesses: [
