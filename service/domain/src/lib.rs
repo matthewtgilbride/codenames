@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate enum_display_derive;
+
 use std::error::Error;
 use std::fmt;
 use std::fmt::Formatter;

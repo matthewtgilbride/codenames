@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fmt;
+use std::fmt::Display;
 use std::fmt::Formatter;
 
 use log::info;
@@ -9,7 +10,7 @@ use crate::game::board::model::Board;
 use crate::game::model::GameError::InvalidGuess;
 use crate::UniqueError;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Display, Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Team {
     Blue,
     Red,
