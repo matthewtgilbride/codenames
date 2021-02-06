@@ -3,7 +3,7 @@ extern crate wapc_guest as guest;
 use actor_http_server as http;
 use guest::prelude::*;
 
-use codenames_domain::game::model::{Game, GuessRequest, NewGameRequest, Player};
+use codenames_domain::game::model::{Game, GuessRequest, LeaveRequest, NewGameRequest, Player};
 use codenames_domain::game::service::Service;
 use codenames_domain::ServiceResult;
 
@@ -40,9 +40,9 @@ impl WasmRoutes {
     }
 
     pub fn leave(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
-        let player: Player = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
+        let req: LeaveRequest = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
         let (key, _) = self.get_existing_game_by_key(msg)?;
-        let updated_game = self.service.leave(key, player)?;
+        let updated_game = self.service.leave(key, req)?;
         Ok(http::Response::json(updated_game, 200, "OK"))
     }
 

@@ -1,7 +1,7 @@
 use actix_web::{get, post, put, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 
-use codenames_domain::game::model::{GuessRequest, NewGameRequest, Player};
+use codenames_domain::game::model::{GuessRequest, LeaveRequest, NewGameRequest, Player};
 use codenames_domain::{ServiceError, ServiceResult};
 
 use crate::AppData;
@@ -61,7 +61,7 @@ pub async fn join_game(
 #[put("/{id}/leave")]
 pub async fn leave_game(
     path: web::Path<String>,
-    body: web::Json<Player>,
+    body: web::Json<LeaveRequest>,
     data: web::Data<AppData>,
 ) -> impl Responder {
     respond(&data.service.clone().leave(path.clone(), body.into_inner()))

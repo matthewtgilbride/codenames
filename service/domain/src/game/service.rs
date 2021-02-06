@@ -3,7 +3,7 @@ use log::{info, warn};
 use crate::dictionary::service::{Service as DictionaryService, WordGenerator};
 use crate::game::board::service::{BoardGenerator, Service as BoardService};
 use crate::game::dao::{DaoError, DAO};
-use crate::game::model::{Game, GameList, GuessRequest, NewGameRequest, Player};
+use crate::game::model::{Game, GameList, GuessRequest, LeaveRequest, NewGameRequest, Player};
 use crate::{ServiceResult, StdResult};
 
 #[derive(Clone)]
@@ -52,9 +52,9 @@ impl Service {
         Ok(updated_game.clone())
     }
 
-    pub fn leave(&self, key: String, player: Player) -> ServiceResult<Game> {
+    pub fn leave(&self, key: String, req: LeaveRequest) -> ServiceResult<Game> {
         let game = &self.clone().get(key)?;
-        let updated_game = game.clone().leave(player.name.as_str());
+        let updated_game = game.clone().leave(req.name.as_str());
         let _ = &self.clone().save(updated_game.clone())?;
         Ok(updated_game.clone())
     }

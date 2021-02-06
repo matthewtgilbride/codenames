@@ -101,9 +101,7 @@ impl Game {
                      team,
                      ..
                  }| {
-                    *name == guess_request.player_name
-                        && *is_spy_master == false
-                        && *team == self.turn
+                    *name == guess_request.name && *is_spy_master == false && *team == self.turn
                 },
             )
             .map_or_else(
@@ -190,8 +188,13 @@ pub struct NewGameRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct LeaveRequest {
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct GuessRequest {
-    pub player_name: String,
+    pub name: String,
     pub board_index: usize,
 }
 
