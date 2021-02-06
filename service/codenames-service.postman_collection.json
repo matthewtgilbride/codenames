@@ -1,225 +1,237 @@
 {
-	"info": {
-		"_postman_id": "b5094eca-ea5a-4688-86b7-b372ff19aa45",
-		"name": "codenames-service",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "random game",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "localhost:8080",
-					"host": [
-						"localhost"
-					],
-					"port": "8080"
-				},
-				"description": "new game"
-			},
-			"response": []
-		},
-		{
-			"name": "new game",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"name\": \"{{game-name}}\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "localhost:8080/game/",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"game",
-						""
-					]
-				},
-				"description": "new game"
-			},
-			"response": []
-		},
-		{
-			"name": "get game",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8080/game/{{game-name}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"game",
-						"{{game-name}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "join game",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"name\": \"Jamie\",\n    \"team\": \"Blue\",\n    \"is_spy_master\": false\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/game/{{game-name}}/join",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"game",
-						"{{game-name}}",
-						"join"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "leave game",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"name\": \"Matt\",\n    \"team\": \"Red\",\n    \"is_spy_master\": false\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/game/{{game-name}}/leave",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"game",
-						"{{game-name}}",
-						"leave"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "guess",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"board_index\": 2,\n    \"player_name\": \"Matt\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/game/{{game-name}}/guess",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"game",
-						"{{game-name}}",
-						"guess"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "undo guess",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"board_index\": 2\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/game/{{game-name}}/guess/undo",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"game",
-						"{{game-name}}",
-						"guess",
-						"undo"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "end turn",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"board_index\": 2\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/game/{{game-name}}/end-turn",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"game",
-						"{{game-name}}",
-						"end-turn"
-					]
-				}
-			},
-			"response": []
-		}
-	]
+  "info": {
+    "_postman_id": "b5094eca-ea5a-4688-86b7-b372ff19aa45",
+    "name": "codenames-service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "random game",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = JSON.parse(responseBody);",
+              "pm.environment.set(\"game-name\", res.name);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "localhost:8080",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080"
+        },
+        "description": "new game"
+      },
+      "response": []
+    },
+    {
+      "name": "new game",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"{{game-name}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "localhost:8080/game/",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "game",
+            ""
+          ]
+        },
+        "description": "new game"
+      },
+      "response": []
+    },
+    {
+      "name": "get game",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/game/{{game-name}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "game",
+            "{{game-name}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "join game",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Jamie\",\n    \"team\": \"Blue\",\n    \"is_spy_master\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/game/{{game-name}}/join",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "game",
+            "{{game-name}}",
+            "join"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "leave game",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Matt\",\n    \"team\": \"Red\",\n    \"is_spy_master\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/game/{{game-name}}/leave",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "game",
+            "{{game-name}}",
+            "leave"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "guess",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"board_index\": 2,\n    \"player_name\": \"Matt\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/game/{{game-name}}/guess",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "game",
+            "{{game-name}}",
+            "guess"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "undo guess",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"board_index\": 2\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/game/{{game-name}}/guess/undo",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "game",
+            "{{game-name}}",
+            "guess",
+            "undo"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "end turn",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"board_index\": 2\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/game/{{game-name}}/end-turn",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "game",
+            "{{game-name}}",
+            "end-turn"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
 }
