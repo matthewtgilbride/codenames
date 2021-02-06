@@ -1,0 +1,14 @@
+{
+  "name": "service",
+  "version": "1.0.0",
+  "description": "test scripts for the codenames service rust project",
+  "main": "index.js",
+  "scripts": {
+    "test": "newman run codenames-service.postman_collection.json"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "newman": "^5.2.2"
+  }
+}

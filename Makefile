@@ -6,6 +6,7 @@ service-format:
 
 service-test:
 	$(MAKE) -C service test
+	$(MAKE) -C service local-integration-test
 
 service-check: service-build service-format service-test
 

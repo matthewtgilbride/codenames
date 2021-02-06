@@ -13,6 +13,9 @@ check: format build test
 docker-up:
 	docker-compose up -d
 
+local-integration-test: docker-up
+	yarn test
+
 gen-account-key:
 	nk gen account -o json | jq -r .seed > account.nk
 
