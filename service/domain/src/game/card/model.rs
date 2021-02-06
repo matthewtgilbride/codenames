@@ -39,7 +39,7 @@ impl<'de> Visitor<'de> for CardColorVisitor {
     type Value = CardColor;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter.write_str("Blue, Red, Neutral, or Death")
+        formatter.write_str(r#"the literal string "Blue", "Red", "Neutral", or "Death""#)
     }
 
     fn visit_str<E>(self, value: &str) -> Result<CardColor, E>
