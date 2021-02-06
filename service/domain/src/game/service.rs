@@ -2,8 +2,8 @@ use log::{info, warn};
 
 use crate::dictionary::service::{Service as DictionaryService, WordGenerator};
 use crate::game::board::service::{BoardGenerator, Service as BoardService};
-use crate::game::dao::DAO;
-use crate::game::model::{Game, GuessRequest, NewGameRequest, Player};
+use crate::game::dao::{DaoError, DAO};
+use crate::game::model::{Game, GameList, GuessRequest, NewGameRequest, Player};
 use crate::{ServiceResult, StdResult};
 
 #[derive(Clone)]
@@ -85,6 +85,16 @@ impl Service {
             info!("{}", e);
             e.into()
         })
+    }
+
+    pub fn find(&mut self) -> ServiceResult<GameList> {
+        let games = self.dao.keys().map_err(|e| {
+            warn!("{}", e);
+            let de: DaoError = e.into();
+            de
+        })?;
+
+        Ok(GameList { games })
     }
 
     fn save(&mut self, game: Game) -> ServiceResult<()> {

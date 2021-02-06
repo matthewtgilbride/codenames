@@ -1,7 +1,7 @@
 use actix_web::{get, post, put, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 
-use codenames_domain::game::model::{Game, GuessRequest, NewGameRequest, Player};
+use codenames_domain::game::model::{GuessRequest, NewGameRequest, Player};
 use codenames_domain::{ServiceError, ServiceResult};
 
 use crate::AppData;
@@ -17,7 +17,7 @@ impl ErrorResponse {
     }
 }
 
-fn respond(result: &ServiceResult<Game>) -> impl Responder {
+fn respond<T: Serialize>(result: &ServiceResult<T>) -> impl Responder {
     match result {
         Ok(game) => HttpResponse::Ok().json(game),
         Err(service_error) => match service_error {
@@ -32,6 +32,11 @@ fn respond(result: &ServiceResult<Game>) -> impl Responder {
             }
         },
     }
+}
+
+#[get("")]
+pub async fn find_games(data: web::Data<AppData>) -> impl Responder {
+    respond(&data.service.clone().find())
 }
 
 #[post("/")]

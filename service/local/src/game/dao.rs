@@ -49,6 +49,14 @@ impl DAO for RedisDao {
         serde_json::from_str(result.as_str()).map_err(|e| DaoError::Unknown(e.to_string()))
     }
 
+    fn keys(&mut self) -> DaoResult<Vec<String>> {
+        let result: Vec<String> = self
+            .con
+            .keys("*")
+            .map_err(|e| DaoError::Unknown(e.to_string()))?;
+        Ok(result)
+    }
+
     fn set(&mut self, key: String, game: Game) -> DaoResult<()> {
         self.con
             .set(key, json!(game).to_string())

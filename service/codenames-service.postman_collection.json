@@ -116,6 +116,38 @@
 			"response": []
 		},
 		{
+			"name": "get all",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"retrieve all games\", function () {",
+							"    pm.expect(pm.response.status).to.equal(\"OK\")",
+							"    pm.expect(JSON.parse(responseBody).games.length).greaterThan(0)",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/game",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"game"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "join game",
 			"event": [
 				{

@@ -194,3 +194,8 @@ pub struct GuessRequest {
     pub player_name: String,
     pub board_index: usize,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GameList {
+    pub games: Vec<String>,
+}

@@ -52,7 +52,9 @@ impl DAO for DaoStub {
     fn get(&mut self, _: String) -> DaoResult<Game> {
         unimplemented!()
     }
-
+    fn keys(&mut self) -> DaoResult<Vec<String>> {
+        unimplemented!()
+    }
     fn set(&mut self, _: String, _: Game) -> DaoResult<()> {
         unimplemented!()
     }

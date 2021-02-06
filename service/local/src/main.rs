@@ -10,7 +10,9 @@ use codenames_domain::game::service::Service;
 use crate::dictionary::service::WordGeneratorRand;
 use crate::game::board::service::BoardGeneratorRand;
 use crate::game::dao::RedisDao;
-use crate::game::routes::{end_turn, get_game, guess, join_game, leave_game, new_game, undo_guess};
+use crate::game::routes::{
+    end_turn, find_games, get_game, guess, join_game, leave_game, new_game, undo_guess,
+};
 
 mod dictionary;
 mod game;
@@ -43,6 +45,7 @@ async fn main() -> std::io::Result<()> {
             .service(random_name)
             .service(
                 web::scope("/game")
+                    .service(find_games)
                     .service(new_game)
                     .service(get_game)
                     .service(join_game)

@@ -27,6 +27,7 @@ pub type DaoResult<T> = Result<T, DaoError>;
 
 pub trait DAO: DynClone + Send + Sync {
     fn get(&mut self, key: String) -> DaoResult<Game>;
+    fn keys(&mut self) -> DaoResult<Vec<String>>;
     fn set(&mut self, key: String, game: Game) -> DaoResult<()>;
 }
 
