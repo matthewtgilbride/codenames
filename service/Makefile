@@ -10,11 +10,18 @@ test:
 
 check: format build test
 
-docker-up:
-	docker-compose up -d
+redis-up:
+	docker-compose up -d redis
 
-local-integration-test: docker-up
+run-local: export REDIS_HOST=0.0.0.0
+run-local:
+	cargo run
+
+integration-test-local: redis-up
 	yarn test
+
+integration-test-docker:
+	docker-compose up --build --exit-code-from codenames-test codenames-test
 
 gen-account-key:
 	nk gen account -o json | jq -r .seed > account.nk
@@ -31,14 +38,14 @@ start-wasmcloud:
 sign-local:
 	wash claims sign target/wasm32-unknown-unknown/debug/codenames_wasm.wasm --keyvalue --http_server --name "codenames" --destination ./codenames.wasm
 
-push-local: docker-up
+push-local:
 	wash reg push localhost:5000/codenames:v1 codenames.wasm --insecure
 
-start-local-providers: docker-up
+start-local-providers:
 	wash ctl start provider wasmcloud.azurecr.io/redis:0.9.2
 	wash ctl start provider wasmcloud.azurecr.io/httpserver:0.9.2
 
-start-actor: docker-up
+start-actor:
 	wash ctl start actor localhost:5000/codenames:v1
 
 show-module:

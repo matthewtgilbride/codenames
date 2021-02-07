@@ -17,7 +17,8 @@ impl Clone for RedisDao {
 
 impl RedisDao {
     pub fn new() -> StdResult<RedisDao> {
-        let client = redis::Client::open("redis://127.0.0.1/")?;
+        let host = std::env::var("REDIS_HOST")?;
+        let client = redis::Client::open(format!("redis://{}/", host))?;
         let con = client.get_connection()?;
         Ok(RedisDao { con })
     }

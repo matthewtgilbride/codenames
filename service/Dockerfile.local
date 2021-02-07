@@ -1,0 +1,12 @@
+FROM rust:slim-buster
+
+COPY domain domain
+COPY local local
+# because we have a wasm directory in the top level cargo but we won't build it here
+COPY wasm wasm
+COPY Cargo.toml .
+COPY Cargo.lock .
+
+RUN cargo build
+
+ENTRYPOINT cargo run

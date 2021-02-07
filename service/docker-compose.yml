@@ -4,13 +4,33 @@ services:
     image: registry:2
     ports:
       - "5000:5000"
+
   nats:
     image: nats:2.1.9
     ports:
       - "6222:6222"
       - "4222:4222"
       - "8222:8222"
+
   redis:
     image: redis:6.0.9
     ports:
       - "6379:6379"
+
+  codenames-local:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+
+  codenames-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    depends_on:
+      - codenames-local

@@ -1,0 +1,6 @@
+FROM postman/newman:5.2-alpine
+
+COPY codenames-service.postman_collection.json .
+COPY codenames-service.postman_environment.docker.json .
+
+ENTRYPOINT newman run -e codenames-service.postman_environment.docker.json codenames-service.postman_collection.json

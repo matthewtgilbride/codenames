@@ -27,9 +27,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:8080",
+					"raw": "{{host}}:8080",
 					"host": [
-						"localhost"
+						"{{host}}"
 					],
 					"port": "8080"
 				},
@@ -68,9 +68,9 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:8080/game/",
+					"raw": "{{host}}:8080/game/",
 					"host": [
-						"localhost"
+						"{{host}}"
 					],
 					"port": "8080",
 					"path": [
@@ -101,10 +101,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/game/{{game-name}}",
+					"raw": "http://{{host}}:8080/game/{{game-name}}",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"{{host}}"
 					],
 					"port": "8080",
 					"path": [
@@ -135,9 +135,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:8080/game",
+					"raw": "{{host}}:8080/game",
 					"host": [
-						"localhost"
+						"{{host}}"
 					],
 					"port": "8080",
 					"path": [
@@ -175,10 +175,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/game/{{game-name}}/join",
+					"raw": "http://{{host}}:8080/game/{{game-name}}/join",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"{{host}}"
 					],
 					"port": "8080",
 					"path": [
@@ -218,10 +218,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/game/{{game-name}}/guess",
+					"raw": "http://{{host}}:8080/game/{{game-name}}/guess",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"{{host}}"
 					],
 					"port": "8080",
 					"path": [
@@ -261,10 +261,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/game/{{game-name}}/guess/undo",
+					"raw": "http://{{host}}:8080/game/{{game-name}}/guess/undo",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"{{host}}"
 					],
 					"port": "8080",
 					"path": [
@@ -305,10 +305,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/game/{{game-name}}/end-turn",
+					"raw": "http://{{host}}:8080/game/{{game-name}}/end-turn",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"{{host}}"
 					],
 					"port": "8080",
 					"path": [
@@ -348,10 +348,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/game/{{game-name}}/leave",
+					"raw": "http://{{host}}:8080/game/{{game-name}}/leave",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"{{host}}"
 					],
 					"port": "8080",
 					"path": [
@@ -362,6 +362,40 @@
 				}
 			},
 			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "localhost"
+		},
+		{
+			"key": "game-name",
+			"value": ""
+		},
+		{
+			"key": "game-team",
+			"value": ""
 		}
 	]
 }
