@@ -34,3 +34,12 @@ services:
       dockerfile: Dockerfile.test
     depends_on:
       - codenames-local
+
+  wash:
+    build:
+      context: .
+      dockerfile: Dockerfile.wash
+    depends_on:
+      - nats
+      - redis
+      - registry

@@ -1,0 +1,12 @@
+FROM rust:slim-buster
+
+RUN apt-get update
+RUN apt-get install build-essential -y
+RUN apt-get install pkg-config -y
+RUN apt-get install libssl-dev -y
+RUN apt-get install llvm -y
+RUN apt-get install clang -y
+
+RUN cargo install --git https://github.com/wasmcloud/wash --tag v0.1.16
+
+ENTRYPOINT "/bin/sh"

@@ -1,3 +1,5 @@
+.PHONY: $(MAKECMDGOALS)
+
 build:
 	cargo build
 	cargo build -p codenames-wasm --target wasm32-unknown-unknown
@@ -13,8 +15,10 @@ check: format build test
 redis-up:
 	docker-compose up -d redis
 
+run-local: redis-up
 run-local: export REDIS_HOST=0.0.0.0
 run-local:
+	cargo build
 	cargo run
 
 integration-test-local: redis-up
