@@ -21,10 +21,10 @@ run-local:
 	cargo build
 	cargo run
 
-integration-test-local: redis-up
+integration-test-local: check redis-up
 	yarn test
 
-integration-test-docker:
+integration-test-docker: check
 	docker-compose up --build --exit-code-from codenames-test codenames-test
 
 gen-account-key:

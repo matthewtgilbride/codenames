@@ -8,19 +8,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::game::board::model::Board;
 use crate::game::model::GameError::InvalidGuess;
+use crate::game::player::model::Player;
 use crate::UniqueError;
 
 #[derive(Display, Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Team {
     Blue,
     Red,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct Player {
-    pub team: Team,
-    pub name: String,
-    pub is_spy_master: bool,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -146,6 +140,7 @@ impl Game {
 #[derive(Debug)]
 pub enum GameError {
     UniquePlayerName(UniqueError),
+    PlayerNotFound(String),
     UniqueGuess(UniqueError),
     InvalidGuess,
 }
@@ -175,6 +170,7 @@ impl fmt::Display for GameError {
         match self {
             GameError::UniquePlayerName(u) => u.fmt(f),
             GameError::UniqueGuess(u) => u.fmt(f),
+            GameError::PlayerNotFound(name) => write!(f, "player not found: {}", name),
             GameError::InvalidGuess => write!(f, "guess must be made by a valid player in the game (by name), on the team that matches the game's current turn, who is not a spy master")
         }
     }

@@ -3,7 +3,8 @@ extern crate wapc_guest as guest;
 use actor_http_server as http;
 use guest::prelude::*;
 
-use codenames_domain::game::model::{Game, GuessRequest, LeaveRequest, NewGameRequest, Player};
+use codenames_domain::game::model::{Game, GuessRequest, LeaveRequest, NewGameRequest};
+use codenames_domain::game::player::model::Player;
 use codenames_domain::game::service::Service;
 use codenames_domain::ServiceResult;
 
