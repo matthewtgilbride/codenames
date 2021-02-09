@@ -32,7 +32,7 @@ impl Service {
     pub fn random_name(&self) -> ServiceResult<NewGameRequest> {
         let (first_name, last_name) = self.dictionary_service.new_word_pair()?;
         Ok(NewGameRequest {
-            name: format!("{}-{}", first_name, last_name),
+            game_name: format!("{}-{}", first_name, last_name),
         })
     }
 
@@ -40,7 +40,7 @@ impl Service {
         let words = self.dictionary_service.new_word_set()?;
         let (board, first_team) = self.board_service.new_board(words)?;
 
-        let game = Game::new(request.name, board, first_team);
+        let game = Game::new(request.game_name, board, first_team);
         let _ = &self.clone().save(game.clone())?;
 
         Ok(game.clone())
@@ -55,7 +55,7 @@ impl Service {
 
     pub fn leave(&self, key: String, req: LeaveRequest) -> ServiceResult<Game> {
         let game = &self.clone().get(key)?;
-        let updated_game = game.clone().leave(req.name.as_str());
+        let updated_game = game.clone().leave(req.player_name.as_str());
         let _ = &self.clone().save(updated_game.clone())?;
         Ok(updated_game.clone())
     }

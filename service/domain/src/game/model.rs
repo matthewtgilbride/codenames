@@ -17,18 +17,13 @@ pub enum Team {
     Red,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct Guess {
-    pub board_index: usize,
-}
-
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Game {
     pub name: String,
     pub board: Board,
     pub turn: Team,
     pub players: Vec<Player>,
-    pub guesses: Vec<Guess>,
+    pub guesses: Vec<usize>,
 }
 
 pub type GameResult = Result<Game, GameError>;
@@ -84,8 +79,7 @@ impl Game {
     }
 
     pub fn guess(self, guess_request: GuessRequest) -> GameResult {
-        let foo = self
-            .players
+        self.players
             .iter()
             .cloned()
             .find(
@@ -95,7 +89,9 @@ impl Game {
                      team,
                      ..
                  }| {
-                    *name == guess_request.name && *is_spy_master == false && *team == self.turn
+                    *name == guess_request.player_name
+                        && *is_spy_master == false
+                        && *team == self.turn
                 },
             )
             .map_or_else(
@@ -106,7 +102,7 @@ impl Game {
                 |_| {
                     self.guesses
                         .iter()
-                        .find(|Guess { board_index, .. }| *board_index == guess_request.board_index)
+                        .find(|&index| *index == guess_request.board_index)
                         .map(|g| {
                             let error = GameError::unique_guess(g.clone());
                             info!("{}", error);
@@ -114,19 +110,12 @@ impl Game {
                         })
                         .unwrap_or_else(|| {
                             Ok(Game {
-                                guesses: [
-                                    &[Guess {
-                                        board_index: guess_request.board_index,
-                                    }],
-                                    &self.guesses[..],
-                                ]
-                                .concat(),
+                                guesses: [&[guess_request.board_index], &self.guesses[..]].concat(),
                                 ..self.clone()
                             })
                         })
                 },
-            );
-        foo
+            )
     }
 
     pub fn undo_guess(self) -> Game {
@@ -156,11 +145,11 @@ impl GameError {
             player.name,
         ))
     }
-    pub fn unique_guess(guess: Guess) -> GameError {
+    pub fn unique_guess(guess: usize) -> GameError {
         GameError::UniqueGuess(UniqueError::new(
             GameError::entity_name(),
-            "guess.board_index".to_string(),
-            guess.board_index.to_string(),
+            "guesses".to_string(),
+            guess.to_string(),
         ))
     }
 }
@@ -180,17 +169,17 @@ impl Error for GameError {}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NewGameRequest {
-    pub name: String,
+    pub game_name: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct LeaveRequest {
-    pub name: String,
+    pub player_name: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GuessRequest {
-    pub name: String,
+    pub player_name: String,
     pub board_index: usize,
 }
 

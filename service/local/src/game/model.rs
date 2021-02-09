@@ -60,7 +60,7 @@ mod tests {
         let updated_game = game
             .guess(GuessRequest {
                 board_index: 0,
-                name: player_name.clone(),
+                player_name: player_name.clone(),
             })
             .unwrap();
 
@@ -68,7 +68,7 @@ mod tests {
 
         let failed_update = updated_game.guess(GuessRequest {
             board_index: 0,
-            name: player_name.clone(),
+            player_name: player_name.clone(),
         });
 
         assert!(failed_update.is_err())

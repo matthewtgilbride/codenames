@@ -1,6 +1,6 @@
 use crate::game::board::model::BOARD_SIZE;
 use crate::game::card::model::CardColor;
-use crate::game::model::{Game, GameError, Guess, Team};
+use crate::game::model::{Game, GameError, Team};
 
 use serde::{Deserialize, Serialize};
 use std::convert::TryInto;
@@ -52,7 +52,7 @@ impl PlayerGame {
                     let maybe_card_color = game
                         .guesses
                         .iter()
-                        .find(|Guess { board_index }| board_index == &index)
+                        .find(|board_index| *board_index == &index)
                         .map(|_| card.color);
                     PlayerCard {
                         color: maybe_card_color,
