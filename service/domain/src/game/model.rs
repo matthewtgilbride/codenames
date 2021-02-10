@@ -1,3 +1,4 @@
+use std::convert::TryInto;
 use std::error::Error;
 use std::fmt;
 use std::fmt::Display;
@@ -6,15 +7,22 @@ use std::fmt::Formatter;
 use log::info;
 use serde::{Deserialize, Serialize};
 
-use crate::game::board::model::Board;
+use crate::game::board::model::{Board, BoardState};
+use crate::game::card::model::CardState;
 use crate::game::model::GameError::InvalidGuess;
-use crate::game::player::model::Player;
 use crate::UniqueError;
 
 #[derive(Display, Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Team {
     Blue,
     Red,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct Player {
+    pub team: Team,
+    pub name: String,
+    pub is_spy_master: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -123,6 +131,28 @@ impl Game {
             guesses: self.guesses[1..].iter().cloned().collect(),
             ..self.clone()
         }
+    }
+}
+
+impl Into<BoardState> for Game {
+    fn into(self) -> BoardState {
+        let cards: Vec<CardState> = self
+            .board
+            .iter()
+            .enumerate()
+            .map(|(index, card)| {
+                let maybe_card_color = self
+                    .guesses
+                    .iter()
+                    .find(|board_index| *board_index == &index)
+                    .map(|_| card.color);
+                CardState {
+                    color: maybe_card_color,
+                    word: card.clone().word,
+                }
+            })
+            .collect();
+        cards.try_into().unwrap()
     }
 }
 

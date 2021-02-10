@@ -1,11 +1,11 @@
 use actix_web::{get, post, put, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 
+use codenames_domain::game::model::Player;
 use codenames_domain::game::model::{GuessRequest, LeaveRequest, NewGameRequest};
 use codenames_domain::{ServiceError, ServiceResult};
 
 use crate::AppData;
-use codenames_domain::game::player::model::Player;
 
 #[derive(Serialize, Deserialize)]
 struct ErrorResponse {

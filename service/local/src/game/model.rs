@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod tests {
+    use codenames_domain::game::model::Player;
     use codenames_domain::game::model::{Game, GuessRequest, Team};
 
     use crate::game::tests::rand_game;
-    use codenames_domain::game::player::model::Player;
 
     #[test]
     fn join() {

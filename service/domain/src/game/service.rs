@@ -3,8 +3,8 @@ use log::{info, warn};
 use crate::dictionary::service::{Service as DictionaryService, WordGenerator};
 use crate::game::board::service::{BoardGenerator, Service as BoardService};
 use crate::game::dao::{DaoError, DAO};
+use crate::game::model::Player;
 use crate::game::model::{Game, GameList, GuessRequest, LeaveRequest, NewGameRequest};
-use crate::game::player::model::Player;
 use crate::{ServiceResult, StdResult};
 
 #[derive(Clone)]

@@ -6,12 +6,12 @@ pub mod routes;
 #[cfg(test)]
 mod tests {
     use codenames_domain::game::dao::{DaoResult, DAO};
+    use codenames_domain::game::model::Player;
     use codenames_domain::game::model::{Game, Team};
     use codenames_domain::game::service::Service;
 
     use crate::dictionary::service::WordGeneratorRand;
     use crate::game::board::service::BoardGeneratorRand;
-    use codenames_domain::game::player::model::Player;
 
     #[derive(Clone)]
     struct DaoStub;

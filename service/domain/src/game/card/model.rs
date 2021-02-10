@@ -1,9 +1,10 @@
+use std::fmt;
+use std::fmt::Display;
+
+use serde::de::Visitor;
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::game::model::Team;
-use serde::de::Visitor;
-use std::fmt;
-use std::fmt::Display;
 
 #[derive(Display, Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum CardColor {
@@ -66,6 +67,12 @@ pub const ALL_CARD_COLORS: [CardColor; 4] = [
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Card {
     pub color: CardColor,
+    pub word: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct CardState {
+    pub color: Option<CardColor>,
     pub word: String,
 }
 
