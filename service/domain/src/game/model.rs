@@ -34,6 +34,15 @@ pub struct Game {
     pub guesses: Vec<usize>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct GameState {
+    pub name: String,
+    pub board: BoardState,
+    pub turn: Team,
+    pub players: Vec<Player>,
+    pub guesses: Vec<usize>,
+}
+
 pub type GameResult = Result<Game, GameError>;
 
 impl Game {
@@ -153,6 +162,18 @@ impl Into<BoardState> for Game {
             })
             .collect();
         cards.try_into().unwrap()
+    }
+}
+
+impl Into<GameState> for Game {
+    fn into(self) -> GameState {
+        GameState {
+            name: self.clone().name,
+            board: self.clone().into(),
+            turn: self.clone().turn,
+            players: self.players,
+            guesses: self.guesses,
+        }
     }
 }
 
