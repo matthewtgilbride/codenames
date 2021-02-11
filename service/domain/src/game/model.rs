@@ -169,10 +169,10 @@ impl Into<GameState> for Game {
     fn into(self) -> GameState {
         GameState {
             name: self.clone().name,
-            board: self.clone().into(),
             turn: self.clone().turn,
-            players: self.players,
-            guesses: self.guesses,
+            players: self.clone().players,
+            guesses: self.clone().guesses,
+            board: self.clone().into(),
         }
     }
 }
