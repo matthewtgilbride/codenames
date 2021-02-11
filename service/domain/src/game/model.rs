@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::convert::TryInto;
 use std::error::Error;
 use std::fmt;
@@ -9,7 +10,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::game::board::model::{Board, BoardState};
 use crate::game::card::model::CardState;
-use crate::game::model::GameError::InvalidGuess;
+use crate::game::model::GameError::{InvalidGuess, PlayerNotFound};
 use crate::UniqueError;
 
 #[derive(Display, Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -25,21 +26,21 @@ pub struct Player {
     pub is_spy_master: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Game {
     pub name: String,
     pub board: Board,
     pub turn: Team,
-    pub players: Vec<Player>,
+    pub players: HashMap<String, Player>,
     pub guesses: Vec<usize>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GameState {
     pub name: String,
     pub board: BoardState,
     pub turn: Team,
-    pub players: Vec<Player>,
+    pub players: HashMap<String, Player>,
     pub guesses: Vec<usize>,
 }
 
@@ -51,23 +52,24 @@ impl Game {
             name,
             board,
             turn,
-            players: Vec::new(),
+            players: HashMap::new(),
             guesses: Vec::new(),
         }
     }
 
     pub fn join(self, player: Player) -> GameResult {
         self.players
-            .iter()
-            .find(|Player { name, .. }| *name == player.name)
+            .get(&player.name)
             .map(|p| {
                 let error = GameError::unique_player(p.clone());
                 info!("{}", error);
                 Err(error)
             })
             .unwrap_or_else(|| {
+                let mut new_players = self.players.clone();
+                new_players.insert(player.name.clone(), player.clone());
                 Ok(Game {
-                    players: [&[player], &self.players[..]].concat(),
+                    players: new_players,
                     ..self.clone()
                 })
             })
@@ -84,55 +86,48 @@ impl Game {
     }
 
     pub fn leave(self, player_name: &str) -> Game {
+        let mut new_players = self.players.clone();
+        new_players.remove(player_name);
         Game {
-            players: self
-                .players
-                .iter()
-                .filter(|Player { name, .. }| *name != player_name)
-                .cloned()
-                .collect(),
+            players: new_players,
             ..self.clone()
         }
     }
 
     pub fn guess(self, guess_request: GuessRequest) -> GameResult {
-        self.players
-            .iter()
-            .cloned()
-            .find(
-                |Player {
-                     name,
-                     is_spy_master,
-                     team,
-                     ..
-                 }| {
-                    *name == guess_request.player_name
-                        && *is_spy_master == false
-                        && *team == self.turn
-                },
-            )
-            .map_or_else(
-                || {
-                    info!("{}", InvalidGuess);
-                    Err(InvalidGuess)
-                },
-                |_| {
-                    self.guesses
-                        .iter()
-                        .find(|&index| *index == guess_request.board_index)
-                        .map(|g| {
-                            let error = GameError::unique_guess(g.clone());
-                            info!("{}", error);
-                            Err(error)
+        let maybe_player = self.players.get(&guess_request.player_name);
+        match maybe_player {
+            None => Err(PlayerNotFound(guess_request.player_name)),
+            Some(Player {
+                team,
+                is_spy_master,
+                ..
+            }) => {
+                if *is_spy_master {
+                    return Err(InvalidGuess(format!(
+                        "{} is a spy master",
+                        guess_request.player_name
+                    )));
+                }
+                if *team != self.turn {
+                    return Err(InvalidGuess(format!("{} team is not up", team)));
+                }
+                self.guesses
+                    .iter()
+                    .find(|&index| *index == guess_request.board_index)
+                    .map(|g| {
+                        let error = GameError::unique_guess(g.clone());
+                        info!("{}", error);
+                        Err(error)
+                    })
+                    .unwrap_or_else(|| {
+                        Ok(Game {
+                            guesses: [&[guess_request.board_index], &self.guesses[..]].concat(),
+                            ..self.clone()
                         })
-                        .unwrap_or_else(|| {
-                            Ok(Game {
-                                guesses: [&[guess_request.board_index], &self.guesses[..]].concat(),
-                                ..self.clone()
-                            })
-                        })
-                },
-            )
+                    })
+            }
+        }
     }
 
     pub fn undo_guess(self) -> Game {
@@ -182,7 +177,7 @@ pub enum GameError {
     UniquePlayerName(UniqueError),
     PlayerNotFound(String),
     UniqueGuess(UniqueError),
-    InvalidGuess,
+    InvalidGuess(String),
 }
 
 impl GameError {
@@ -211,7 +206,11 @@ impl fmt::Display for GameError {
             GameError::UniquePlayerName(u) => u.fmt(f),
             GameError::UniqueGuess(u) => u.fmt(f),
             GameError::PlayerNotFound(name) => write!(f, "player not found: {}", name),
-            GameError::InvalidGuess => write!(f, "guess must be made by a valid player in the game (by name), on the team that matches the game's current turn, who is not a spy master")
+            GameError::InvalidGuess(msg) => write!(
+                f,
+                "Guess must be made by an operative on the current team: {}",
+                msg
+            ),
         }
     }
 }

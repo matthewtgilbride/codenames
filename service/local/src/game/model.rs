@@ -53,7 +53,8 @@ mod tests {
         let player_name = game
             .players
             .iter()
-            .find(|p| p.team == game.turn)
+            .find(|(_, p)| p.team == game.turn && !p.is_spy_master)
+            .map(|(_, p)| p)
             .unwrap()
             .clone()
             .name;
