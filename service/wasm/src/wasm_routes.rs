@@ -3,8 +3,9 @@ extern crate wapc_guest as guest;
 use actor_http_server as http;
 use guest::prelude::*;
 
-use codenames_domain::game::model::Player;
-use codenames_domain::game::model::{Game, GuessRequest, LeaveRequest, NewGameRequest};
+use codenames_domain::game::model::{
+    GameVariant, GuessRequest, NewGameRequest, Player, PlayerRequest,
+};
 use codenames_domain::game::service::Service;
 use codenames_domain::ServiceResult;
 
@@ -41,7 +42,7 @@ impl WasmRoutes {
     }
 
     pub fn leave(&mut self, msg: http::Request) -> HandlerResult<http::Response> {
-        let req: LeaveRequest = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
+        let req: PlayerRequest = serde_json::from_str(std::str::from_utf8(msg.body.as_slice())?)?;
         let (key, _) = self.get_existing_game_by_key(msg)?;
         let updated_game = self.service.leave(key, req)?;
         Ok(http::Response::json(updated_game, 200, "OK"))
@@ -66,11 +67,14 @@ impl WasmRoutes {
         Ok(http::Response::json(updated_game, 200, "OK"))
     }
 
-    fn get_existing_game_by_key(&mut self, msg: http::Request) -> ServiceResult<(String, Game)> {
+    fn get_existing_game_by_key(
+        &mut self,
+        msg: http::Request,
+    ) -> ServiceResult<(String, GameVariant)> {
         let game_key = get_game_key(msg.path);
         game_key.map_or_else(
             || Err("game key could not be found in path".into()),
-            |key| self.service.get(key.clone()).map(|game| (key, game)),
+            |key| self.service.get(key.clone(), None).map(|game| (key, game)),
         )
     }
 }

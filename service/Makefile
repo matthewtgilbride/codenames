@@ -21,7 +21,7 @@ run-local:
 	cargo build
 	cargo run
 
-integration-test-local: check redis-up
+integration-test-local:
 	yarn test
 
 integration-test-docker: check

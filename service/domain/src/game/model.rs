@@ -44,6 +44,22 @@ pub struct GameState {
     pub guesses: Vec<usize>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum GameVariant {
+    Data(Game),
+    State(GameState),
+}
+
+impl From<(Player, Game)> for GameVariant {
+    fn from((Player { is_spy_master, .. }, g): (Player, Game)) -> Self {
+        match is_spy_master {
+            true => GameVariant::Data(g.clone()),
+            false => GameVariant::State(g.clone().into()),
+        }
+    }
+}
+
 pub type GameResult = Result<Game, GameError>;
 
 impl Game {
@@ -162,11 +178,18 @@ impl Into<BoardState> for Game {
 
 impl Into<GameState> for Game {
     fn into(self) -> GameState {
+        let Game {
+            name,
+            turn,
+            players,
+            guesses,
+            ..
+        } = self.clone();
         GameState {
-            name: self.clone().name,
-            turn: self.clone().turn,
-            players: self.clone().players,
-            guesses: self.clone().guesses,
+            name,
+            turn,
+            players,
+            guesses,
             board: self.clone().into(),
         }
     }
@@ -223,7 +246,7 @@ pub struct NewGameRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct LeaveRequest {
+pub struct PlayerRequest {
     pub player_name: String,
 }
 
