@@ -1,403 +1,522 @@
 {
-  "info": {
-    "_postman_id": "b5094eca-ea5a-4688-86b7-b372ff19aa45",
-    "name": "codenames-service",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "item": [
-    {
-      "name": "random game",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"generate a random name\", function () {",
-              "    pm.expect(pm.response.status).to.equal(\"OK\")",
-              "});",
-              "",
-              "const res = JSON.parse(responseBody);",
-              "pm.environment.set(\"game-name\", res.game_name);"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{host}}:8080",
-          "host": [
-            "{{host}}"
-          ],
-          "port": "8080"
-        },
-        "description": "new game"
-      },
-      "response": []
-    },
-    {
-      "name": "new game",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"create a game\", function () {",
-              "    pm.expect(pm.response.status).to.equal(\"OK\")",
-              "});",
-              "",
-              "const res = JSON.parse(responseBody);",
-              "pm.environment.set(\"game-turn\", res.turn);"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"game_name\": \"{{game-name}}\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{host}}:8080/game",
-          "host": [
-            "{{host}}"
-          ],
-          "port": "8080",
-          "path": [
-            "game"
-          ]
-        },
-        "description": "new game"
-      },
-      "response": []
-    },
-    {
-      "name": "get game",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"retrieve a game\", function () {",
-              "    pm.expect(pm.response.status).to.equal(\"OK\")",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://{{host}}:8080/game/{{game-name}}",
-          "protocol": "http",
-          "host": [
-            "{{host}}"
-          ],
-          "port": "8080",
-          "path": [
-            "game",
-            "{{game-name}}"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "get all",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"retrieve all games\", function () {",
-              "    pm.expect(pm.response.status).to.equal(\"OK\")",
-              "    pm.expect(JSON.parse(responseBody).games.length).greaterThan(0)",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{host}}:8080/game",
-          "host": [
-            "{{host}}"
-          ],
-          "port": "8080",
-          "path": [
-            "game"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "join game",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"join a game\", function () {",
-              "    pm.expect(pm.response.status).to.equal(\"OK\")",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"name\": \"Test\",\n    \"team\": \"{{game-turn}}\",\n    \"is_spy_master\": false\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "http://{{host}}:8080/game/{{game-name}}/join",
-          "protocol": "http",
-          "host": [
-            "{{host}}"
-          ],
-          "port": "8080",
-          "path": [
-            "game",
-            "{{game-name}}",
-            "join"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "guess",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"guess a word\", function () {",
-              "    pm.expect(pm.response.status).to.equal(\"OK\")",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "http://{{host}}:8080/game/{{game-name}}/test/guess/0",
-          "protocol": "http",
-          "host": [
-            "{{host}}"
-          ],
-          "port": "8080",
-          "path": [
-            "game",
-            "{{game-name}}",
-            "test",
-            "guess",
-            "0"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "undo guess",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"undo a guess\", function () {",
-              "    pm.expect(pm.response.status).to.equal(\"OK\")",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "http://{{host}}:8080/game/{{game-name}}/guess/undo",
-          "protocol": "http",
-          "host": [
-            "{{host}}"
-          ],
-          "port": "8080",
-          "path": [
-            "game",
-            "{{game-name}}",
-            "guess",
-            "undo"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "end turn",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"end a turn\", function () {",
-              "    pm.expect(pm.response.status).to.equal(\"OK\")",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "http://{{host}}:8080/game/{{game-name}}/end-turn",
-          "protocol": "http",
-          "host": [
-            "{{host}}"
-          ],
-          "port": "8080",
-          "path": [
-            "game",
-            "{{game-name}}",
-            "end-turn"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "leave game",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"leave a game\", function () {",
-              "    pm.expect(pm.response.status).to.equal(\"OK\")",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "http://{{host}}:8080/game/{{game-name}}/test/leave",
-          "protocol": "http",
-          "host": [
-            "{{host}}"
-          ],
-          "port": "8080",
-          "path": [
-            "game",
-            "{{game-name}}",
-            "test",
-            "leave"
-          ]
-        }
-      },
-      "response": []
-    }
-  ],
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          ""
-        ]
-      }
-    },
-    {
-      "listen": "test",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          ""
-        ]
-      }
-    }
-  ],
-  "variable": [
-    {
-      "key": "host",
-      "value": "localhost"
-    },
-    {
-      "key": "game-name",
-      "value": ""
-    },
-    {
-      "key": "game-team",
-      "value": ""
-    }
-  ]
+	"info": {
+		"_postman_id": "b5094eca-ea5a-4688-86b7-b372ff19aa45",
+		"name": "codenames-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "random game",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"generate a random name\", function () {",
+							"    pm.expect(pm.response.status).to.equal(\"OK\")",
+							"});",
+							"",
+							"const res = JSON.parse(responseBody);",
+							"pm.environment.set(\"game-name\", res.game_name);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}:8080",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080"
+				},
+				"description": "new game"
+			},
+			"response": []
+		},
+		{
+			"name": "new game",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"create a game\", function () {",
+							"    pm.expect(pm.response.status).to.equal(\"OK\")",
+							"});",
+							"",
+							"const res = JSON.parse(responseBody);",
+							"pm.environment.set(\"game-turn\", res.turn);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"game_name\": \"{{game-name}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}:8080/game",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"game"
+					]
+				},
+				"description": "new game"
+			},
+			"response": []
+		},
+		{
+			"name": "get game",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"retrieve a game\", function () {",
+							"    pm.expect(pm.response.status).to.equal(\"OK\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:8080/game/{{game-name}}",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"game",
+						"{{game-name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"retrieve all games\", function () {",
+							"    pm.expect(pm.response.status).to.equal(\"OK\")",
+							"    pm.expect(JSON.parse(responseBody).games.length).greaterThan(0)",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}:8080/game",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"game"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "join game (operative)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"join a game as an operative\", function () {",
+							"    pm.expect(pm.response.status).to.equal(\"OK\")",
+							"    pm.expect(Object.keys(JSON.parse(responseBody).players).length).to.equal(1)",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Operative\",\n    \"team\": \"{{game-turn}}\",\n    \"is_spy_master\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{host}}:8080/game/{{game-name}}/join",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"game",
+						"{{game-name}}",
+						"join"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "join game (spy master)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"join a game as a spy master\", function () {",
+							"    pm.expect(pm.response.status).to.equal(\"OK\")",
+							"    pm.expect(Object.keys(JSON.parse(responseBody).players).length).to.equal(2)",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Spy Master\",\n    \"team\": \"{{game-turn}}\",\n    \"is_spy_master\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{host}}:8080/game/{{game-name}}/join",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"game",
+						"{{game-name}}",
+						"join"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "guess",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"guess a word\", function () {",
+							"    pm.expect(pm.response.status).to.equal(\"OK\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{host}}:8080/game/{{game-name}}/operative/guess/0",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"game",
+						"{{game-name}}",
+						"operative",
+						"guess",
+						"0"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get game (operative)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get a game as an operative\", function () {",
+							"    pm.expect(pm.response.status).to.equal(\"OK\")",
+							"    let board = JSON.parse(responseBody).board",
+							"    let revealedWords = board.filter(card => card.color !== null)",
+							"    pm.expect(revealedWords.length).to.equal(1)",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:8080/game/{{game-name}}/operative",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"game",
+						"{{game-name}}",
+						"operative"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get game (spy master)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get a game as a spy master\", function () {",
+							"    pm.expect(pm.response.status).to.equal(\"OK\")",
+							"    let board = JSON.parse(responseBody).board",
+							"    let revealedWords = board.filter(card => card.color !== null)",
+							"    pm.expect(revealedWords.length).to.equal(25)",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:8080/game/{{game-name}}/spy master",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"game",
+						"{{game-name}}",
+						"spy master"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "undo guess",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"undo a guess\", function () {",
+							"    pm.expect(pm.response.status).to.equal(\"OK\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{host}}:8080/game/{{game-name}}/guess/undo",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"game",
+						"{{game-name}}",
+						"guess",
+						"undo"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "end turn",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"end a turn\", function () {",
+							"    pm.expect(pm.response.status).to.equal(\"OK\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{host}}:8080/game/{{game-name}}/end-turn",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"game",
+						"{{game-name}}",
+						"end-turn"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "leave game",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"leave a game\", function () {",
+							"    pm.expect(pm.response.status).to.equal(\"OK\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{host}}:8080/game/{{game-name}}/operative/leave",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"game",
+						"{{game-name}}",
+						"operative",
+						"leave"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "localhost"
+		},
+		{
+			"key": "game-name",
+			"value": ""
+		},
+		{
+			"key": "game-team",
+			"value": ""
+		}
+	]
 }
