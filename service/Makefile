@@ -31,6 +31,9 @@ integration-test-local:
 integration-test-docker: check
 	docker-compose up --build --exit-code-from codenames-test codenames-test
 
+integration-test: integration-test-docker
+	docker-compose down
+
 gen-account-key:
 	nk gen account -o json | jq -r .seed > account.nk
 
