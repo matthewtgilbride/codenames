@@ -85,7 +85,7 @@ mod tests {
     fn leave() {
         let game = test_game();
         let game_clone = game.clone();
-        let updated_game = game.leave("foo");
+        let updated_game = game.leave("foo").unwrap();
 
         assert_eq!(game_clone.players.len() - 1, updated_game.players.len())
     }

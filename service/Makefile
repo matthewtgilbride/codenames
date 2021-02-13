@@ -15,7 +15,11 @@ check: format build test
 redis-up:
 	docker-compose up -d redis
 
-run-local: redis-up
+LOCAL_PID = $(shell lsof -t -i:8080)
+kill-local:
+	-kill $(LOCAL_PID)
+
+run-local: redis-up kill-local
 run-local: export REDIS_HOST=0.0.0.0
 run-local:
 	cargo build

@@ -74,8 +74,9 @@ impl Game {
     }
 
     pub fn join(self, player: Player) -> GameResult {
+        let key = player.name.to_lowercase();
         self.players
-            .get(&player.name)
+            .get(key.as_str())
             .map(|p| {
                 let error = GameError::unique_player(p.clone());
                 info!("{}", error);
@@ -83,7 +84,7 @@ impl Game {
             })
             .unwrap_or_else(|| {
                 let mut new_players = self.players.clone();
-                new_players.insert(player.name.clone(), player.clone());
+                new_players.insert(key, player.clone());
                 Ok(Game {
                     players: new_players,
                     ..self.clone()
@@ -101,13 +102,15 @@ impl Game {
         }
     }
 
-    pub fn leave(self, player_name: &str) -> Game {
+    pub fn leave(self, player_name: &str) -> GameResult {
         let mut new_players = self.players.clone();
-        new_players.remove(player_name);
-        Game {
-            players: new_players,
-            ..self.clone()
-        }
+        new_players
+            .remove(player_name)
+            .map(|_| Game {
+                players: new_players.clone(),
+                ..self.clone()
+            })
+            .ok_or_else(|| PlayerNotFound(player_name.to_string()))
     }
 
     pub fn guess(self, guess_request: GuessRequest) -> GameResult {

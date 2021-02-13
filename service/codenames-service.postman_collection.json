@@ -68,14 +68,13 @@
           }
         },
         "url": {
-          "raw": "{{host}}:8080/game/",
+          "raw": "{{host}}:8080/game",
           "host": [
             "{{host}}"
           ],
           "port": "8080",
           "path": [
-            "game",
-            ""
+            "game"
           ]
         },
         "description": "new game"
@@ -210,7 +209,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"board_index\": 0,\n    \"player_name\": \"Test\"\n}",
+          "raw": "",
           "options": {
             "raw": {
               "language": "json"
@@ -218,7 +217,7 @@
           }
         },
         "url": {
-          "raw": "http://{{host}}:8080/game/{{game-name}}/guess",
+          "raw": "http://{{host}}:8080/game/{{game-name}}/test/guess/0",
           "protocol": "http",
           "host": [
             "{{host}}"
@@ -227,7 +226,9 @@
           "path": [
             "game",
             "{{game-name}}",
-            "guess"
+            "test",
+            "guess",
+            "0"
           ]
         }
       },
@@ -340,7 +341,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"player_name\": \"Test\"\n}",
+          "raw": "",
           "options": {
             "raw": {
               "language": "json"
@@ -348,7 +349,7 @@
           }
         },
         "url": {
-          "raw": "http://{{host}}:8080/game/{{game-name}}/leave",
+          "raw": "http://{{host}}:8080/game/{{game-name}}/test/leave",
           "protocol": "http",
           "host": [
             "{{host}}"
@@ -357,6 +358,7 @@
           "path": [
             "game",
             "{{game-name}}",
+            "test",
             "leave"
           ]
         }

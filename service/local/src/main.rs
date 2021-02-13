@@ -10,12 +10,11 @@ use codenames_domain::game::service::Service;
 use crate::dictionary::service::WordGeneratorRand;
 use crate::game::board::service::BoardGeneratorRand;
 use crate::game::dao::RedisDao;
-use crate::game::routes::{
-    end_turn, find_games, get_game, guess, join_game, leave_game, new_game, undo_guess,
-};
+use crate::game::routes::routes as game_routes;
 
 mod dictionary;
 mod game;
+mod util;
 
 #[derive(Clone)]
 pub struct AppData {
@@ -43,17 +42,7 @@ async fn main() -> std::io::Result<()> {
                 .clone(),
             )
             .service(random_name)
-            .service(
-                web::scope("/game")
-                    .service(find_games)
-                    .service(new_game)
-                    .service(get_game)
-                    .service(join_game)
-                    .service(leave_game)
-                    .service(guess)
-                    .service(undo_guess)
-                    .service(end_turn),
-            )
+            .service(game_routes("/game"))
     })
     .bind("0.0.0.0:8080")?
     .run()
