@@ -6,9 +6,30 @@ service-format:
 
 service-test:
 	$(MAKE) -C service test
-	$(MAKE) -C service local-integration-test
 
 service-check: service-build service-format service-test
+
+service-start:
+	${MAKE} -C service run-local
+
+service-integration-test:
+	$(MAKE) -C service integration-test
+
+app-tsc:
+	cd app; yarn tsc
+
+app-build:
+	cd app; yarn build
+
+app-format:
+	cd app; yarn lint --fix
+
+app-check: app-tsc app-format app-build
+
+check: service-integration-test app-check
+
+app-start:
+	cd app: yarn dev
 
 service-gen-keys:
 	$(MAKE) -C service gen-account-key
