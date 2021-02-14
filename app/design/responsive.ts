@@ -20,3 +20,12 @@ export const Breakpoints: ResponsiveBreakpoints = {
   desktop: 1440,
   '4K': 2560,
 };
+
+export const beginAt = (breakpoint: number): string =>
+  `@media (min-width: ${breakpoint}px)`;
+
+export const endAt = (breakpoint: number): string =>
+  `@media (max-width: ${breakpoint - 1}px`;
+
+export const between = (start: number, end: number): string =>
+  `${beginAt(start)} and ${endAt(end)}`;

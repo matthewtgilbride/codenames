@@ -12,22 +12,24 @@ const Container = styled.div`
   display: grid;
   // background-color: ${neutral};
   flex-direction: column;
+  padding: 0 0.75rem;
   margin: auto;
   border-radius: 1rem;
   max-width: ${tabletPortrait}px;
   text-align: center;
   // box-shadow: 0 0 2px 1px ${blue};
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-  grid-row-gap: 2rem;
-  grid-column-gap: 1rem;
+  grid-row-gap: 1rem;
+  grid-column-gap: 0.75rem;
   max-width: ${tabletPortrait}px;
 `;
 
 const Card = styled.div`
   background-color: ${neutral};
   box-shadow: 0 0 2px 1px ${blue};
-  border-radius: 1rem;
-  padding: 2rem;
+  border-radius: 0.25rem;
+  padding: 1rem 0.1rem;
+  font-size: 0.5rem;
 `;
 
 interface GameLandingProps {
