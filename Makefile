@@ -29,7 +29,7 @@ app-check: app-tsc app-format app-build
 check: service-integration-test app-check
 
 app-start:
-	cd app: yarn dev
+	cd app; yarn dev
 
 service-gen-keys:
 	$(MAKE) -C service gen-account-key
