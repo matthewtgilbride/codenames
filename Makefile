@@ -1,35 +1,38 @@
-service-build:
+build-service:
 	$(MAKE) -C service build
 
-service-format:
+format-service:
 	$(MAKE) -C service format
 
-service-test:
+test-service:
 	$(MAKE) -C service test
 
-service-check: service-build service-format service-test
+check-service:
+	$(MAKE) -C service check
 
-service-start:
+start-service:
 	${MAKE} -C service run-local
 
-service-integration-test:
+integration-test-service:
 	$(MAKE) -C service integration-test
 
-app-tsc:
+build-app:
 	cd app; yarn tsc
-
-app-build:
 	cd app; yarn build
 
-app-format:
+format-app:
 	cd app; yarn lint --fix
 
-app-check: app-tsc app-format app-build
+check-app: format-app build-app
 
-check: service-integration-test app-check
-
-app-start:
+start-app: export API_HOST=localhost
+start-app: export API_PORT=8080
+start-app:
 	cd app; yarn dev
+
+check: check-service check-app
+
+integration-test: integration-test-service
 
 service-gen-keys:
 	$(MAKE) -C service gen-account-key

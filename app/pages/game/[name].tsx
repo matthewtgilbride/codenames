@@ -5,7 +5,7 @@ import { lighten } from 'polished';
 import { Breakpoints } from '../../design/responsive';
 import { getConstants } from '../../constants';
 import { Palette } from '../../design/color';
-import { Card, CardColor, CardType } from '../../components/game/Card';
+import { Card, CardColor } from '../../components/game/Card';
 
 const { tabletPortrait } = Breakpoints;
 
