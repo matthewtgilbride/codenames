@@ -3,7 +3,6 @@ import { GetServerSideProps } from 'next';
 import styled from 'styled-components';
 import { lighten } from 'polished';
 import { Breakpoints } from '../../design/responsive';
-import { getConstants } from '../../constants';
 import { Palette } from '../../design/color';
 import { Card, CardColor } from '../../components/game/Card';
 
@@ -125,9 +124,9 @@ const GameLanding: FC<GameProps> = ({ board, name, turn, players }) => (
 export const getServerSideProps: GetServerSideProps<GameProps> = async ({
   params,
 }) => {
-  const { API_BASE_URL } = getConstants();
   const game = params?.name;
-  const result = await fetch(`${API_BASE_URL}/game/${game}`);
+  const url = `${process.env.API_URL}/game/${game}`;
+  const result = await fetch(url);
   const json = await result.json();
 
   return { props: json as GameProps };

@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import Link from 'next/link';
 import { GetServerSideProps } from 'next';
-import { getConstants } from '../../constants';
 import { ContentContainer } from '../../components/ContentContainer';
 
 interface GameListProps {
@@ -20,8 +19,7 @@ const GameList: FC<GameListProps> = ({ games }) => (
 );
 
 export const getServerSideProps: GetServerSideProps<GameListProps> = async () => {
-  const { API_BASE_URL } = getConstants();
-  const result = await fetch(`${API_BASE_URL}/game`);
+  const result = await fetch(`${process.env.API_URL}/game`);
   const json = await result.json();
 
   return { props: json as GameListProps };

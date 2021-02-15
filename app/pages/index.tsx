@@ -2,7 +2,6 @@ import type {} from 'styled-components/cssprop'; // eslint-disable-line
 import { FC } from 'react';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
-import { getConstants } from '../constants';
 import { NewGame } from '../components/NewGame';
 import { ContentContainer } from '../components/ContentContainer';
 
@@ -23,8 +22,7 @@ const Home: FC<HomeProps> = ({ game_name }) => (
 );
 
 export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
-  const { API_BASE_URL } = getConstants();
-  const result = await fetch(API_BASE_URL);
+  const result = await fetch(process.env.API_URL as string);
   const json = await result.json();
 
   return { props: json as HomeProps };

@@ -1,6 +1,8 @@
+/* eslint-disable no-alert */
 import { ChangeEventHandler, FC, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { lighten } from 'polished';
+import { useRouter } from 'next/router';
 import { Breakpoints } from '../design/responsive';
 import { Palette } from '../design/color';
 
@@ -30,15 +32,33 @@ interface NewGameProps {
 }
 
 export const NewGame: FC<NewGameProps> = ({ initialName }) => {
+  const router = useRouter();
   const [name, setName] = useState(initialName);
   const onChange = useCallback<ChangeEventHandler<HTMLInputElement>>((e) => {
     setName(e.currentTarget.value);
   }, []);
 
+  const onSubmit = useCallback(() => {
+    fetch('/api/game', {
+      method: 'POST',
+      body: JSON.stringify({ game_name: name }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          router.push(`/game/${name}`);
+        } else {
+          alert('error creating game');
+        }
+      })
+      .catch(() => alert('error creating game'));
+  }, [name]);
+
   return (
     <Container>
       <input value={name} onChange={onChange} />
-      <button type="button">Start</button>
+      <button type="button" onClick={onSubmit}>
+        Start
+      </button>
     </Container>
   );
 };

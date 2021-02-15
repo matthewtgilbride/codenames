@@ -25,8 +25,6 @@ format-app:
 
 check-app: format-app build-app
 
-start-app: export API_HOST=localhost
-start-app: export API_PORT=8080
 start-app:
 	cd app; yarn dev
 
