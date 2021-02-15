@@ -19,7 +19,6 @@ const Container = styled.div`
     background-color: ${red};
     padding: 0.5rem;
     border-radius: 0.25rem;
-    line-height: 1.15;
     :hover {
       background-color: ${lighten(0.1, red)};
     }

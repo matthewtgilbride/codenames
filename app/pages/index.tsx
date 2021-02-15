@@ -1,3 +1,5 @@
+// eslint-disable-next-line import/extensions
+import type {} from 'styled-components/cssprop';
 import { FC } from 'react';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
