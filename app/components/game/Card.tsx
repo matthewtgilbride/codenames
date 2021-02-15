@@ -2,11 +2,10 @@ import { FC } from 'react';
 import styled from 'styled-components';
 import { Palette } from '../../design/color';
 import { beginAt, Breakpoints } from '../../design/responsive';
+import { CardColor, CardType } from '../../model';
 
 const { neutral, death, blue, red, contrast } = Palette;
 const { phoneLg, tabletPortrait } = Breakpoints;
-
-export type CardType = 'Neutral' | 'Death' | 'Blue' | 'Red';
 
 const CardColorMap: { [key in CardType]: string } = {
   Neutral: neutral,
@@ -14,11 +13,6 @@ const CardColorMap: { [key in CardType]: string } = {
   Blue: blue,
   Red: red,
 };
-
-export interface CardColor {
-  color?: CardType;
-  word: string;
-}
 
 const Container = styled.div<{ color: CardColor['color'] }>`
   background-color: ${(props) =>

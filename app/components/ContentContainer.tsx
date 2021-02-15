@@ -9,6 +9,7 @@ export const ContentContainer = styled.div`
   display: flex;
   flex-direction: column;
   margin: auto;
+  padding: 1rem;
   border-radius: 1rem;
   box-shadow: 0 0 2px 1px ${blue};
   color: ${contrast};

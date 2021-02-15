@@ -32,12 +32,12 @@ interface NewGameProps {
 }
 
 export const NewGame: FC<NewGameProps> = ({ initialName }) => {
-  const router = useRouter();
   const [name, setName] = useState(initialName);
   const onChange = useCallback<ChangeEventHandler<HTMLInputElement>>((e) => {
     setName(e.currentTarget.value);
   }, []);
 
+  const router = useRouter();
   const onSubmit = useCallback(() => {
     fetch('/api/game', {
       method: 'POST',

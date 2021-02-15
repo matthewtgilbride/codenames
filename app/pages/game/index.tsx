@@ -10,11 +10,18 @@ interface GameListProps {
 const GameList: FC<GameListProps> = ({ games }) => (
   <ContentContainer>
     <h2>espionage in progress</h2>
-    {games.map((g) => (
-      <Link key={g} href={`/game/${g}`}>
-        {g}
-      </Link>
-    ))}
+    <ul>
+      {games.map((g) => (
+        <li
+          key={g}
+          css={`
+            margin: 1rem;
+          `}
+        >
+          <Link href={`/game/${g}`}>{g}</Link>
+        </li>
+      ))}
+    </ul>
   </ContentContainer>
 );
 

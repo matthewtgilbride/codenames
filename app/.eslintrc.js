@@ -37,5 +37,7 @@ module.exports = {
     'react/jsx-props-no-spreading': 'off',
     'react/react-in-jsx-scope': 'off',
     'import/prefer-default-export': 'off',
+    '@typescript-eslint/no-use-before-define': ['error', { functions: false }],
+    '@typescript-eslint/naming-convention': 'off',
   },
 };
