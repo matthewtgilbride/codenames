@@ -2,6 +2,7 @@ extern crate env_logger;
 #[macro_use]
 extern crate serde_json;
 
+use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 
@@ -33,7 +34,10 @@ async fn main() -> std::io::Result<()> {
     let service = Service::new(word_generator, board_generator, dao).unwrap();
 
     HttpServer::new(move || {
-        let cors = Cors::permissive();
+        let cors = Cors::default()
+            .allow_any_header()
+            .allow_any_method()
+            .allowed_origin(std::env::var("APP_ORIGIN").unwrap().as_str());
         App::new()
             .wrap(Logger::default())
             .wrap(cors)

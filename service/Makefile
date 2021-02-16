@@ -21,6 +21,7 @@ kill-local:
 
 run-local: redis-up kill-local
 run-local: export REDIS_HOST=0.0.0.0
+run-local: export APP_ORIGIN=http://localhost:3000
 run-local:
 	cargo build
 	cargo run
