@@ -33,8 +33,10 @@ async fn main() -> std::io::Result<()> {
     let service = Service::new(word_generator, board_generator, dao).unwrap();
 
     HttpServer::new(move || {
+        let cors = Cors::permissive();
         App::new()
             .wrap(Logger::default())
+            .wrap(cors)
             .data(
                 AppData {
                     service: service.clone(),

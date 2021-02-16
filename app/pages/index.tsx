@@ -7,13 +7,14 @@ import { ContentContainer } from '../components/ContentContainer';
 
 interface HomeProps {
   game_name: string;
+  API_URL: string;
 }
 
-const Home: FC<HomeProps> = ({ game_name }) => (
+const Home: FC<HomeProps> = ({ API_URL, game_name }) => (
   <ContentContainer>
     <div>
       <h2>create a new game</h2>
-      <NewGame initialName={game_name} />
+      <NewGame API_URL={API_URL} initialName={game_name} />
     </div>
     <h2>
       or <Link href="/game">join an existing one</Link>
@@ -22,10 +23,11 @@ const Home: FC<HomeProps> = ({ game_name }) => (
 );
 
 export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
-  const result = await fetch(process.env.API_URL as string);
+  const API_URL = process.env.API_URL as string;
+  const result = await fetch(API_URL);
   const json = await result.json();
 
-  return { props: json as HomeProps };
+  return { props: { ...json, API_URL } as HomeProps };
 };
 
 export default Home;

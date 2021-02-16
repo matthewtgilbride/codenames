@@ -50,6 +50,7 @@ const PlayerList = styled.div<{ color: Team }>`
 `;
 
 interface GameProps {
+  API_URL: string;
   board: CardColor[];
   name: string;
   turn: Team;
@@ -57,7 +58,13 @@ interface GameProps {
   guesses: number[];
 }
 
-const GameLanding: FC<GameProps> = ({ board, name, turn, players }) => (
+const GameLanding: FC<GameProps> = ({
+  API_URL,
+  board,
+  name,
+  turn,
+  players,
+}) => (
   <Container turn={turn}>
     <Grid>
       {board.map(({ color, word }) => (
@@ -82,7 +89,7 @@ const GameLanding: FC<GameProps> = ({ board, name, turn, players }) => (
             ))}
         </ul>
       </PlayerList>
-      <Join game={name} />
+      <Join game={name} API_URL={API_URL} />
       <PlayerList color="Red">
         <ul>
           {Object.values(players)
@@ -103,11 +110,12 @@ export const getServerSideProps: GetServerSideProps<GameProps> = async ({
   params,
 }) => {
   const game = params?.name;
-  const url = `${process.env.API_URL}/game/${game}`;
+  const API_URL = process.env.API_URL as string;
+  const url = `${API_URL}/game/${game}`;
   const result = await fetch(url);
   const json = await result.json();
 
-  return { props: json as GameProps };
+  return { props: { ...json, API_URL } as GameProps };
 };
 
 export default GameLanding;

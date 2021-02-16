@@ -29,9 +29,10 @@ const Container = styled.div`
 
 interface NewGameProps {
   initialName: string;
+  API_URL: string;
 }
 
-export const NewGame: FC<NewGameProps> = ({ initialName }) => {
+export const NewGame: FC<NewGameProps> = ({ initialName, API_URL }) => {
   const [name, setName] = useState(initialName);
   const onChange = useCallback<ChangeEventHandler<HTMLInputElement>>((e) => {
     setName(e.currentTarget.value);
@@ -39,9 +40,10 @@ export const NewGame: FC<NewGameProps> = ({ initialName }) => {
 
   const router = useRouter();
   const onSubmit = useCallback(() => {
-    fetch('/api/game', {
+    fetch(`${API_URL}/game`, {
       method: 'POST',
       body: JSON.stringify({ game_name: name }),
+      headers: { 'content-type': 'application/json' },
     })
       .then((response) => {
         if (response.ok) {

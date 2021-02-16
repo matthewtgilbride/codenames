@@ -11,7 +11,12 @@ import { useRouter } from 'next/router';
 import { Palette } from '../../design/color';
 import { Player } from '../../model';
 
-export const Join: FC<{ game: string }> = ({ game }) => {
+export interface JoinProps {
+  game: string;
+  API_URL: string;
+}
+
+export const Join: FC<JoinProps> = ({ game, API_URL }) => {
   const [player, setPlayer] = useState<Player>({
     team: 'Blue',
     is_spy_master: false,
@@ -36,12 +41,10 @@ export const Join: FC<{ game: string }> = ({ game }) => {
       alert('name is required');
       return;
     }
-    fetch(`/api/game/${game}/join`, {
+    fetch(`${API_URL}/game/${game}/join`, {
       method: 'PUT',
       body: JSON.stringify(player),
-      headers: {
-        'content-type': 'application/json',
-      },
+      headers: { 'content-type': 'application/json' },
     })
       .then((response) => {
         if (response.ok) {
