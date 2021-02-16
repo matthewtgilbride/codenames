@@ -97,7 +97,7 @@ impl Service {
             Some(PlayerRequest { player_name }) => {
                 let player = data
                     .players
-                    .get(player_name.as_str())
+                    .get(player_name.to_lowercase().as_str())
                     .ok_or(ServiceError::NotFound(format!("player: {}", player_name)))?;
                 Ok((player.clone(), data).into())
             }

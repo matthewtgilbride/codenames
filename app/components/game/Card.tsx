@@ -18,7 +18,7 @@ const Container = styled.div<{ color: CardColor['color'] }>`
   background-color: ${(props) =>
     props.color ? CardColorMap[props.color] : 'white'};
   box-shadow: 0 0 2px 1px ${Palette.blue};
-  color: ${contrast};
+  color: ${(props) => (props.color === 'Death' ? neutral : contrast)};
   border-radius: 0.25rem;
   padding: 1rem 0.1rem;
   word-break: break-all;

@@ -12,3 +12,11 @@ export interface CardColor {
   color?: CardType;
   word: string;
 }
+
+export interface GameState {
+  board: CardColor[];
+  name: string;
+  turn: Team;
+  players: { [key: string]: Player };
+  guesses: number[];
+}
