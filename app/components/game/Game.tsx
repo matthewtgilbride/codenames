@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import styled from 'styled-components';
 import { Breakpoints } from '../../design/responsive';
 import { Palette } from '../../design/color';
@@ -63,11 +63,19 @@ export const Game: FC<GameProps> = ({
   players,
 }) => {
   const player = players[currentPlayer?.toLowerCase() ?? ''];
+  const [selectedWord, setSelectedWord] = useState<string | undefined>();
+  const onClick = (word: string) => () => setSelectedWord(word);
   return (
     <Container turn={turn}>
       <Grid>
-        {board.map(({ color, word }) => (
-          <Card key={word} color={color} word={word} />
+        {board.map((card) => (
+          <Card
+            key={card.word}
+            card={card}
+            player={player}
+            turn={turn}
+            onClick={onClick(card.word)}
+          />
         ))}
       </Grid>
       <ThreeColumnGrid>
@@ -89,7 +97,14 @@ export const Game: FC<GameProps> = ({
           </ul>
         </PlayerList>
         {player ? (
-          <Play API_URL={API_URL} player={player} />
+          <Play
+            API_URL={API_URL}
+            game={name}
+            board={board}
+            player={player}
+            turn={turn}
+            word={selectedWord}
+          />
         ) : (
           <Join game={name} API_URL={API_URL} />
         )}
