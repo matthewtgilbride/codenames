@@ -87,10 +87,21 @@ export const Play: FC<PlayProps> = ({
         `}
         type="button"
         onClick={() => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const _ = confirm(
+          const confirmed = confirm(
             `Are you sure you want to end ${turn} team's turn?`,
           );
+          if (confirmed) {
+            const url = `${API_URL}/game/${game}/end-turn`;
+            fetch(url, { method: 'PUT' })
+              .then((response) => {
+                if (response.ok) {
+                  router.reload();
+                } else {
+                  alert('failed to end turn');
+                }
+              })
+              .catch(() => alert('failed to end turn'));
+          }
         }}
       >
         End Turn

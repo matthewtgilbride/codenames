@@ -53,7 +53,7 @@ export const NewGame: FC<NewGameProps> = ({ initialName, API_URL }) => {
         }
       })
       .catch(() => alert('error creating game'));
-  }, [name]);
+  }, [name, API_URL, router]);
 
   return (
     <Container>

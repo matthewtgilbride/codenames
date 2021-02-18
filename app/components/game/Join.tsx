@@ -54,7 +54,7 @@ export const Join: FC<JoinProps> = ({ game, API_URL }) => {
         }
       })
       .catch(() => alert('error joining game'));
-  }, [player]);
+  }, [player, game, API_URL, router]);
 
   return (
     <div
