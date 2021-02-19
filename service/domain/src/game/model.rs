@@ -114,7 +114,7 @@ impl Game {
     }
 
     pub fn guess(self, guess_request: GuessRequest) -> GameResult {
-        let maybe_player = self.players.get(&guess_request.player_name);
+        let maybe_player = self.players.get(&guess_request.player_name.to_lowercase());
         match maybe_player {
             None => Err(PlayerNotFound(guess_request.player_name)),
             Some(Player {

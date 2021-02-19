@@ -4,6 +4,7 @@ import { FC } from 'react';
 import { useRouter } from 'next/router';
 import { Palette } from '../../design/color';
 import { CardColor, Player, Team } from '../../model';
+import { voidFetch } from '../../utils/fetch';
 
 export interface PlayProps {
   game: string;
@@ -23,38 +24,54 @@ export const Play: FC<PlayProps> = ({
   API_URL,
 }) => {
   const router = useRouter();
-  const onClick = () => {
+
+  const onGuess = () => {
     if (!word) {
       alert(
-        'Click on a word to select it, and then click here to confirm your guess',
+        'Tap on a word to select it, and then tap here to confirm your guess.',
       );
     } else {
-      const index = board.map((c) => c.word).indexOf(word);
-      const url = `${API_URL}/game/${game}/${player.name}/guess/${index}`;
-      fetch(url, {
-        method: 'PUT',
-      })
-        .then((response) => {
-          if (response.ok) {
-            router.reload();
-          } else {
-            alert('error making guess');
-          }
-        })
-        .catch(() => alert('error making guess'));
+      const confirmed = confirm(`Are you sure you want to guess ${word}?`);
+      if (confirmed) {
+        const index = board.map((c) => c.word).indexOf(word);
+        voidFetch({
+          url: `${API_URL}/game/${game}/${player.name}/guess/${index}`,
+          init: { method: 'PUT' },
+          onSuccess: () => router.reload(),
+          onError: () => alert('error making guess'),
+        });
+      }
     }
   };
+
+  const onEndTurn = () => {
+    const confirmed = confirm(
+      `Are you sure you want to end ${turn} team's turn?`,
+    );
+    if (confirmed) {
+      voidFetch({
+        url: `${API_URL}/game/${game}/end-turn`,
+        init: { method: 'PUT' },
+        onSuccess: () => router.reload(),
+        onError: () => alert('failed to end turn'),
+      });
+    }
+  };
+
   return (
     <div
       css={`
         display: flex;
         flex-direction: column;
         align-items: center;
+        & button {
+          width: 100%;
+        }
       `}
     >
-      {!player.is_spy_master && (
+      {!player.is_spy_master && player.team === turn && (
         <button
-          onClick={onClick}
+          onClick={onGuess}
           type="button"
           css={`
             background: transparent;
@@ -64,7 +81,6 @@ export const Play: FC<PlayProps> = ({
             margin: 0.5rem;
             width: 5rem;
             color: ${player.team === 'Blue' ? Palette.blue : Palette.red};
-
             :focus {
               outline: none;
             }
@@ -74,6 +90,8 @@ export const Play: FC<PlayProps> = ({
         </button>
       )}
       <button
+        type="button"
+        onClick={onEndTurn}
         css={`
           background-color: ${Palette.neutral};
           padding: 0.5rem;
@@ -85,24 +103,6 @@ export const Play: FC<PlayProps> = ({
             background-color: ${lighten(0.1, Palette.neutral)};
           }
         `}
-        type="button"
-        onClick={() => {
-          const confirmed = confirm(
-            `Are you sure you want to end ${turn} team's turn?`,
-          );
-          if (confirmed) {
-            const url = `${API_URL}/game/${game}/end-turn`;
-            fetch(url, { method: 'PUT' })
-              .then((response) => {
-                if (response.ok) {
-                  router.reload();
-                } else {
-                  alert('failed to end turn');
-                }
-              })
-              .catch(() => alert('failed to end turn'));
-          }
-        }}
       >
         End Turn
       </button>

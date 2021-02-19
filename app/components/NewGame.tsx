@@ -5,6 +5,7 @@ import { lighten } from 'polished';
 import { useRouter } from 'next/router';
 import { Breakpoints } from '../design/responsive';
 import { Palette } from '../design/color';
+import { jsonHeaders, voidFetch } from '../utils/fetch';
 
 const { phone } = Breakpoints;
 const { red } = Palette;
@@ -40,19 +41,16 @@ export const NewGame: FC<NewGameProps> = ({ initialName, API_URL }) => {
 
   const router = useRouter();
   const onSubmit = useCallback(() => {
-    fetch(`${API_URL}/game`, {
-      method: 'POST',
-      body: JSON.stringify({ game_name: name }),
-      headers: { 'content-type': 'application/json' },
-    })
-      .then((response) => {
-        if (response.ok) {
-          router.push(`/game/${name}`);
-        } else {
-          alert('error creating game');
-        }
-      })
-      .catch(() => alert('error creating game'));
+    voidFetch({
+      url: `${API_URL}/game`,
+      init: {
+        method: 'POST',
+        body: JSON.stringify({ game_name: name }),
+        headers: jsonHeaders,
+      },
+      onSuccess: () => router.push(`/game/${name}`),
+      onError: () => alert('error creating game'),
+    });
   }, [name, API_URL, router]);
 
   return (

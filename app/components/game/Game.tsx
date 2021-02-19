@@ -13,6 +13,7 @@ const Container = styled.div<{ turn: Team }>`
   text-align: center;
   & h2 {
     color: ${(props) => (props.turn === 'Blue' ? Palette.blue : Palette.red)};
+    margin: 0;
   }
   & p {
     color: ${Palette.neutral};
@@ -35,6 +36,7 @@ const ThreeColumnGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   align-items: center;
+  margin: 1rem;
 `;
 
 const PlayerList = styled.div<{ color: Team }>`

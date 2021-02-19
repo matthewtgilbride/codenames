@@ -10,6 +10,7 @@ import {
 import { useRouter } from 'next/router';
 import { Palette } from '../../design/color';
 import { Player } from '../../model';
+import { jsonHeaders, voidFetch } from '../../utils/fetch';
 
 export interface JoinProps {
   game: string;
@@ -36,24 +37,21 @@ export const Join: FC<JoinProps> = ({ game, API_URL }) => {
   }, [player]);
 
   const router = useRouter();
-  const onSubmit = useCallback(() => {
+  const onJoin = useCallback(() => {
     if (!player.name) {
       alert('name is required');
       return;
     }
-    fetch(`${API_URL}/game/${game}/join`, {
-      method: 'PUT',
-      body: JSON.stringify(player),
-      headers: { 'content-type': 'application/json' },
-    })
-      .then((response) => {
-        if (response.ok) {
-          router.push(`/game/${game}/${player.name}`);
-        } else {
-          alert('error joining game');
-        }
-      })
-      .catch(() => alert('error joining game'));
+    voidFetch({
+      url: `${API_URL}/game/${game}/join`,
+      init: {
+        method: 'PUT',
+        body: JSON.stringify(player),
+        headers: jsonHeaders,
+      },
+      onSuccess: () => router.push(`/game/${game}/${player.name}`),
+      onError: () => alert('error joining game'),
+    });
   }, [player, game, API_URL, router]);
 
   return (
@@ -62,6 +60,10 @@ export const Join: FC<JoinProps> = ({ game, API_URL }) => {
         display: flex;
         flex-direction: column;
         align-items: center;
+        & button,
+        input {
+          width: 100%;
+        }
       `}
     >
       <button
@@ -103,7 +105,7 @@ export const Join: FC<JoinProps> = ({ game, API_URL }) => {
           }
         `}
         type="button"
-        onClick={onSubmit}
+        onClick={onJoin}
       >
         Join
       </button>
