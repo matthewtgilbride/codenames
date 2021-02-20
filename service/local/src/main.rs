@@ -34,11 +34,16 @@ async fn main() -> std::io::Result<()> {
     let service = Service::new(word_generator, board_generator, dao).unwrap();
 
     HttpServer::new(move || {
-        let allowed_origin = std::env::var("APP_ORIGIN").unwrap_or_else(|_| "".to_string());
-        let cors = Cors::default()
-            .allow_any_header()
-            .allow_any_method()
-            .allowed_origin(allowed_origin.as_str());
+        let mut cors = Cors::default().allow_any_header().allow_any_method();
+        let allowed_origins: Vec<String> = std::env::var("ALLOWED_ORIGINS")
+            .unwrap_or_else(|_| "".to_string())
+            .split(",")
+            .map(|s| s.to_string())
+            .collect();
+
+        cors = allowed_origins
+            .iter()
+            .fold(cors, |c, o| c.allowed_origin(o));
 
         App::new()
             .wrap(Logger::default())

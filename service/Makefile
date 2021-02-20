@@ -13,7 +13,7 @@ test:
 check: format build test
 
 redis-up:
-	docker-compose up -d redis
+	docker-compose -f ../docker-compose.yml up -d redis
 
 LOCAL_PID = $(shell lsof -t -i:8080)
 kill-local:
@@ -21,7 +21,7 @@ kill-local:
 
 run-local: redis-up kill-local
 run-local: export REDIS_HOST=0.0.0.0
-run-local: export APP_ORIGIN=http://localhost:3000
+run-local: export ALLOWED_ORIGINS=http://localhost:3000
 run-local:
 	cargo build
 	cargo run
@@ -30,10 +30,10 @@ integration-test-local:
 	yarn test
 
 integration-test-docker: check
-	docker-compose up --build --exit-code-from codenames-test codenames-test
+	docker-compose -f ../docker-compose.yml up --build --exit-code-from codenames-test codenames-test
 
 integration-test: integration-test-docker
-	docker-compose down
+	docker-compose -f ../docker-compose.yml down
 
 gen-account-key:
 	nk gen account -o json | jq -r .seed > account.nk

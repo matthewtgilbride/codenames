@@ -19,7 +19,7 @@ services:
 
   codenames-local:
     build:
-      context: .
+      context: service
       dockerfile: Dockerfile.local
     ports:
       - "8080:8080"
@@ -27,20 +27,31 @@ services:
       - redis
     environment:
       - REDIS_HOST=redis
-      - APP_ORIGIN=codenames-test
+      - ALLOWED_ORIGINS=codenames-test,app,http://localhost:3000
 
   codenames-test:
     build:
-      context: .
+      context: service
       dockerfile: Dockerfile.test
     depends_on:
       - codenames-local
 
   wash:
     build:
-      context: .
+      context: service
       dockerfile: Dockerfile.wash
     depends_on:
       - nats
       - redis
       - registry
+
+  app:
+    build:
+      context: app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - codenames-local
+    environment:
+      - API_URL=http://codenames-local:8080
+

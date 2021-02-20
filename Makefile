@@ -32,6 +32,9 @@ check: check-service check-app
 
 integration-test: integration-test-service
 
+start:
+	docker-compose up --build -d app
+
 service-gen-keys:
 	$(MAKE) -C service gen-account-key
 	$(MAKE) -C service gen-module-key
