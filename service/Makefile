@@ -19,9 +19,11 @@ LOCAL_PID = $(shell lsof -t -i:8080)
 kill-local:
 	-kill $(LOCAL_PID)
 
+LOCAL_IP = $(shell ipconfig getifaddr en0)
+
 run-local: redis-up kill-local
 run-local: export REDIS_HOST=0.0.0.0
-run-local: export ALLOWED_ORIGINS=http://localhost:3000
+run-local: export ALLOWED_ORIGINS=http://$(LOCAL_IP):3000
 run-local:
 	cargo build
 	cargo run

@@ -25,6 +25,10 @@ format-app:
 
 check-app: format-app build-app
 
+LOCAL_IP = $(shell ipconfig getifaddr en0)
+
+start-app: export API_URL=http://$(LOCAL_IP):8080
+start-app: export HOST=$(LOCAL_IP)
 start-app:
 	cd app; yarn dev
 
