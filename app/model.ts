@@ -16,6 +16,7 @@ export interface CardColor {
 export interface GameState {
   board: CardColor[];
   name: string;
+  first_team: Team;
   turn: Team;
   players: { [key: string]: Player };
   guesses: number[];

@@ -9,10 +9,11 @@ import { Play } from './Play';
 
 const { tabletPortrait } = Breakpoints;
 
-const Container = styled.div<{ turn: Team }>`
+const Container = styled.div<{ first_team: Team }>`
   text-align: center;
   & h2 {
-    color: ${(props) => (props.turn === 'Blue' ? Palette.blue : Palette.red)};
+    color: ${(props) =>
+      props.first_team === 'Blue' ? Palette.blue : Palette.red};
     margin: 0;
   }
   & p {
@@ -36,7 +37,8 @@ const ThreeColumnGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   align-items: center;
-  margin: 1rem;
+  margin: 1rem auto;
+  max-width: ${tabletPortrait}px;
 `;
 
 const PlayerList = styled.div<{ color: Team }>`
@@ -60,6 +62,7 @@ export const Game: FC<GameProps> = ({
   API_URL,
   currentPlayer,
   board,
+  first_team,
   name,
   turn,
   players,
@@ -68,7 +71,7 @@ export const Game: FC<GameProps> = ({
   const [selectedWord, setSelectedWord] = useState<string | undefined>();
   const onClick = (word: string) => () => setSelectedWord(word);
   return (
-    <Container turn={turn}>
+    <Container first_team={first_team}>
       <Grid>
         {board.map((card) => (
           <Card

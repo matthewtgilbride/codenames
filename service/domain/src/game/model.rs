@@ -30,6 +30,7 @@ pub struct Player {
 pub struct Game {
     pub name: String,
     pub board: Board,
+    pub first_team: Team,
     pub turn: Team,
     pub players: HashMap<String, Player>,
     pub guesses: Vec<usize>,
@@ -63,11 +64,12 @@ impl From<(Player, Game)> for GameVariant {
 pub type GameResult = Result<Game, GameError>;
 
 impl Game {
-    pub fn new(name: String, board: Board, turn: Team) -> Game {
+    pub fn new(name: String, board: Board, first_team: Team) -> Game {
         Game {
             name,
             board,
-            turn,
+            first_team,
+            turn: first_team,
             players: HashMap::new(),
             guesses: Vec::new(),
         }

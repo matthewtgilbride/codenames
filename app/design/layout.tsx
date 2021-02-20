@@ -11,7 +11,7 @@ export const GlobalStyle = createGlobalStyle`
   ${reset};
   body {
     font-family: Montserrat, 'Arial CE', Arial, sans-serif;
-    box-sizing: border-box;
+    & * { box-sizing: border-box; }
   }
   button, input {
     border-style: solid;
