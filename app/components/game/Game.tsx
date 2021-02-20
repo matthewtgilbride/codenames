@@ -84,9 +84,9 @@ export const Game: FC<GameProps> = ({
         ))}
       </Grid>
       <ThreeColumnGrid>
-        <p>{turn === 'Blue' && '(•_•)'}</p>
+        <p>Blue Team {turn === 'Blue' && '(•_•)'}</p>
         <h2>{name}</h2>
-        <p>{turn === 'Red' && '(•_•)'}</p>
+        <p>Red Team {turn === 'Red' && '(•_•)'}</p>
       </ThreeColumnGrid>
       <ThreeColumnGrid>
         <PlayerList color="Blue">

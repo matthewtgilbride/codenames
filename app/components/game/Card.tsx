@@ -45,7 +45,7 @@ export const Card: FC<CardProps> = ({
         }
         ${beginAt(tabletPortrait)} {
           font-size: ${size * 2}px;
-          padding: 2rem 0.1rem;
+          padding: 1rem 0.1rem;
         }
       `}
     >

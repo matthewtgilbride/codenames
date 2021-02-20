@@ -63,9 +63,12 @@ export const Join: FC<JoinProps> = ({ game, API_URL }) => {
         & button,
         input {
           width: 100%;
+          padding: 0.5rem;
+          margin: 0 0.5rem 1rem;
         }
       `}
     >
+      <p>choose a team and role</p>
       <button
         type="button"
         onClick={togglePlayerType}
@@ -73,8 +76,6 @@ export const Join: FC<JoinProps> = ({ game, API_URL }) => {
           background: transparent;
           border-color: ${Palette.neutral};
           border-radius: 0.25rem;
-          padding: 0.5rem;
-          margin: 0.5rem;
           width: 5rem;
           color: ${player.team === 'Blue' ? Palette.blue : Palette.red};
           :focus {
@@ -84,12 +85,11 @@ export const Join: FC<JoinProps> = ({ game, API_URL }) => {
       >
         {player.is_spy_master ? '⌐■-■' : '(•_•)'}
       </button>
+      <p>your name</p>
       <input
         value={player.name}
         onChange={onChange}
         css={`
-          margin: 0.5rem;
-          padding: 0.5rem;
           border-radius: 0.25rem;
         `}
       />
