@@ -17,7 +17,7 @@ services:
     ports:
       - "6379:6379"
 
-  codenames-local:
+  service:
     build:
       context: service
       dockerfile: Dockerfile.local
@@ -27,14 +27,14 @@ services:
       - redis
     environment:
       - REDIS_HOST=redis
-      - ALLOWED_ORIGINS=codenames-test,app,http://localhost:3000
+      - ALLOWED_ORIGINS=service-test,app,http://localhost:3000
 
-  codenames-test:
+  service-test:
     build:
       context: service
       dockerfile: Dockerfile.test
     depends_on:
-      - codenames-local
+      - service
 
   wash:
     build:
@@ -51,7 +51,7 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - codenames-local
+      - service
     environment:
-      - API_URL=http://codenames-local:8080
+      - API_URL=http://service:8080
 

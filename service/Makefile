@@ -30,7 +30,7 @@ integration-test-local:
 	yarn test
 
 integration-test-docker: check
-	docker-compose -f ../docker-compose.yml up --build --exit-code-from codenames-test codenames-test
+	docker-compose -f ../docker-compose.yml up --build --exit-code-from service-test service-test
 
 integration-test: integration-test-docker
 	docker-compose -f ../docker-compose.yml down
