@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 use std::convert::TryInto;
 
 use rand::seq::SliceRandom;
@@ -6,8 +5,7 @@ use rand::thread_rng;
 
 use codenames_domain::game::board::model::Board;
 use codenames_domain::game::board::service::BoardGenerator;
-use codenames_domain::game::board::util::{card_color_count, max_card_color};
-use codenames_domain::game::card::model::{Card, CardColor, ALL_CARD_COLORS};
+use codenames_domain::game::card::model::{Card, CardColor, CardState};
 use codenames_domain::game::model::Team;
 use codenames_domain::ServiceResult;
 
@@ -21,36 +19,50 @@ impl BoardGeneratorRand {
             .unwrap()
             .clone()
     }
-
-    fn random_color(&self, available_colors: HashSet<CardColor>) -> CardColor {
-        let as_vector: Vec<CardColor> = available_colors.into_iter().collect();
-        *as_vector.choose(&mut thread_rng()).unwrap()
-    }
 }
 
 impl BoardGenerator for BoardGeneratorRand {
     fn random_board(&self, words: [String; 25]) -> ServiceResult<(Board, Team)> {
         let first_team = self.random_team();
 
-        let mut board: Vec<Card> = Vec::new();
+        let mut indices: Vec<usize> = (0..25).collect();
+        indices.shuffle(&mut thread_rng());
 
-        words.iter().for_each(|word| {
-            let available_colors: HashSet<CardColor> = ALL_CARD_COLORS
-                .to_vec()
-                .iter()
-                .filter(|card_color| {
-                    card_color_count(&board, card_color) < max_card_color(card_color, &first_team)
-                })
-                .cloned()
-                .collect();
-
-            let color = self.random_color(available_colors);
-
-            board.push(Card {
-                color,
+        let mut initial_board: Vec<CardState> = words
+            .iter()
+            .map(|word| CardState {
                 word: word.clone(),
+                color: None,
             })
-        });
+            .collect();
+
+        indices
+            .iter()
+            .enumerate()
+            .for_each(|(index, &random_index)| {
+                let CardState { word, .. } = initial_board[random_index].clone();
+                let color = match index {
+                    0 => Some(CardColor::Death),
+                    i if i < 8 => Some(CardColor::Neutral),
+                    i if i < 16 => {
+                        if first_team == Team::Blue {
+                            Some(CardColor::Team(Team::Red))
+                        } else {
+                            Some(CardColor::Team(Team::Blue))
+                        }
+                    }
+                    _ => Some(CardColor::Team(first_team)),
+                };
+                initial_board[random_index] = CardState { word, color }
+            });
+
+        let board: Vec<Card> = initial_board
+            .iter()
+            .map(|CardState { word, color }| Card {
+                word: word.clone(),
+                color: color.unwrap(),
+            })
+            .collect();
 
         Ok((board.try_into().unwrap(), first_team))
     }
