@@ -36,6 +36,7 @@ check: check-service check-app
 
 integration-test: integration-test-service
 
+start: export HOST=$(LOCAL_IP)
 start:
 	docker-compose up --build -d app
 
