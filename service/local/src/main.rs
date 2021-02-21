@@ -33,14 +33,15 @@ async fn main() -> std::io::Result<()> {
 
     let service = Service::new(word_generator, board_generator, dao).unwrap();
 
+    let port = std::env::var("PORT").unwrap_or_else(|_| "8080".into());
+    let allowed_origins: Vec<String> = std::env::var("ALLOWED_ORIGINS")
+        .unwrap_or_else(|_| "".into())
+        .split(",")
+        .map(|s| s.to_lowercase())
+        .collect();
+
     HttpServer::new(move || {
         let mut cors = Cors::default().allow_any_header().allow_any_method();
-        let allowed_origins: Vec<String> = std::env::var("ALLOWED_ORIGINS")
-            .unwrap_or_else(|_| "".to_string())
-            .split(",")
-            .map(|s| s.to_string())
-            .collect();
-
         cors = allowed_origins
             .iter()
             .fold(cors, |c, o| c.allowed_origin(o));
@@ -57,7 +58,7 @@ async fn main() -> std::io::Result<()> {
             .service(random_name)
             .service(game_routes("/game"))
     })
-    .bind("0.0.0.0:8080")?
+    .bind(format!("0.0.0.0:{}", port))?
     .run()
     .await
 }

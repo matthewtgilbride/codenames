@@ -53,5 +53,5 @@ services:
     depends_on:
       - service
     environment:
-      - API_URL=http://service:8080
+      - API_URL=http://${HOST}:8080
 
