@@ -5,6 +5,13 @@
 */target/*
 */node_modules/*
 
+node_modules
+
+# CDK asset staging directory
+infra/.cdk.staging
+infra/cdk.out
+infra/cdk.context.json
+
 *.nk
 
 service/*.wasm

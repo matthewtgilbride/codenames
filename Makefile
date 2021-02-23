@@ -40,14 +40,15 @@ start: export HOST=$(LOCAL_IP)
 start:
 	docker-compose up --build -d app
 
-service-gen-keys:
-	$(MAKE) -C service gen-account-key
-	$(MAKE) -C service gen-module-key
+AWS_ACCOUNT = $(shell aws sts get-caller-identity | jq -r .Account)
+AWS_ECS_URL = ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com
 
-service-sign-module:
-	$(MAKE) -C service sign-module
+build-images: export IMAGE_URL=${AWS_ECS_URL}
+build-images:
+	docker-compose build service app
 
-service-show-module:
-	$(MAKE) -C service show-module
+push-images:
+	docker push ${AWS_ECS_URL}/codenames_service
+	docker push ${AWS_ECS_URL}/codenames_app
 
 
