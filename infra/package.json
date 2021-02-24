@@ -38,7 +38,10 @@
     "@aws-cdk/aws-ecs": "^1.90.1",
     "@aws-cdk/aws-ecs-patterns": "^1.90.1",
     "@aws-cdk/aws-elasticache": "^1.90.1",
+    "@aws-cdk/aws-ssm": "1.90.1",
+    "@aws-cdk/aws-certificatemanager": "1.90.1",
     "@aws-cdk/core": "1.90.1",
+    "@aws-cdk/aws-route53": "1.90.1",
     "source-map-support": "^0.5.16"
   }
 }

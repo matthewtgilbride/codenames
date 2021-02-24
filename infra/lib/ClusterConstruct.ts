@@ -9,10 +9,28 @@ import {
   InstanceType,
   Vpc,
 } from '@aws-cdk/aws-ec2';
+import { StringParameter } from '@aws-cdk/aws-ssm';
+import { HostedZone } from '@aws-cdk/aws-route53';
+import { Certificate } from '@aws-cdk/aws-certificatemanager';
 
 export class ClusterConstruct extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
+
+    const domainName = StringParameter.valueFromLookup(this, 'domainName');
+    const certificateArn = StringParameter.valueFromLookup(
+      this,
+      'certificateArn',
+    );
+
+    const certificate = Certificate.fromCertificateArn(
+      this,
+      'cert',
+      certificateArn,
+    );
+
+    const appDnsRecord = `codenames.${domainName}`;
+    const serviceDnsRecord = `codenames.${appDnsRecord}`;
 
     const redis = new CfnCacheCluster(this, 'redis', {
       cacheNodeType: 'cache.t3.micro',
@@ -21,6 +39,8 @@ export class ClusterConstruct extends Construct {
     });
 
     const vpc = Vpc.fromLookup(this, 'default-vpc', { isDefault: true });
+
+    const hostedZone = HostedZone.fromLookup(this, 'hz', { domainName });
 
     // Create an ECS cluster
     const cluster = new Cluster(this, 'Cluster', {
@@ -32,6 +52,9 @@ export class ClusterConstruct extends Construct {
 
     new ApplicationLoadBalancedEc2Service(this, 'service', {
       cluster,
+      certificate,
+      domainZone: hostedZone,
+      domainName: serviceDnsRecord,
       memoryLimitMiB: 1024,
       taskImageOptions: {
         image: ContainerImage.fromEcrRepository(
@@ -43,20 +66,23 @@ export class ClusterConstruct extends Construct {
         ),
         environment: {
           REDIS_HOST: redis.attrConfigurationEndpointAddress,
-          ALLOWED_ORIGINS: 'codenames.mattgilbride.com',
+          ALLOWED_ORIGINS: appDnsRecord,
         },
       },
     });
 
     new ApplicationLoadBalancedEc2Service(this, 'app', {
       cluster,
+      certificate,
+      domainZone: hostedZone,
+      domainName: serviceDnsRecord,
       memoryLimitMiB: 1024,
       taskImageOptions: {
         image: ContainerImage.fromEcrRepository(
           Repository.fromRepositoryName(this, 'app-service', 'codenames_app'),
         ),
         environment: {
-          API_URL: 'https://service.codenames.mattgilbride.com',
+          API_URL: `https://${serviceDnsRecord}`,
         },
       },
     });
