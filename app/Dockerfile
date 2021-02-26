@@ -1,6 +1,4 @@
-FROM node:12
-
-ENV PORT 3000
+FROM node:12-alpine
 
 COPY package.json .
 COPY yarn.lock .

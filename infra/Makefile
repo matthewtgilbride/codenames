@@ -1,11 +1,26 @@
-AWS_ACCOUNT = $(shell aws sts get-caller-identity | jq -r .Account)
+AWS_ACCOUNT_NUMBER = $(shell aws sts get-caller-identity | jq -r .Account)
+AWS_DEFAULT_REGION := us-east-1
 
-synth: export AWS_ACCOUNT_NUMBER=${AWS_ACCOUNT}
-synth: export AWS_DEFAULT_REGION=us-east-1
-synth:
+synth-registry: export DEPLOY_TYPE=registry
+synth-registry:
 	yarn cdk synth
 
-deploy: export AWS_ACCOUNT_NUMBER=${AWS_ACCOUNT}
-deploy: export AWS_DEFAULT_REGION=us-east-1
-deploy:
-	yarn deploy
+deploy-registry: export DEPLOY_TYPE=registry
+deploy-registry:
+	yarn cdk deploy
+
+destroy-registry: export DEPLOY_TYPE=registry
+destroy-registry:
+	yarn cdk destroy
+
+synth-cluster: export DEPLOY_TYPE=cluster
+synth-cluster:
+	yarn cdk synth
+
+deploy-cluster: export DEPLOY_TYPE=cluster
+deploy-cluster:
+	yarn cdk deploy
+
+destroy-cluster: export DEPLOY_TYPE=cluster
+destroy-cluster:
+	yarn cdk destroy

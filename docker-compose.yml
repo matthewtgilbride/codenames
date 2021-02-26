@@ -18,7 +18,7 @@ services:
       - "6379:6379"
 
   service:
-    image: ${IMAGE_URL}/codenames_service
+    image: ${AWS_ECR_URL}/codenames_service
     build:
       context: service
       dockerfile: Dockerfile.local
@@ -27,8 +27,9 @@ services:
     depends_on:
       - redis
     environment:
+      - PORT=${SERVICE_PORT}
       - REDIS_HOST=redis
-      - ALLOWED_ORIGINS=service-test,app,http://localhost:3000,http://${HOST}:3000
+      - ALLOWED_ORIGINS=service-test,app,http://localhost:${APP_PORT},http://${HOST}:${APP_PORT}
 
   service-test:
     build:
@@ -47,7 +48,7 @@ services:
       - registry
 
   app:
-    image: ${IMAGE_URL}/codenames_app
+    image: ${AWS_ECR_URL}/codenames_app
     build:
       context: app
     ports:
@@ -55,5 +56,6 @@ services:
     depends_on:
       - service
     environment:
-      - API_URL=http://${HOST}:8080
+      - PORT=${APP_PORT}
+      - API_URL=http://${HOST}:${SERVICE_PORT}
 
