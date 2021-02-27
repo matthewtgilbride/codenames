@@ -1,3 +1,4 @@
+.EXPORT_ALL_VARIABLES:
 AWS_ACCOUNT_NUMBER = $(shell aws sts get-caller-identity | jq -r .Account)
 AWS_DEFAULT_REGION := us-east-1
 

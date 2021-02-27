@@ -37,9 +37,9 @@ export class ClusterConstruct extends Construct {
     );
 
     const appDnsRecord = `codenames.${domainName}`;
-    const serviceDnsRecord = `service.${appDnsRecord}`;
+    const serviceDnsRecord = `codenamesapi.${domainName}`;
 
-    /* const redisSg = new SecurityGroup(this, 'redis-sg', {
+    const redisSg = new SecurityGroup(this, 'redis-sg', {
       securityGroupName: `codenames_redis`,
       vpc,
     });
@@ -50,22 +50,23 @@ export class ClusterConstruct extends Construct {
       engine: 'redis',
       numCacheNodes: 1,
       vpcSecurityGroupIds: [redisSg.securityGroupId],
-    }); */
+    });
 
     // Create an ECS cluster
     const cluster = new Cluster(this, 'Cluster', {
       vpc,
       capacity: {
-        instanceType: InstanceType.of(InstanceClass.T3A, InstanceSize.SMALL),
+        instanceType: InstanceType.of(InstanceClass.T3A, InstanceSize.MEDIUM),
         keyName: 'aws_ssh',
       },
     });
 
-    /* new ApplicationLoadBalancedEc2Service(this, 'service', {
+    new ApplicationLoadBalancedEc2Service(this, 'service', {
       cluster,
       certificate,
       domainZone: hostedZone,
       domainName: serviceDnsRecord,
+      redirectHTTP: true,
       memoryLimitMiB: 1024,
       taskImageOptions: {
         image: ContainerImage.fromEcrRepository(
@@ -76,11 +77,12 @@ export class ClusterConstruct extends Construct {
           ),
         ),
         environment: {
+          PORT: '80',
           REDIS_HOST: redis.attrRedisEndpointAddress,
-          ALLOWED_ORIGINS: appDnsRecord,
+          ALLOWED_ORIGINS: `https://${appDnsRecord}`,
         },
       },
-    }); */
+    });
 
     const appService = new ApplicationLoadBalancedEc2Service(this, 'app', {
       cluster,

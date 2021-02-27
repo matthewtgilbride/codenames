@@ -56,11 +56,25 @@ const Title = styled.h1`
   }
 `;
 
+const Subtitle = styled.p`
+  text-align: center;
+  color: ${Palette.neutral};
+  font-size: 0.5rem;
+  margin: 0.5rem;
+  a {
+    color: ${Palette.neutral};
+  }
+`;
+
 export const Layout: FC = ({ children }) => (
   <Container>
     <Title>
       (•_•) ( •_•)<Link href="/">Codenames</Link>⌐■-■ (⌐■_■)
     </Title>
+    <Subtitle>
+      brought to you by your{' '}
+      <a href="https://www.mattgilbride.com">friendly neighborhood developer</a>
+    </Subtitle>
     {children}
   </Container>
 );
