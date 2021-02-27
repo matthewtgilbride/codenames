@@ -1,4 +1,4 @@
-FROM node:12-alpine
+FROM amd64/node:12-alpine
 
 COPY package.json .
 COPY yarn.lock .

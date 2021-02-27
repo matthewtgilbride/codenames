@@ -1,6 +1,6 @@
 import { Construct } from '@aws-cdk/core';
 import { ApplicationLoadBalancedEc2Service } from '@aws-cdk/aws-ecs-patterns';
-import { Cluster, ContainerImage } from '@aws-cdk/aws-ecs';
+import { Cluster, ContainerImage, LogDriver } from '@aws-cdk/aws-ecs';
 import { CfnCacheCluster } from '@aws-cdk/aws-elasticache';
 import { Repository } from '@aws-cdk/aws-ecr';
 import {
@@ -82,11 +82,12 @@ export class ClusterConstruct extends Construct {
       },
     }); */
 
-    new ApplicationLoadBalancedEc2Service(this, 'app', {
+    const appService = new ApplicationLoadBalancedEc2Service(this, 'app', {
       cluster,
       certificate,
       domainZone: hostedZone,
-      domainName: serviceDnsRecord,
+      domainName: appDnsRecord,
+      redirectHTTP: true,
       memoryLimitMiB: 1024,
       taskImageOptions: {
         image: ContainerImage.fromEcrRepository(
@@ -94,8 +95,13 @@ export class ClusterConstruct extends Construct {
         ),
         environment: {
           API_URL: `https://${serviceDnsRecord}`,
+          PORT: '80',
         },
       },
+    });
+
+    appService.targetGroup.configureHealthCheck({
+      path: '/api/health',
     });
   }
 }
