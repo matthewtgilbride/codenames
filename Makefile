@@ -39,7 +39,7 @@ build: build-service build-app
 AWS_ACCOUNT := $(shell aws sts get-caller-identity | jq -r .Account)
 AWS_ECR_URL := ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com
 
-LOCAL_IP = $(shell ipconfig getifaddr en0)
+LOCAL_IP = $(shell ifconfig en0 | grep -i mask | awk '{print $2}')
 SERVICE_PORT := 8080
 APP_PORT := 3000
 
@@ -57,8 +57,14 @@ start:
 
 build-images: build-service-image build-app-image
 
-push-images:
+ecr-login:
+	aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS_ECR_URL}
+
+push-service-image:
 	docker push ${AWS_ECR_URL}/codenames_service
+
+push-app-image:
 	docker push ${AWS_ECR_URL}/codenames_app
 
+push-images: push-service-image push-app-image
 
