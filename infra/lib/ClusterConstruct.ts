@@ -56,7 +56,7 @@ export class ClusterConstruct extends Construct {
     const cluster = new Cluster(this, 'Cluster', {
       vpc,
       capacity: {
-        instanceType: InstanceType.of(InstanceClass.T3A, InstanceSize.MEDIUM),
+        instanceType: InstanceType.of(InstanceClass.T3A, InstanceSize.SMALL),
         keyName: 'aws_ssh',
       },
     });
@@ -67,7 +67,7 @@ export class ClusterConstruct extends Construct {
       domainZone: hostedZone,
       domainName: serviceDnsRecord,
       redirectHTTP: true,
-      memoryLimitMiB: 1024,
+      memoryReservationMiB: 256,
       taskImageOptions: {
         image: ContainerImage.fromEcrRepository(
           Repository.fromRepositoryName(
@@ -90,7 +90,7 @@ export class ClusterConstruct extends Construct {
       domainZone: hostedZone,
       domainName: appDnsRecord,
       redirectHTTP: true,
-      memoryLimitMiB: 1024,
+      memoryReservationMiB: 256,
       taskImageOptions: {
         image: ContainerImage.fromEcrRepository(
           Repository.fromRepositoryName(this, 'app-service', 'codenames_app'),
