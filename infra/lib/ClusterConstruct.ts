@@ -1,15 +1,18 @@
 import { Construct } from '@aws-cdk/core';
 import { ApplicationLoadBalancedEc2Service } from '@aws-cdk/aws-ecs-patterns';
-import { Cluster, ContainerImage, LogDriver } from '@aws-cdk/aws-ecs';
-import { CfnCacheCluster } from '@aws-cdk/aws-elasticache';
+import {
+  Cluster,
+  ContainerDependencyCondition,
+  ContainerImage,
+  Ec2TaskDefinition,
+  LogDriver,
+  NetworkMode,
+} from '@aws-cdk/aws-ecs';
 import { Repository } from '@aws-cdk/aws-ecr';
 import {
   InstanceClass,
   InstanceSize,
   InstanceType,
-  Peer,
-  Port,
-  SecurityGroup,
   Vpc,
 } from '@aws-cdk/aws-ec2';
 import { StringParameter } from '@aws-cdk/aws-ssm';
@@ -39,19 +42,6 @@ export class ClusterConstruct extends Construct {
     const appDnsRecord = `codenames.${domainName}`;
     const serviceDnsRecord = `codenamesapi.${domainName}`;
 
-    const redisSg = new SecurityGroup(this, 'redis-sg', {
-      securityGroupName: `codenames_redis`,
-      vpc,
-    });
-    redisSg.addIngressRule(Peer.ipv4('0.0.0.0/0'), Port.tcp(6379));
-
-    const redis = new CfnCacheCluster(this, 'redis', {
-      cacheNodeType: 'cache.t3.micro',
-      engine: 'redis',
-      numCacheNodes: 1,
-      vpcSecurityGroupIds: [redisSg.securityGroupId],
-    });
-
     // Create an ECS cluster
     const cluster = new Cluster(this, 'Cluster', {
       vpc,
@@ -61,27 +51,44 @@ export class ClusterConstruct extends Construct {
       },
     });
 
+    const serviceTask = new Ec2TaskDefinition(this, 'service-task', {
+      networkMode: NetworkMode.AWS_VPC,
+    });
+
+    const serviceContainer = serviceTask.addContainer('service', {
+      image: ContainerImage.fromEcrRepository(
+        Repository.fromRepositoryName(this, 'api-service', 'codenames_service'),
+      ),
+      memoryReservationMiB: 64,
+      environment: {
+        PORT: '80',
+        REDIS_HOST: 'localhost',
+        ALLOWED_ORIGINS: `https://${appDnsRecord}`,
+      },
+      logging: LogDriver.awsLogs({ streamPrefix: 'codenames-service' }),
+    });
+    serviceContainer.addPortMappings({ containerPort: 80 });
+
+    const redisContainer = serviceTask.addContainer('redis', {
+      image: ContainerImage.fromRegistry('redis:6.0.9'),
+      memoryReservationMiB: 64,
+      healthCheck: { command: ['CMD-SHELL', 'redis-cli PING || exit 1'] },
+      logging: LogDriver.awsLogs({ streamPrefix: 'codenames-redis' }),
+    });
+    redisContainer.addPortMappings({ containerPort: 6369 });
+
+    serviceContainer.addContainerDependencies({
+      container: redisContainer,
+      condition: ContainerDependencyCondition.HEALTHY,
+    });
+
     new ApplicationLoadBalancedEc2Service(this, 'service', {
       cluster,
       certificate,
       domainZone: hostedZone,
       domainName: serviceDnsRecord,
       redirectHTTP: true,
-      memoryReservationMiB: 64,
-      taskImageOptions: {
-        image: ContainerImage.fromEcrRepository(
-          Repository.fromRepositoryName(
-            this,
-            'api-service',
-            'codenames_service',
-          ),
-        ),
-        environment: {
-          PORT: '80',
-          REDIS_HOST: redis.attrRedisEndpointAddress,
-          ALLOWED_ORIGINS: `https://${appDnsRecord}`,
-        },
-      },
+      taskDefinition: serviceTask,
     });
 
     const appService = new ApplicationLoadBalancedEc2Service(this, 'app', {

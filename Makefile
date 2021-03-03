@@ -16,23 +16,30 @@ start-service:
 integration-test-service:
 	$(MAKE) -C service integration-test
 
+integration-test: integration-test-service
+
 build-app:
-	cd app; yarn tsc
-	cd app; yarn build
+	${MAKE} -C app build
 
 format-app:
-	cd app; yarn lint --fix
+	${MAKE} -C app format
 
-check-app: format-app build-app
+check-app:
+	${MAKE} -C app check
+
+start-app:
+	${MAKE} -C app format
 
 check: check-service check-app
 
-integration-test: integration-test-service
-
-start-app:
-	cd app; yarn dev
-
 build: build-service build-app
+
+deploy-infra:
+	${MAKE} -C infra deploy-registry
+	${MAKE} -C infra deploy-cluster
+
+destroy-infra:
+	${MAKE} -C infra destroy-cluster
 
 .EXPORT_ALL_VARIABLES:
 

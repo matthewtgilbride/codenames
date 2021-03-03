@@ -1,5 +1,0 @@
-{
-  "dependencies": {
-    "@aws-cdk/aws-ecr": "^1.90.1"
-  }
-}
