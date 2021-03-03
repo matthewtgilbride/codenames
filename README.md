@@ -49,12 +49,28 @@ push-images                    push both images
 
 ## subprojects
 
+Each subproject contains its own makefile.  For simplicity and readability, many of those commands are exposed to the top level Makefile, but not all.
+You can execute `make` or `make help` in any of the below subdirectories to view descriptions of various commands.
+
 ### service
 The [service](./service) directory contains the REST service supporting gameplay, written in Rust.
+
+You will notice three subprojects within the service directory.  They are as follows
+
+#### domain
+This is a rust library containing the core business logic representing a game of codenames.
+
+#### local
+A better name for this would be `actix-web`.  This subproject is an actix-web server implementation of the domain.
+
+#### wasm
+The ultimate goal is to run this project as a [wasmCloud actor](https://wasmcloud.dev/).  This subproject is a wasmCloud implementation of the domain.
 
 ### app
 The [app](./app) directory contains the web based user interface, written in React with NextJS.
 
 ### infra
 The [infra](./infra) directory contains the AWS deployment for the project, written in Typescript with the AWS CDK.
+
+There are two separate cloudformation stacks deployed here.  The repository stack simply creates two registries to push the app and service images to.  The main stack is the cluster stack, which creates a load balanced ECS Cluster that serves the codenames application to the world.
 

@@ -1,11 +1,15 @@
-build:
+include ../help.mk
+
+compile: ## run typescript compiler
 	yarn tsc
+
+build: ## build the nextjs app
 	yarn build
 
-format:
+format: ## fix lint errors
 	yarn lint --fix
 
-check: format build
+check: format compile build ## lint, compile, build
 
-start:
+start: ## start dev server
 	yarn dev

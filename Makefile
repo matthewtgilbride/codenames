@@ -1,7 +1,4 @@
-# https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html - just not sorting the targets
-.PHONY: help
-help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+include help.mk
 
 build-service: ## compile the rust REST service project
 	$(MAKE) -C service build
@@ -16,7 +13,7 @@ check-service: ## check the rust project (format, build, and unit test)
 	$(MAKE) -C service check
 
 start-service: ## start the rust project locally using cargo run
-	${MAKE} -C service run-local
+	$(MAKE) -C service run-local
 
 integration-test-service: ## run the newman integration test suite on the service
 	$(MAKE) -C service integration-test
@@ -24,16 +21,16 @@ integration-test-service: ## run the newman integration test suite on the servic
 integration-test: integration-test-service ## as of now, there are only integration tests for the service
 
 build-app: ## build the web UI
-	${MAKE} -C app build
+	$(MAKE) -C app build
 
 format-app: ## lint the web UI
-	${MAKE} -C app format
+	$(MAKE) -C app format
 
 check-app: ## build and lint the web UI
-	${MAKE} -C app check
+	$(MAKE) -C app check
 
 start-app: ## start the web UI locally
-	${MAKE} -C app start
+	$(MAKE) -C app start
 
 check: check-service check-app ## check both the service and app projects
 
@@ -44,7 +41,7 @@ build: build-service build-app ## build both the service and app projects
 AWS_ACCOUNT := $(shell aws sts get-caller-identity | jq -r .Account)
 AWS_ECR_URL := ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com
 
-LOCAL_IP = $(shell ifconfig en0 | grep -i mask | awk '{print $2}')
+LOCAL_IP := $(shell ifconfig en0 | grep -i mask | awk '{print $2}')
 SERVICE_PORT := 8080
 APP_PORT := 3000
 
