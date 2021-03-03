@@ -1,45 +1,43 @@
-build-service:
+# https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html - just not sorting the targets
+.PHONY: help
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+build-service: ## compile the rust REST service project
 	$(MAKE) -C service build
 
-format-service:
+format-service: ## run code formatting on the rust project
 	$(MAKE) -C service format
 
-test-service:
+test-service: ## run unit tests on the rust project
 	$(MAKE) -C service test
 
-check-service:
+check-service: ## check the rust project (format, build, and unit test)
 	$(MAKE) -C service check
 
-start-service:
+start-service: ## start the rust project locally using cargo run
 	${MAKE} -C service run-local
 
-integration-test-service:
+integration-test-service: ## run the newman integration test suite on the service
 	$(MAKE) -C service integration-test
 
-integration-test: integration-test-service
+integration-test: integration-test-service ## as of now, there are only integration tests for the service
 
-build-app:
+build-app: ## build the web UI
 	${MAKE} -C app build
 
-format-app:
+format-app: ## lint the web UI
 	${MAKE} -C app format
 
-check-app:
+check-app: ## build and lint the web UI
 	${MAKE} -C app check
 
-start-app:
-	${MAKE} -C app format
+start-app: ## start the web UI locally
+	${MAKE} -C app start
 
-check: check-service check-app
+check: check-service check-app ## check both the service and app projects
 
-build: build-service build-app
-
-deploy-infra:
-	${MAKE} -C infra deploy-registry
-	${MAKE} -C infra deploy-cluster
-
-destroy-infra:
-	${MAKE} -C infra destroy-cluster
+build: build-service build-app ## build both the service and app projects
 
 .EXPORT_ALL_VARIABLES:
 
@@ -53,25 +51,32 @@ APP_PORT := 3000
 API_URL := http://$(LOCAL_IP):${SERVICE_PORT}
 HOST := ${LOCAL_IP}
 
-build-service-image:
-	docker-compose build service
-
-build-app-image:
-	docker-compose build app
-
-start:
+start: ## start fully functioning stack locally via docker
 	docker-compose up -d app
 
-build-images: build-service-image build-app-image
+deploy-infra: ## deploy AWS infrastructure
+	${MAKE} -C infra deploy-registry
+	${MAKE} -C infra deploy-cluster
 
-ecr-login:
+destroy-infra: ## tear down AWS infrastructure
+	${MAKE} -C infra destroy-cluster
+
+build-service-image: ## build docker image for the service - CAREFUL - this needs to be done from an AMD powered machine (not Apple M1 silicon)
+	docker-compose build service
+
+build-app-image: ## build docker image for the web ui
+	docker-compose build app
+
+build-images: build-service-image build-app-image ## build both images
+
+ecr-login: ## login into AWS ECR for docker
 	aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS_ECR_URL}
 
-push-service-image:
+push-service-image: ## push service image
 	docker push ${AWS_ECR_URL}/codenames_service
 
-push-app-image:
+push-app-image: ## push app image
 	docker push ${AWS_ECR_URL}/codenames_app
 
-push-images: push-service-image push-app-image
+push-images: push-service-image push-app-image ## push both images
 
