@@ -21,10 +21,10 @@ kill-local: ## kill whatever is running on port 8080
 
 LOCAL_IP = $(shell ipconfig getifaddr en0)
 
-run-local: redis-up kill-local ## run the http server locally
+run-local: redis-up kill-local
 run-local: export REDIS_HOST=0.0.0.0
 run-local: export ALLOWED_ORIGINS=http://$(LOCAL_IP):3000
-run-local:
+run-local: ## run the http server locally
 	cargo build
 	cargo run
 
