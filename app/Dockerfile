@@ -11,6 +11,7 @@ COPY design ./design
 COPY pages ./pages
 COPY public ./public
 COPY utils ./utils
+COPY hooks ./hooks
 
 RUN yarn
 RUN yarn build

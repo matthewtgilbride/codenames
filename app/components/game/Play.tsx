@@ -3,23 +3,19 @@ import { lighten } from 'polished';
 import { FC } from 'react';
 import { useRouter } from 'next/router';
 import { Palette } from '../../design/color';
-import { CardColor, Player, Team } from '../../model';
+import { GameState, Player } from '../../model';
 import { voidFetch } from '../../utils/fetch';
 
 export interface PlayProps {
-  game: string;
-  board: CardColor[];
-  player: Player;
-  turn: Team;
-  word?: string;
   API_URL: string;
+  word?: string;
+  player: Player;
+  game: GameState;
 }
 
 export const Play: FC<PlayProps> = ({
-  game,
-  board,
+  game: { board, turn, name },
   player,
-  turn,
   word,
   API_URL,
 }) => {
@@ -35,7 +31,7 @@ export const Play: FC<PlayProps> = ({
       if (confirmed) {
         const index = board.map((c) => c.word).indexOf(word);
         voidFetch({
-          url: `${API_URL}/game/${game}/${player.name}/guess/${index}`,
+          url: `${API_URL}/game/${name}/${player.name}/guess/${index}`,
           init: { method: 'PUT' },
           onSuccess: () => router.reload(),
           onError: () => alert('error making guess'),
@@ -50,7 +46,7 @@ export const Play: FC<PlayProps> = ({
     );
     if (confirmed) {
       voidFetch({
-        url: `${API_URL}/game/${game}/end-turn`,
+        url: `${API_URL}/game/${name}/end-turn`,
         init: { method: 'PUT' },
         onSuccess: () => router.reload(),
         onError: () => alert('failed to end turn'),

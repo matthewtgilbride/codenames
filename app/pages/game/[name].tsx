@@ -13,7 +13,7 @@ export const getServerSideProps: GetServerSideProps<GameProps> = async ({
   const result = await fetch(url);
   const json = await result.json();
 
-  return { props: { ...json, API_URL } as GameProps };
+  return { props: { game: json, API_URL } as GameProps };
 };
 
 export default GameLanding;

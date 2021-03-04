@@ -41,7 +41,7 @@ build: build-service build-app ## build both the service and app projects
 AWS_ACCOUNT := $(shell aws sts get-caller-identity | jq -r .Account)
 AWS_ECR_URL := ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com
 
-LOCAL_IP := $(shell ifconfig en0 | grep -i mask | awk '{print $2}')
+LOCAL_IP := $(shell ifconfig | grep broadcast | head -n 1 | awk '{print $$2}')
 SERVICE_PORT := 8080
 APP_PORT := 3000
 

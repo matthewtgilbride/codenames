@@ -6,6 +6,7 @@ import { Card } from './Card';
 import { Join } from './Join';
 import { GameState, Team } from '../../model';
 import { Play } from './Play';
+import { usePoll } from '../../hooks/usePoll';
 
 const { tabletPortrait } = Breakpoints;
 
@@ -56,20 +57,24 @@ const PlayerList = styled.div<{ color: Team }>`
 export type GameProps = {
   API_URL: string;
   currentPlayer?: string;
-} & GameState;
+  game: GameState;
+};
 
-export const Game: FC<GameProps> = ({
-  API_URL,
-  currentPlayer,
-  board,
-  first_team,
-  name,
-  turn,
-  players,
-}) => {
-  const player = players[currentPlayer?.toLowerCase() ?? ''];
+export const Game: FC<GameProps> = ({ API_URL, currentPlayer, game }) => {
   const [selectedWord, setSelectedWord] = useState<string | undefined>();
   const onClick = (word: string) => () => setSelectedWord(word);
+
+  const [gameState, setGameState] = useState(game);
+  usePoll<GameState>({
+    url: `${API_URL}/game/${gameState.name}`,
+    // eslint-disable-next-line no-alert
+    onError: () => alert('error fetching game data'),
+    onSuccess: (newGame: GameState) => setGameState(newGame),
+  });
+
+  const { players, first_team, board, turn, name } = gameState;
+  const player = players[currentPlayer?.toLowerCase() ?? ''];
+
   return (
     <Container first_team={first_team}>
       <Grid>
@@ -104,11 +109,9 @@ export const Game: FC<GameProps> = ({
         {player ? (
           <Play
             API_URL={API_URL}
-            game={name}
-            board={board}
             player={player}
-            turn={turn}
             word={selectedWord}
+            game={gameState}
           />
         ) : (
           <Join game={name} API_URL={API_URL} />

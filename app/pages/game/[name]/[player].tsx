@@ -14,7 +14,7 @@ export const getServerSideProps: GetServerSideProps<GameProps> = async ({
   const result = await fetch(url);
   const json = await result.json();
 
-  return { props: { ...json, currentPlayer: player, API_URL } as GameProps };
+  return { props: { game: json, currentPlayer: player, API_URL } as GameProps };
 };
 
 export default GamePlayer;
