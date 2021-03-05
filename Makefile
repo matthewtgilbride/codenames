@@ -77,3 +77,6 @@ push-app-image: ## push app image
 
 push-images: push-service-image push-app-image ## push both images
 
+wash:
+	docker-compose run --rm wash
+

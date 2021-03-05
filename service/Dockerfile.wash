@@ -7,6 +7,6 @@ RUN apt-get install libssl-dev -y
 RUN apt-get install llvm -y
 RUN apt-get install clang -y
 
-RUN cargo install --git https://github.com/wasmcloud/wash --tag v0.1.16
+RUN cargo install --git https://github.com/wasmcloud/wash --tag v0.3.0
 
 ENTRYPOINT "/bin/sh"

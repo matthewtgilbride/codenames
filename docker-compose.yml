@@ -46,6 +46,10 @@ services:
       - nats
       - redis
       - registry
+    environment:
+      - WASH_RPC_HOST=nats
+    ports:
+      - "8080:8080"
 
   app:
     image: ${AWS_ECR_URL}/codenames_app
