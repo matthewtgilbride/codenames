@@ -1,7 +1,9 @@
+use wasmcloud_actor_keyvalue as kv;
+
 use codenames_domain::game::dao::{DaoError, DaoResult, DAO};
 use codenames_domain::game::model::Game;
 
-use wasmcloud_actor_keyvalue as kv;
+const ALL_GAMES_KEY: &str = "GAME_KEYS";
 
 #[derive(Clone)]
 pub struct WasmKeyValueDao;
@@ -22,9 +24,18 @@ impl DAO for WasmKeyValueDao {
         }
     }
     fn keys(&mut self) -> DaoResult<Vec<String>> {
-        unimplemented!()
+        let result = kv::default()
+            .range(ALL_GAMES_KEY.into(), 0, std::i32::MAX)
+            .map_err(|e| DaoError::Unknown(e.to_string()))?;
+        Ok(result.values)
     }
-    fn set(&mut self, _: String, _: Game) -> DaoResult<()> {
-        unimplemented!()
+    fn set(&mut self, key: String, game: Game) -> DaoResult<()> {
+        kv::default()
+            .set(key.clone(), json!(game).to_string(), 0)
+            .map_err(|e| DaoError::Unknown(e.to_string()))?;
+        kv::default()
+            .push(ALL_GAMES_KEY.into(), key.clone())
+            .map_err(|e| DaoError::Unknown(e.to_string()))?;
+        Ok(())
     }
 }
