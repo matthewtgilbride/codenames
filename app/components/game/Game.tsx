@@ -66,7 +66,9 @@ export const Game: FC<GameProps> = ({ API_URL, currentPlayer, game }) => {
 
   const [gameState, setGameState] = useState(game);
   usePoll<GameState>({
-    url: `${API_URL}/game/${gameState.name}`,
+    url: `${API_URL}/game/${gameState.name}${
+      currentPlayer ? `/${currentPlayer}` : ''
+    }`,
     // eslint-disable-next-line no-alert
     onError: () => alert('error fetching game data'),
     onSuccess: (newGame: GameState) => setGameState(newGame),
