@@ -1,8 +1,12 @@
 include ../help.mk
 
-build: ## compile and build all subprojects
+build: ## compile and build non-wasm subprojects
 	cargo build
+
+build-wasm: ## compile and build wasm subproject
 	cargo build -p codenames-wasm --target wasm32-unknown-unknown
+
+build-all: build build-wasm ## compile and build all projects
 
 format: ## format code
 	cargo fmt

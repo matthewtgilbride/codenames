@@ -2,63 +2,22 @@
 extern crate serde_json;
 extern crate wapc_guest as guest;
 
-use std::collections::hash_map::RandomState;
-use std::collections::HashSet;
-
-use actor_core as core;
-use actor_http_server as http;
 use guest::prelude::*;
+use wasmcloud_actor_core as core;
+use wasmcloud_actor_http_server as http;
 
-use codenames_domain::dictionary::service::WordGenerator;
-use codenames_domain::game::board::service::BoardGenerator;
-use codenames_domain::game::card::model::Card;
-use codenames_domain::game::dao::{DaoResult, DAO};
-use codenames_domain::game::model::{Game, Team};
 use codenames_domain::game::service::Service;
-use codenames_domain::ServiceResult;
 
+use crate::dictionary::service::WordGeneratorWasmCloud;
+use crate::game::board::service::BoardGeneratorWasmCloud;
+use crate::game::dao::WasmKeyValueDao;
 use crate::wasm_routes::WasmRoutes;
 
 // use wasm_routes::WasmRoutes;
 
+mod dictionary;
+mod game;
 mod wasm_routes;
-
-#[derive(Clone)]
-struct WordStub;
-
-impl WordGenerator for WordStub {
-    fn random_set(&self, _: HashSet<String, RandomState>) -> ServiceResult<[String; 25]> {
-        unimplemented!()
-    }
-
-    fn random_pair(&self, _: HashSet<String, RandomState>) -> ServiceResult<(String, String)> {
-        unimplemented!()
-    }
-}
-
-#[derive(Clone)]
-struct BoardStub;
-
-impl BoardGenerator for BoardStub {
-    fn random_board(&self, _: [String; 25]) -> ServiceResult<([Card; 25], Team)> {
-        unimplemented!()
-    }
-}
-
-#[derive(Clone)]
-struct DaoStub;
-
-impl DAO for DaoStub {
-    fn get(&mut self, _: String) -> DaoResult<Game> {
-        unimplemented!()
-    }
-    fn keys(&mut self) -> DaoResult<Vec<String>> {
-        unimplemented!()
-    }
-    fn set(&mut self, _: String, _: Game) -> DaoResult<()> {
-        unimplemented!()
-    }
-}
 
 #[no_mangle]
 pub fn wapc_init() {
@@ -71,9 +30,9 @@ fn health(_h: core::HealthCheckRequest) -> HandlerResult<core::HealthCheckRespon
 }
 
 fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {
-    let word_generator = Box::new(WordStub);
-    let board_generator = Box::new(BoardStub);
-    let dao = Box::new(DaoStub);
+    let word_generator = Box::new(WordGeneratorWasmCloud);
+    let board_generator = Box::new(BoardGeneratorWasmCloud);
+    let dao = Box::new(WasmKeyValueDao);
 
     let service = Service::new(word_generator, board_generator, dao)?;
 

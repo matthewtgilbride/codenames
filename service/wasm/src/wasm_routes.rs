@@ -1,7 +1,7 @@
 extern crate wapc_guest as guest;
 
-use actor_http_server as http;
 use guest::prelude::*;
+use wasmcloud_actor_http_server as http;
 
 use codenames_domain::game::model::{
     GameVariant, GuessRequest, NewGameRequest, Player, PlayerRequest,
