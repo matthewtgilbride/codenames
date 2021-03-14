@@ -17,7 +17,7 @@ WORKDIR codenames
 
 RUN git checkout -b wasmcloud origin/wasmcloud
 
-WORKDIR codenames/service
+WORKDIR service
 
 RUN make build-wasm
 

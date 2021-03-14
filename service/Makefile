@@ -8,6 +8,7 @@ build: ## compile and build non-wasm subprojects
 
 build-wasm: ## compile and build wasm subproject
 	cargo build -p codenames-wasm --release --target wasm32-unknown-unknown
+	mv target/wasm32-unknown-unknown/release/codenames_wasm.wasm codenames.wasm
 
 build-all: build build-wasm ## compile and build all projects
 
