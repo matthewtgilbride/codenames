@@ -8,7 +8,6 @@ build: ## compile and build non-wasm subprojects
 
 build-wasm: ## compile and build wasm subproject
 	cargo build -p codenames-wasm --release --target wasm32-unknown-unknown
-	mv target/wasm32-unknown-unknown/release/codenames_wasm.wasm codenames.wasm
 
 build-all: build build-wasm ## compile and build all projects
 
@@ -57,13 +56,13 @@ install-wasmcloud:
 start-wasmcloud:
 	wasmcloud
 
-sign-local:
-	wash claims sign target/wasm32-unknown-unknown/debug/codenames_wasm.wasm --keyvalue --http_server --name "codenames" --destination ./codenames.wasm
+sign-wasm: ## sign the built wasmcloud module
+	wash claims sign target/wasm32-unknown-unknown/release/codenames_wasm.wasm --keyvalue --http_server --name "codenames" --destination ./codenames.wasm
 
-push-local:
+push-wasm-local: ## push the built wasmcloud module to a local registry
 	wash reg push localhost:5000/codenames:v1 codenames.wasm --insecure
 
-start-local-providers:
+start-providers-local: ## start providers on the local machine
 	wash ctl start provider wasmcloud.azurecr.io/redis:0.9.2
 	wash ctl start provider wasmcloud.azurecr.io/httpserver:0.9.2
 
