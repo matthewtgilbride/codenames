@@ -27,3 +27,20 @@ deploy-cluster: ## deploy ECS cluster
 destroy-cluster: export DEPLOY_TYPE=cluster
 destroy-cluster: ## destroy ECS cluster
 	yarn cdk destroy
+
+public_ip = $(shell dig +short myip.opendns.com @resolver1.opendns.com)
+
+synth-instance: export DEPLOY_TYPE=instance
+synth-instance: export PUBLIC_IP=$(public_ip)
+synth-instance: ## validate cfn for development EC2 x86 instance
+	yarn cdk synth
+
+deploy-instance: export DEPLOY_TYPE=instance
+deploy-instance: export PUBLIC_IP=$(public_ip)
+deploy-instance: ## deploy development EC2 instance
+	yarn cdk deploy
+
+destroy-instance: export DEPLOY_TYPE=instance
+destroy-instance: export PUBLIC_IP=$(public_ip)
+destroy-instance: ## destroy development EC2 instance
+	yarn cdk destroy

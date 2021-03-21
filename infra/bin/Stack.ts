@@ -3,8 +3,9 @@ import 'source-map-support/register';
 import { App, Construct, Stack } from '@aws-cdk/core';
 import { ClusterConstruct } from '../lib/ClusterConstruct';
 import { RepositoryConstruct } from '../lib/RepositoryConstruct';
+import { DevelopmentInstanceConstruct } from '../lib/DevelopmentInstanceConstruct';
 
-type DeployType = 'cluster' | 'registry';
+type DeployType = 'instance' | 'cluster' | 'registry';
 
 class CodenamesStack extends Stack {
   constructor(scope: Construct, id: string, deployType: DeployType) {
@@ -23,9 +24,19 @@ class CodenamesStack extends Stack {
       case 'registry':
         new RepositoryConstruct(this, `${id}-Repositories`);
         break;
+      case 'instance':
+        if (!process.env.PUBLIC_IP) {
+          throw new Error(
+            `PUBLIC_IP environment variable must be provided to deploy dev EC2 instance`,
+          );
+        }
+        new DevelopmentInstanceConstruct(this, `${id}-DevelopmentInstance`, {
+          publicIp: process.env.PUBLIC_IP,
+        });
+        break;
       default:
         throw new Error(
-          `expected DEPLOY_TYPE of repository or cluster but got ${deployType}`,
+          `expected DEPLOY_TYPE of instance, registry, or cluster but got ${deployType}`,
         );
     }
   }
