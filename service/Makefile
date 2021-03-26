@@ -1,6 +1,6 @@
 include ../help.mk
 
-clean:
+clean: ## cargo clean
 	cargo clean
 
 build: ## compile and build non-wasm subprojects
@@ -44,30 +44,15 @@ integration-test-docker: check ## check code, build newman test container, and r
 integration-test: integration-test-docker ## run integration tests and clean up
 	docker-compose -f ../docker-compose.yml down
 
-gen-account-key:
-	nk gen account -o json | jq -r .seed > account.nk
-
-gen-module-key:
-	nk gen module -o json | jq -r .seed > module.nk
-
-install-wasmcloud:
-	cargo install wasmcloud  --git https://github.com/wasmCloud/wasmCloud --branch main
-
-start-wasmcloud:
-	wasmcloud
-
-sign-wasm: ## sign the built wasmcloud module
+sign-wasmcloud: ## sign the built wasmcloud module
 	wash claims sign target/wasm32-unknown-unknown/release/codenames_wasm.wasm --keyvalue --http_server --name "codenames" --destination ./codenames.wasm
 
-push-wasm-local: ## push the built wasmcloud module to a local registry
+push-wasmcloud: ## push the built wasmcloud module to a local registry
 	wash reg push localhost:5000/codenames:v1 codenames.wasm --insecure
 
-start-providers-local: ## start providers on the local machine
-	wash ctl start provider wasmcloud.azurecr.io/redis:0.9.2
-	wash ctl start provider wasmcloud.azurecr.io/httpserver:0.9.2
+start-wasmcloud-providers: ## start providers on the local machine
+	wash ctl start provider wasmcloud.azurecr.io/redis:0.11.2
+	wash ctl start provider wasmcloud.azurecr.io/httpserver:0.12.1
 
-start-actor:
+start-wasmcloud-actor:
 	wash ctl start actor localhost:5000/codenames:v1
-
-show-module:
-	wascap caps ~/.wash/codenames_wasm_module.nk
