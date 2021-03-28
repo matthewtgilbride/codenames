@@ -50,25 +50,35 @@ wasmcloud-deps: ## start the auxiliary services needed to run wash locally
 wasmcloud-start: wasmcloud-deps ## start a wasmcloud host
 	wasmcloud --allowed-insecure localhost:5000
 
+.PHONY: wasmcloud-start-background
 wasmcloud-start-background: ## start and detach from the wasmcloud host process
-	$(MAKE wasmcloud start &)
+	$(MAKE) wasmcloud-start &
 
 wasmcloud-actor-build: build-wasm ## compile and build wasmcloud actor mosule
 
-.codenames.wasm: build-wasm ## sign the built wasmcloud actor
+wasmcloud-actor-sign:
 	wash claims sign target/wasm32-unknown-unknown/release/codenames_wasm.wasm --keyvalue --http_server --name "codenames" --destination ./codenames.wasm
 
-wasmcloud-actor-push: .codenames.wasm ## push the built wasmcloud module to a local registry
+codenames.wasm: build-wasm wasmcloud-actor-sign ## sign the built wasmcloud actor
+
+.PHONY: wasmcloud-actor-push
+wasmcloud-actor-push: codenames.wasm ## push the built wasmcloud module to a local registry
 	wash reg push localhost:5000/codenames:v1 codenames.wasm --insecure
 
+.PHONY: wasmcloud-providers-start
 wasmcloud-providers-start: ## start providers on the local machine
 	wash ctl start provider wasmcloud.azurecr.io/redis:0.11.2
 	wash ctl start provider wasmcloud.azurecr.io/httpserver:0.12.1
 
+.PHONY: wasmcloud-actor-start
 wasmcloud-actor-start: wasmcloud-actor-push ## start the codenames wasmcloud actor
 	wash ctl start actor localhost:5000/codenames:v1
 
-wasmcloud-link: wasmcloud-actor-start wasmcloud-providers-start ## link actor to capability providers - need to provide ACTOR_PUBLIC_KEY in the environment
+wasmcloud-up: wasmcloud-actor-start wasmcloud-providers-start ## link actor to capability providers - need to provide ACTOR_PUBLIC_KEY in the environment
 	wash ctl link ${ACTOR_PUBLIC_KEY} VAZVC4RX54J2NVCMCW7BPCAHGGG5XZXDBXFUMDUXGESTMQEJLC3YVZWB wasmcloud:keyvalue
 	wash ctl link ${ACTOR_PUBLIC_KEY} VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M wasmcloud:httpserver PORT=8080
 	wash ctl link ${ACTOR_PUBLIC_KEY} VDHPKGFKDI34Y4RN4PWWZHRYZ6373HYRSNNEM4UTDLLOGO5B37TSVREP wasmcloud:extras
+
+wasmcloud-down:
+	docker-compose down
+	ps | grep wasmcloud | awk '{print $$1}'
