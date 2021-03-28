@@ -56,10 +56,10 @@ wasmcloud-start-background: ## start and detach from the wasmcloud host process
 
 wasmcloud-actor-build: build-wasm ## compile and build wasmcloud actor mosule
 
-wasmcloud-actor-sign:
+wasmcloud-actor-sign: wasmcloud-actor-build ## sign the built wasmcloud actor
 	wash claims sign target/wasm32-unknown-unknown/release/codenames_wasm.wasm --keyvalue --http_server --name "codenames" --destination ./codenames.wasm
 
-codenames.wasm: build-wasm wasmcloud-actor-sign ## sign the built wasmcloud actor
+codenames.wasm: build-wasm wasmcloud-actor-sign
 
 .PHONY: wasmcloud-actor-push
 wasmcloud-actor-push: codenames.wasm ## push the built wasmcloud module to a local registry
