@@ -19,14 +19,9 @@ mod dictionary;
 mod game;
 mod wasm_routes;
 
-#[no_mangle]
-pub fn wapc_init() {
-    core::Handlers::register_health_request(health);
-    http::Handlers::register_handle_request(route_wrapper);
-}
-
-fn health(_h: core::HealthCheckRequest) -> HandlerResult<core::HealthCheckResponse> {
-    Ok(core::HealthCheckResponse::healthy())
+#[core::init]
+fn init() {
+ http::Handlers::register_handle_request(route_wrapper);
 }
 
 fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {

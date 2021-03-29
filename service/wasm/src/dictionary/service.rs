@@ -22,7 +22,7 @@ impl WordGeneratorWasmCloud {
         while chosen_indices.len() < size {
             chosen_indices.insert(
                 (extras::default()
-                    .request_random(0, (size - 1) as u32)
+                    .request_random(0, dictionary.len() as u32)
                     .map_err(|_| ServiceError::Unknown("could not get random number".into()))?)
                     as usize,
             );
