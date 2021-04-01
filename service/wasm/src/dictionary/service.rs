@@ -42,7 +42,13 @@ impl WordGenerator for WordGeneratorWasmCloud {
     }
 
     fn random_pair(&self, dictionary: HashSet<String>) -> ServiceResult<(String, String)> {
-        let [first, second]: [String; 2] = (self.random_list(&dictionary, 2)?).try_into().unwrap();
-        Ok((first, second))
+        let result = self.random_list(&dictionary, 2)?;
+        if result.len() == 2 {
+            return Ok((result[0].clone(), result[1].clone()));
+        }
+        return Err(ServiceError::Unknown(
+            "error generating random words.  expected vec of length 2 but got something else"
+                .to_string(),
+        ));
     }
 }

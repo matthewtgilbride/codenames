@@ -1,0 +1,13 @@
+{
+  "actors": [
+    "./target/wasm32-unknown-unknown/release/codenames_wasm.wasm"
+  ],
+  "capabilities": [
+    {
+      "image_ref": "wasmcloud.azurecr.io/nats:0.10.2"
+    },
+    {
+      "image_ref": ""
+    }
+  ]
+}

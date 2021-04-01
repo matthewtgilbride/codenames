@@ -81,6 +81,6 @@ wasmcloud-up: wasmcloud-actor-start wasmcloud-providers-start ## start the wasmc
 
 wasmcloud_process = $(shell ps | grep wasmcloud | awk '{print $$1}')
 
-wasmcloud-down: ## tear down wasmcloud and it's dependencies
+wasmcloud-down: kill-local## tear down wasmcloud and it's dependencies
 	docker-compose down
-	kill $(wasmcloud_process)
+	-kill $(wasmcloud_process)

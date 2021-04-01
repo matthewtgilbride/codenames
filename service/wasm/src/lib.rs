@@ -21,7 +21,7 @@ mod wasm_routes;
 
 #[core::init]
 fn init() {
- http::Handlers::register_handle_request(route_wrapper);
+    http::Handlers::register_handle_request(route_wrapper);
 }
 
 fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {
