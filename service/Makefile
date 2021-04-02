@@ -47,7 +47,12 @@ integration-test: integration-test-docker ## run integration tests and clean up
 wasmcloud-deps: ## start the auxiliary services needed to run wash locally
 	docker-compose -f ../docker-compose.yml up -d registry nats redis
 
+rust_log := debug
+
 wasmcloud-start: wasmcloud-deps ## start a wasmcloud host
+wasmcloud-start: export RUST_LOG=$(rust_log)
+wasmcloud-start:
+	wash drain all
 	wasmcloud --allowed-insecure localhost:5000
 
 .PHONY: wasmcloud-start-background
@@ -57,7 +62,7 @@ wasmcloud-start-background: ## start and detach from the wasmcloud host process
 wasmcloud-actor-build: build-wasm ## compile and build wasmcloud actor mosule
 
 wasmcloud-actor-sign: wasmcloud-actor-build ## sign the built wasmcloud actor
-	wash claims sign target/wasm32-unknown-unknown/release/codenames_wasm.wasm --keyvalue --http_server --cap wasmcloud:extras --name "codenames" --destination ./codenames.wasm
+	wash claims sign target/wasm32-unknown-unknown/release/codenames_wasm.wasm --keyvalue --http_server --logging --cap wasmcloud:extras --name "codenames" --destination ./codenames.wasm
 
 codenames.wasm: build-wasm wasmcloud-actor-sign
 
@@ -69,18 +74,22 @@ wasmcloud-actor-push: codenames.wasm ## push the built wasmcloud module to a loc
 wasmcloud-providers-start: ## start providers on the local machine
 	wash ctl start provider wasmcloud.azurecr.io/redis:0.11.2
 	wash ctl start provider wasmcloud.azurecr.io/httpserver:0.12.1
+	wash ctl start provider wasmcloud.azurecr.io/logging:0.9.3
 
 .PHONY: wasmcloud-actor-start
 wasmcloud-actor-start: wasmcloud-actor-push ## start the codenames wasmcloud actor
 	wash ctl start actor localhost:5000/codenames:v1
 
+.PHONY: wasmcloud-up
 wasmcloud-up: wasmcloud-actor-start wasmcloud-providers-start ## start the wasmcloud actor locally
 	wash ctl link MCW7EHKF5Y4GZ2SDSJTNLFO7U6RZFQ5ZC4ZAXHSUPTKJPHKLPPDR3HEI VAZVC4RX54J2NVCMCW7BPCAHGGG5XZXDBXFUMDUXGESTMQEJLC3YVZWB wasmcloud:keyvalue
 	wash ctl link MCW7EHKF5Y4GZ2SDSJTNLFO7U6RZFQ5ZC4ZAXHSUPTKJPHKLPPDR3HEI VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M wasmcloud:httpserver PORT=8080
 	wash ctl link MCW7EHKF5Y4GZ2SDSJTNLFO7U6RZFQ5ZC4ZAXHSUPTKJPHKLPPDR3HEI VDHPKGFKDI34Y4RN4PWWZHRYZ6373HYRSNNEM4UTDLLOGO5B37TSVREP wasmcloud:extras
+	wash ctl link MCW7EHKF5Y4GZ2SDSJTNLFO7U6RZFQ5ZC4ZAXHSUPTKJPHKLPPDR3HEI VCCANMDC7KONJK435W6T7JFEEL7S3ZG6GUZMZ3FHTBZ32OZHJQR5MJWZ wasmcloud:logging
 
 wasmcloud_process = $(shell ps | grep wasmcloud | awk '{print $$1}')
 
+.PHONY: wasmcloud-down
 wasmcloud-down: kill-local## tear down wasmcloud and it's dependencies
 	docker-compose down
 	-kill $(wasmcloud_process)

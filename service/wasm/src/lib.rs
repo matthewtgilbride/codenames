@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate serde_json;
 extern crate wapc_guest as guest;
+extern crate wasmcloud_actor_logging as logging;
 
 use guest::prelude::*;
 use wasmcloud_actor_core as core;
@@ -13,7 +14,7 @@ use crate::game::board::service::BoardGeneratorWasmCloud;
 use crate::game::dao::WasmKeyValueDao;
 use crate::wasm_routes::WasmRoutes;
 
-// use wasm_routes::WasmRoutes;
+use log::debug;
 
 mod dictionary;
 mod game;
@@ -22,6 +23,7 @@ mod wasm_routes;
 #[core::init]
 fn init() {
     http::Handlers::register_handle_request(route_wrapper);
+    logging::enable_macros();
 }
 
 fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {
@@ -32,6 +34,8 @@ fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {
     let service = Service::new(word_generator, board_generator, dao)?;
 
     let mut routes = WasmRoutes::new(service);
+
+    debug!("Request received. Path is {}", msg.path);
 
     if msg.path == "/" {
         return routes.random_name(msg);

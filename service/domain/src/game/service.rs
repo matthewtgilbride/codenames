@@ -1,4 +1,4 @@
-use log::{info, warn};
+use log::{debug, info, warn};
 
 use crate::dictionary::service::{Service as DictionaryService, WordGenerator};
 use crate::game::board::service::{BoardGenerator, Service as BoardService};
@@ -22,6 +22,7 @@ impl Service {
         board_generator: Box<dyn BoardGenerator>,
         dao: Box<dyn DAO + Send + Sync>,
     ) -> StdResult<Service> {
+        debug!("call: game.Service::new");
         let dictionary_service = DictionaryService::new(word_generator)?;
         let board_service = BoardService::new(board_generator);
         Ok(Service {
@@ -32,6 +33,7 @@ impl Service {
     }
 
     pub fn random_name(&self) -> ServiceResult<NewGameRequest> {
+        debug!("call: game.Service.random_name");
         let (first_name, last_name) = self.dictionary_service.new_word_pair()?;
         Ok(NewGameRequest {
             game_name: format!("{}-{}", first_name, last_name),

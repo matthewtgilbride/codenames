@@ -1,5 +1,7 @@
 extern crate wapc_guest as guest;
 
+use log::debug;
+
 use guest::prelude::*;
 use wasmcloud_actor_http_server as http;
 
@@ -19,6 +21,7 @@ impl WasmRoutes {
     }
 
     pub fn random_name(&self, _: http::Request) -> HandlerResult<http::Response> {
+        debug!("call: WasmRoutes.random_name");
         let json = json!(self.service.random_name()?);
         Ok(http::Response::json(json, 200, "OK"))
     }
