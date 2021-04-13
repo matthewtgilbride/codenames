@@ -4,6 +4,7 @@ extern crate wapc_guest as guest;
 extern crate wasmcloud_actor_logging as logging;
 
 use guest::prelude::*;
+use log::debug;
 use wasmcloud_actor_core as core;
 use wasmcloud_actor_http_server as http;
 
@@ -12,12 +13,14 @@ use codenames_domain::game::service::Service;
 use crate::dictionary::service::WordGeneratorWasmCloud;
 use crate::game::board::service::BoardGeneratorWasmCloud;
 use crate::game::dao::WasmKeyValueDao;
+use crate::routed_request::{RoutedRequest, RoutedRequestHandler};
+use crate::router::RootRouter;
 use crate::wasm_routes::WasmRoutes;
-
-use log::debug;
 
 mod dictionary;
 mod game;
+mod routed_request;
+mod router;
 mod wasm_routes;
 
 #[core::init]
@@ -33,37 +36,45 @@ fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {
 
     let service = Service::new(word_generator, board_generator, dao)?;
 
+    let root_router = RootRouter::new(&service);
+
     let mut routes = WasmRoutes::new(service);
 
     debug!("Request received. Path is {}", msg.path);
 
-    if msg.path == "/" {
-        return routes.random_name(msg);
+    let root_request = RoutedRequest::new(&msg);
+
+    let root_response = root_router.handle(root_request);
+
+    match root_response {
+        Some(r) => r,
+        None => {
+            if msg.path.starts_with("/game") {
+                if msg.method == "GET" {
+                    return routes.get(msg);
+                }
+                if msg.method == "POST" {
+                    return routes.new_game(msg);
+                }
+                if msg.method == "PUT" {
+                    if msg.path.ends_with("/join") {
+                        return routes.join(msg);
+                    }
+                    if msg.path.ends_with("/leave") {
+                        return routes.leave(msg);
+                    }
+                    if msg.path.ends_with("/guess") {
+                        return routes.guess(msg);
+                    }
+                    if msg.path.ends_with("/guess/undo") {
+                        return routes.undo_guess(msg);
+                    }
+                    if msg.path.ends_with("/end-turn") {
+                        return routes.end_turn(msg);
+                    }
+                }
+            }
+            Ok(http::Response::not_found())
+        }
     }
-    if msg.path.starts_with("/game") {
-        if msg.method == "GET" {
-            return routes.get(msg);
-        }
-        if msg.method == "POST" {
-            return routes.new_game(msg);
-        }
-        if msg.method == "PUT" {
-            if msg.path.ends_with("/join") {
-                return routes.join(msg);
-            }
-            if msg.path.ends_with("/leave") {
-                return routes.leave(msg);
-            }
-            if msg.path.ends_with("/guess") {
-                return routes.guess(msg);
-            }
-            if msg.path.ends_with("/guess/undo") {
-                return routes.undo_guess(msg);
-            }
-            if msg.path.ends_with("/end-turn") {
-                return routes.end_turn(msg);
-            }
-        }
-    }
-    Ok(http::Response::not_found())
 }

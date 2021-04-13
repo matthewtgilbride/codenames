@@ -3,9 +3,9 @@ use std::collections::HashSet;
 use dyn_clone::DynClone;
 use log::debug;
 
-use crate::{ServiceResult, StdResult};
 use crate::dictionary::model::DictionaryType;
 use crate::dictionary::util::get_dictionary_words;
+use crate::{ServiceResult, StdResult};
 
 #[derive(Clone)]
 pub struct Service {

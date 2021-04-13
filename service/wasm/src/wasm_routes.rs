@@ -1,8 +1,7 @@
 extern crate wapc_guest as guest;
 
-use log::debug;
-
 use guest::prelude::*;
+use log::debug;
 use wasmcloud_actor_http_server as http;
 
 use codenames_domain::game::model::{

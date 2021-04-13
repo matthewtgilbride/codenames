@@ -2,7 +2,6 @@ use std::collections::HashSet;
 use std::convert::TryInto;
 
 use log::debug;
-
 use wasmcloud_actor_extras as extras;
 
 use codenames_domain::dictionary::model::MINIMUM_DICTIONARY_SIZE;
@@ -47,7 +46,10 @@ impl WordGenerator for WordGeneratorWasmCloud {
     fn random_pair(&self, dictionary: HashSet<String>) -> ServiceResult<(String, String)> {
         debug!("call: dictionary.WordGenerator.random_pair");
         let result = self.random_list(&dictionary, 2)?;
-        debug!("dictionary.WordGenerator.random_pair: got random list from generator: {}", result.len());
+        debug!(
+            "dictionary.WordGenerator.random_pair: got random list from generator: {}",
+            result.len()
+        );
         if result.len() == 2 {
             return Ok((result[0].clone(), result[1].clone()));
         }
