@@ -27,7 +27,7 @@ impl RootRouter {
 impl RoutedRequestHandler for RootRouter {
     fn handle(&self, request: RoutedRequest) -> Option<HandlerResult<Response>> {
         match request.path_head {
-            None => match request.original_request.method.as_str() {
+            None => match request.msg.method.as_str() {
                 "GET" => Some(self.random_name()),
                 _ => None,
             },

@@ -1,6 +1,6 @@
 use crate::routed_request::{RoutedRequest, RoutedRequestHandler};
 use crate::HandlerResult;
-use codenames_domain::game::model::{GameVariant, NewGameRequest};
+use codenames_domain::game::model::{GameVariant, NewGameRequest, Player, PlayerRequest};
 use codenames_domain::game::service::Service;
 use codenames_domain::{ServiceError, ServiceResult};
 use serde_json::ser::State::Rest;
@@ -27,12 +27,15 @@ impl GameRootRouter {
 
 impl RoutedRequestHandler for GameRootRouter {
     fn handle(&self, request: RoutedRequest) -> Option<HandlerResult<Response>> {
-        match (request.path_head, request.path_tail.len()) {
-            (Some(s) , 0) if s.as_str() == "game" => match request.original_request.method.as_str() {
-                "POST" => Some(self.clone().new_game(request.original_request)),
-                _ => None,
-            },
-            (Some(_), _) | (None, _) => None,
+        match (
+            request.msg.method.as_str(),
+            request.path_head,
+            request.path_tail.len(),
+        ) {
+            ("POST", Some(s), 0) if s.as_str() == "game" => {
+                Some(self.clone().new_game(request.msg))
+            }
+            _ => None,
         }
     }
 }
@@ -54,20 +57,34 @@ impl GameRouter {
 impl RoutedRequestHandler for GameRouter {
     fn handle(&self, request: RoutedRequest) -> Option<HandlerResult<Response>> {
         match (
-            request.path_tail.len(),
-            request.original_request.method.as_str(),
+            request.msg.method.as_str(),
+            request.path_tail.get(0).map(|s| s.as_str()),
+            request.path_tail.get(1).map(|s| s.as_str()),
         ) {
-            (0, "GET") => {
-                let get_result = self.service.clone().get(self.game_id.clone(), None);
-                match get_result {
-                    Ok(game) => Some(Ok(Response::json(game, 200, "OK"))),
-                    Err(e) => match e {
-                        ServiceError::NotFound(_) => Some(Ok(Response::not_found())),
-                        ServiceError::BadRequest(_) => Some(Ok(Response::bad_request())),
-                        ServiceError::Unknown(u) => Some(Ok(Response::internal_server_error(u.as_str())))
-                    },
-                }
-            },
+            ("GET", None, None) => self
+                .service
+                .clone()
+                .get(self.game_id.clone(), None)
+                .map(|game| Some(Ok(Response::json(game, 200, "OK"))))
+                .unwrap_or_else(|e| RoutedRequest::handle_service_error(e)),
+            ("PUT", Some("join"), None) => std::str::from_utf8(request.msg.body.as_slice())
+                .map(|body| {
+                    serde_json::from_str(body)
+                        .map(|player: Player| {
+                            self.service
+                                .join(self.game_id.clone(), player)
+                                .map(|updated_game| {
+                                    Some(Ok(Response::json(updated_game, 200, "OK")))
+                                })
+                                .unwrap_or_else(|e| RoutedRequest::handle_service_error(e))
+                        })
+                        .unwrap_or_else(|e| Some(Ok(Response::bad_request())))
+                })
+                .unwrap_or_else(|e| Some(Ok(Response::internal_server_error("Utf8Error")))),
+            ("PUT", Some("leave"), None) => None,
+            ("PUT", Some("guess"), None) => None,
+            ("PUT", Some("end-turn"), None) => None,
+            ("PUT", Some("guess"), Some("undo")) => None,
             _ => None,
         }
     }
