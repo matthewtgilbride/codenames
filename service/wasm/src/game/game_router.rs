@@ -1,8 +1,9 @@
 use wasmcloud_actor_http_server::{Request, Response};
 
-use codenames_domain::game::model::{GuessRequest, NewGameRequest, Player, PlayerRequest};
+use codenames_domain::game::model::{NewGameRequest, Player};
 use codenames_domain::game::service::Service;
 
+use crate::game::player::player_router::PlayerRouter;
 use crate::routed_request::{RoutedRequest, RoutedRequestHandler};
 use crate::HandlerResult;
 
@@ -71,27 +72,16 @@ impl RoutedRequestHandler for GameIdRouter {
                         let updated_game = self.service.join(game_key, player)?;
                         Ok(Some(Response::json(updated_game, 200, "OK")))
                     }
-                    ("PUT", Some("leave"), None) => {
-                        let req: PlayerRequest = serde_json::from_str(std::str::from_utf8(
-                            request.msg.body.as_slice(),
-                        )?)?;
-                        let updated_game = self.service.leave(game_key, req)?;
-                        Ok(Some(Response::json(updated_game, 200, "OK")))
-                    }
-                    ("PUT", Some("guess"), None) => {
-                        let guess: GuessRequest = serde_json::from_str(std::str::from_utf8(
-                            request.msg.body.as_slice(),
-                        )?)?;
-                        let updated_game = self.service.guess(game_key, guess)?;
+                    ("PUT", Some("guess"), Some("undo")) => {
+                        let updated_game = self.service.undo_guess(game_key)?;
                         Ok(Some(Response::json(updated_game, 200, "OK")))
                     }
                     ("PUT", Some("end-turn"), None) => {
                         let updated_game = self.service.end_turn(game_key)?;
                         Ok(Some(Response::json(updated_game, 200, "OK")))
                     }
-                    ("PUT", Some("guess"), Some("undo")) => {
-                        let updated_game = self.service.undo_guess(game_key)?;
-                        Ok(Some(Response::json(updated_game, 200, "OK")))
+                    (_, Some(_), _) => {
+                        PlayerRouter::new(&self.service, &game_key).handle(&request.clone().pop()?)
                     }
                     _ => Ok(None),
                 }
