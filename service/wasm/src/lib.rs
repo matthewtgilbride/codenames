@@ -13,7 +13,6 @@ use codenames_domain::game::service::Service;
 use crate::dictionary::service::WordGeneratorWasmCloud;
 use crate::game::board::service::BoardGeneratorWasmCloud;
 use crate::game::dao::WasmKeyValueDao;
-use crate::game::game_router::{GameRootRouter, GameRouter};
 use crate::root_router::RootRouter;
 use crate::routed_request::{RoutedRequest, RoutedRequestHandler};
 
@@ -37,28 +36,8 @@ fn route_request(msg: Request) -> HandlerResult<Response> {
 
     debug!("Request received. Path is {}", msg.path);
 
-    let root_response = RootRouter::new(&service).handle(&RoutedRequest::new(&msg))?;
-    if root_response.is_some() {
-        return Ok(root_response.unwrap());
+    match RootRouter::new(&service).handle(&RoutedRequest::new(&msg))? {
+        Some(r) => Ok(r),
+        None => Ok(Response::not_found()),
     }
-
-    let game_request = RoutedRequest::new(&msg).pop()?;
-    let game_root_response = GameRootRouter::new(&service).handle(&game_request)?;
-    if game_root_response.is_some() {
-        return Ok(game_root_response.unwrap());
-    }
-
-    let game_id_request = game_request.pop()?;
-    if game_id_request.clone().path_head.is_none() {
-        return Ok(Response::not_found());
-    }
-
-    let game_response = GameRouter::new(&service, game_id_request.clone().path_head.unwrap())
-        .handle(&game_id_request)?;
-
-    if game_response.is_some() {
-        return Ok(game_response.unwrap());
-    }
-
-    Ok(Response::not_found())
 }

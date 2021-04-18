@@ -3,6 +3,7 @@ use wasmcloud_actor_http_server::Response;
 
 use codenames_domain::game::service::Service;
 
+use crate::game::game_router::GameRouter;
 use crate::routed_request::{RoutedRequest, RoutedRequestHandler};
 use crate::HandlerResult;
 
@@ -28,7 +29,7 @@ impl RoutedRequestHandler for RootRouter {
     fn handle(&self, request: &RoutedRequest) -> HandlerResult<Option<Response>> {
         match (request.msg.method.as_str(), &request.path_head) {
             ("GET", None) => self.random_name(),
-            _ => Ok(None),
+            _ => GameRouter::new(&self.service).handle(&request.pop()?),
         }
     }
 }

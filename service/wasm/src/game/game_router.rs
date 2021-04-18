@@ -6,11 +6,11 @@ use codenames_domain::game::service::Service;
 use crate::routed_request::{RoutedRequest, RoutedRequestHandler};
 use crate::HandlerResult;
 
-pub struct GameRootRouter {
+pub struct GameRouter {
     service: Service,
 }
 
-impl GameRootRouter {
+impl GameRouter {
     pub fn new(service: &Service) -> Self {
         Self {
             service: service.clone(),
@@ -24,73 +24,78 @@ impl GameRootRouter {
     }
 }
 
-impl RoutedRequestHandler for GameRootRouter {
+impl RoutedRequestHandler for GameRouter {
     fn handle(&self, request: &RoutedRequest) -> HandlerResult<Option<Response>> {
-        match (
-            request.msg.clone().method.as_str(),
-            request.path_head.clone(),
-            request.path_tail.len(),
-        ) {
-            ("POST", Some(s), 0) if s.as_str() == "game" => {
-                self.clone().new_game(request.clone().msg)
+        match request.path_head.clone() {
+            Some(g) if g.as_str() == "game" => {
+                match (request.msg.clone().method.as_str(), request.path_tail.len()) {
+                    ("POST", 0) => self.clone().new_game(request.clone().msg),
+                    _ => GameIdRouter::new(&self.service).handle(&request.pop()?),
+                }
             }
             _ => Ok(None),
         }
     }
 }
 
-pub struct GameRouter {
+pub struct GameIdRouter {
     service: Service,
-    game_id: String,
 }
 
-impl GameRouter {
-    pub fn new(service: &Service, game_id: String) -> Self {
+impl GameIdRouter {
+    pub fn new(service: &Service) -> Self {
         Self {
-            game_id,
             service: service.clone(),
         }
     }
 }
 
-impl RoutedRequestHandler for GameRouter {
+impl RoutedRequestHandler for GameIdRouter {
     fn handle(&self, request: &RoutedRequest) -> HandlerResult<Option<Response>> {
-        match (
-            request.msg.method.as_str(),
-            request.path_tail.get(0).map(|s| s.as_str()),
-            request.path_tail.get(1).map(|s| s.as_str()),
-        ) {
-            ("GET", None, None) => {
-                let game = self.service.clone().get(self.game_id.clone(), None)?;
-                Ok(Some(Response::json(game, 200, "OK")))
+        match request.path_head.clone() {
+            None => Ok(None),
+            Some(game_key) => {
+                match (
+                    request.msg.method.as_str(),
+                    request.path_tail.get(0).map(|s| s.as_str()),
+                    request.path_tail.get(1).map(|s| s.as_str()),
+                ) {
+                    ("GET", None, None) => {
+                        let game = self.service.clone().get(game_key, None)?;
+                        Ok(Some(Response::json(game, 200, "OK")))
+                    }
+                    ("PUT", Some("join"), None) => {
+                        let player: Player = serde_json::from_str(std::str::from_utf8(
+                            request.msg.body.as_slice(),
+                        )?)?;
+                        let updated_game = self.service.join(game_key, player)?;
+                        Ok(Some(Response::json(updated_game, 200, "OK")))
+                    }
+                    ("PUT", Some("leave"), None) => {
+                        let req: PlayerRequest = serde_json::from_str(std::str::from_utf8(
+                            request.msg.body.as_slice(),
+                        )?)?;
+                        let updated_game = self.service.leave(game_key, req)?;
+                        Ok(Some(Response::json(updated_game, 200, "OK")))
+                    }
+                    ("PUT", Some("guess"), None) => {
+                        let guess: GuessRequest = serde_json::from_str(std::str::from_utf8(
+                            request.msg.body.as_slice(),
+                        )?)?;
+                        let updated_game = self.service.guess(game_key, guess)?;
+                        Ok(Some(Response::json(updated_game, 200, "OK")))
+                    }
+                    ("PUT", Some("end-turn"), None) => {
+                        let updated_game = self.service.end_turn(game_key)?;
+                        Ok(Some(Response::json(updated_game, 200, "OK")))
+                    }
+                    ("PUT", Some("guess"), Some("undo")) => {
+                        let updated_game = self.service.undo_guess(game_key)?;
+                        Ok(Some(Response::json(updated_game, 200, "OK")))
+                    }
+                    _ => Ok(None),
+                }
             }
-            ("PUT", Some("join"), None) => {
-                let player: Player =
-                    serde_json::from_str(std::str::from_utf8(request.msg.body.as_slice())?)?;
-                let updated_game = self.service.join(self.game_id.clone(), player)?;
-                Ok(Some(Response::json(updated_game, 200, "OK")))
-            }
-            ("PUT", Some("leave"), None) => {
-                let req: PlayerRequest =
-                    serde_json::from_str(std::str::from_utf8(request.msg.body.as_slice())?)?;
-                let updated_game = self.service.leave(self.game_id.clone(), req)?;
-                Ok(Some(Response::json(updated_game, 200, "OK")))
-            }
-            ("PUT", Some("guess"), None) => {
-                let guess: GuessRequest =
-                    serde_json::from_str(std::str::from_utf8(request.msg.body.as_slice())?)?;
-                let updated_game = self.service.guess(self.game_id.clone(), guess)?;
-                Ok(Some(Response::json(updated_game, 200, "OK")))
-            }
-            ("PUT", Some("end-turn"), None) => {
-                let updated_game = self.service.end_turn(self.game_id.clone())?;
-                Ok(Some(Response::json(updated_game, 200, "OK")))
-            }
-            ("PUT", Some("guess"), Some("undo")) => {
-                let updated_game = self.service.undo_guess(self.game_id.clone())?;
-                Ok(Some(Response::json(updated_game, 200, "OK")))
-            }
-            _ => Ok(None),
         }
     }
 }
