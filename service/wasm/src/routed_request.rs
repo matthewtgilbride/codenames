@@ -62,5 +62,5 @@ impl RoutedRequest {
 }
 
 pub trait RoutedRequestHandler {
-    fn handle(&self, request: RoutedRequest) -> HandlerResult<Option<Response>>;
+    fn handle(&self, request: &RoutedRequest) -> HandlerResult<Option<Response>>;
 }

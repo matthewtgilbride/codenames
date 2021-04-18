@@ -1,3 +1,3 @@
 pub mod board;
 pub mod dao;
-pub mod router;
+pub mod game_router;

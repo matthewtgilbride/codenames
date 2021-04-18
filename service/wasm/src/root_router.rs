@@ -25,8 +25,8 @@ impl RootRouter {
 }
 
 impl RoutedRequestHandler for RootRouter {
-    fn handle(&self, request: RoutedRequest) -> HandlerResult<Option<Response>> {
-        match (request.msg.method.as_str(), request.path_head) {
+    fn handle(&self, request: &RoutedRequest) -> HandlerResult<Option<Response>> {
+        match (request.msg.method.as_str(), &request.path_head) {
             ("GET", None) => self.random_name(),
             _ => Ok(None),
         }
