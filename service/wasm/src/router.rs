@@ -17,21 +17,18 @@ impl RootRouter {
         }
     }
 
-    fn random_name(&self) -> HandlerResult<Response> {
+    fn random_name(&self) -> HandlerResult<Option<Response>> {
         debug!("call: RootRouter.random_name");
         let json = json!(self.service.random_name()?);
-        Ok(Response::json(json, 200, "OK"))
+        Ok(Some(Response::json(json, 200, "OK")))
     }
 }
 
 impl RoutedRequestHandler for RootRouter {
-    fn handle(&self, request: RoutedRequest) -> Option<HandlerResult<Response>> {
-        match request.path_head {
-            None => match request.msg.method.as_str() {
-                "GET" => Some(self.random_name()),
-                _ => None,
-            },
-            Some(_) => None,
+    fn handle(&self, request: RoutedRequest) -> HandlerResult<Option<Response>> {
+        match (request.msg.method.as_str(), request.path_head) {
+            ("GET", None) => self.random_name(),
+            _ => Ok(None),
         }
     }
 }

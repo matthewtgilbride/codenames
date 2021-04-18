@@ -3,7 +3,6 @@ use wasmcloud_actor_http_server::{Request, Response};
 use codenames_domain::{ServiceError, ServiceResult};
 
 use crate::HandlerResult;
-use std::fmt;
 
 #[derive(Clone)]
 pub struct RoutedRequest {
@@ -11,18 +10,6 @@ pub struct RoutedRequest {
     pub path_tail: Vec<String>,
     pub msg: Request,
 }
-
-#[derive(Debug)]
-pub struct RouteNotMatchedError {
-    pub path: String
-}
-
-impl fmt::Display for RouteNotMatchedError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", format!("No route matches path: {}", self.path))
-    }
-}
-
 
 impl RoutedRequest {
     pub fn new(request: &Request) -> Self {
@@ -59,14 +46,6 @@ impl RoutedRequest {
         }
     }
 
-    pub fn handle_service_error(e: ServiceError) -> Option<HandlerResult<Response>> {
-        match e {
-            ServiceError::NotFound(_) => Some(Ok(Response::not_found())),
-            ServiceError::BadRequest(_) => Some(Ok(Response::bad_request())),
-            ServiceError::Unknown(u) => Some(Ok(Response::internal_server_error(u.as_str()))),
-        }
-    }
-
     fn path_segments(path: &String) -> (Option<String>, Vec<String>) {
         let segments: Vec<String> = path
             .split("/")
@@ -83,5 +62,5 @@ impl RoutedRequest {
 }
 
 pub trait RoutedRequestHandler {
-    fn handle(&self, request: RoutedRequest) -> Option<HandlerResult<Response>>;
+    fn handle(&self, request: RoutedRequest) -> HandlerResult<Option<Response>>;
 }
