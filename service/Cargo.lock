@@ -2045,16 +2045,14 @@ dependencies = [
 
 [[package]]
 name = "wasmcloud-actor-http-server"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "227c7455dc3912ea692f6d66fca07147cae7a721dae15486caea68fbbdf40454"
+checksum = "e3475f57d2e71bc35c61081062794906bb328da6420d7d42ecfb2da926db0dd9"
 dependencies = [
  "lazy_static",
- "log",
  "rmp-serde",
  "serde",
  "serde_bytes",
- "serde_derive",
  "serde_json",
  "wapc-guest",
 ]
