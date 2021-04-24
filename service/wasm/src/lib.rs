@@ -35,7 +35,14 @@ fn route_request(req: Request) -> HandlerResult<Response> {
 
     let method = req.method();
     let segments = req.path_segments();
-    debug!("Segments is: {}", segments.join(","));
+    debug!("Segment length: {}", segments.len());
+    debug!(
+        "Segment head: {}",
+        match segments.get(0) {
+            None => "None",
+            Some(s) => s,
+        }
+    );
 
     let routing_result: Result<Response, ServiceError> =
         match (method.clone(), segments.get(0), segments.get(1)) {
@@ -122,16 +129,19 @@ fn route_request(req: Request) -> HandlerResult<Response> {
             _ => Ok(Response::not_found()),
         };
 
-    debug!("routing_result: {}", match routing_result {
-        Ok(_) => "Ok",
-        Err(_) => "Err",
-    });
+    debug!(
+        "routing_result: {}",
+        match routing_result {
+            Ok(_) => "Ok",
+            Err(_) => "Err",
+        }
+    );
 
     match routing_result {
         Ok(r) => {
             debug!("response status: {}", r.status_code);
             Ok(r)
-        },
+        }
         Err(se) => Ok(Response::json(
             se.clone(),
             match se {
