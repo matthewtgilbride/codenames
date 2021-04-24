@@ -52,7 +52,7 @@ rust_log := debug
 wasmcloud-start: wasmcloud-deps ## start a wasmcloud host
 wasmcloud-start: export RUST_LOG=$(rust_log)
 wasmcloud-start:
-	wash drain all
+	-wash drain all
 	wasmcloud --allowed-insecure localhost:5000
 
 .PHONY: wasmcloud-start-background
