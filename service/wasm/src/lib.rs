@@ -39,6 +39,7 @@ fn route_request(req: Request) -> HandlerResult<Response> {
     let routing_result: Result<Response, ServiceError> =
         match (method.clone(), segments.get(0), segments.get(1)) {
             (Method::Get, None, None) => {
+                debug!("matched root route");
                 let json = json!(service.random_name()?);
                 Ok(Response::json(json, 200, "OK"))
             }
