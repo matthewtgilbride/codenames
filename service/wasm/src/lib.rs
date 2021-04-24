@@ -127,7 +127,7 @@ fn route_request(req: Request) -> HandlerResult<Response> {
 
     match routing_result {
         Ok(r) => {
-            debug("response status: {}", r.status_code);
+            debug!("response status: {}", r.status_code);
             Ok(r)
         },
         Err(se) => Ok(Response::json(
