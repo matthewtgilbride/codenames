@@ -35,6 +35,7 @@ fn route_request(req: Request) -> HandlerResult<Response> {
 
     let method = req.method();
     let segments = req.path_segments();
+    debug!("Segments is: {}", segments.join(","));
 
     let routing_result: Result<Response, ServiceError> =
         match (method.clone(), segments.get(0), segments.get(1)) {
