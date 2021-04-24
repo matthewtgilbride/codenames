@@ -55,6 +55,7 @@ fn route_request(req: Request) -> HandlerResult<Response> {
 
                 match (method.clone(), segments.get(2), segments.get(3)) {
                     (Method::Get, None, None) => {
+                        debug!("creating new game");
                         let game = service.clone().get(game_id, None)?;
                         Ok(Response::json(game, 200, "OK"))
                     }
@@ -118,6 +119,11 @@ fn route_request(req: Request) -> HandlerResult<Response> {
             }
             _ => Ok(Response::not_found()),
         };
+
+    debug!("routing_result: {}", match routing_result {
+        Ok(_) => "Ok",
+        Err(_) => "Err",
+    });
 
     match routing_result {
         Ok(r) => Ok(r),
