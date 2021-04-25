@@ -45,7 +45,7 @@ fn route_request(req: Request) -> HandlerResult<Response> {
         segments.get(4),
     ) {
         // get a random game key
-        (Method::Get, None, None, None, None, None) => {
+        (Method::Get, Some(&""), None, None, None, None) => {
             debug_route("random game");
             let json = json!(service.random_name()?);
             Ok(Response::json(json, 200, "OK"))
