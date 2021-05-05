@@ -52,7 +52,6 @@ rust_log := debug
 wasmcloud-start: wasmcloud-deps ## start a wasmcloud host
 wasmcloud-start: export RUST_LOG=$(rust_log)
 wasmcloud-start:
-	-wash drain all
 	wasmcloud --allowed-insecure localhost:5000
 
 .PHONY: wasmcloud-start-background
@@ -86,6 +85,13 @@ wasmcloud-up: wasmcloud-actor-start wasmcloud-providers-start ## start the wasmc
 	wash ctl link MCW7EHKF5Y4GZ2SDSJTNLFO7U6RZFQ5ZC4ZAXHSUPTKJPHKLPPDR3HEI VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M wasmcloud:httpserver PORT=8080
 	wash ctl link MCW7EHKF5Y4GZ2SDSJTNLFO7U6RZFQ5ZC4ZAXHSUPTKJPHKLPPDR3HEI VDHPKGFKDI34Y4RN4PWWZHRYZ6373HYRSNNEM4UTDLLOGO5B37TSVREP wasmcloud:extras
 	wash ctl link MCW7EHKF5Y4GZ2SDSJTNLFO7U6RZFQ5ZC4ZAXHSUPTKJPHKLPPDR3HEI VCCANMDC7KONJK435W6T7JFEEL7S3ZG6GUZMZ3FHTBZ32OZHJQR5MJWZ wasmcloud:logging
+
+wasmcloud_host_id := $(shell wash ctl get hosts -o json | jq -r '.hosts[0].id')
+codenames_actor_id := $(shell wash ctl get inventory $(wasmcloud_host_id) -o json | jq -r '.inventory.actors[0].id')
+
+.PHONY: wasmcloud-update
+wasmcloud-update: wasmcloud-actor-push ## update the running actor in the wasmcloud host
+	wash ctl update actor $(wasmcloud_host_id) $(codenames_actor_id) localhost:5000/codenames:v1
 
 wasmcloud_process = $(shell ps | grep wasmcloud | awk '{print $$1}')
 
