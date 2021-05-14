@@ -47,7 +47,9 @@ integration-test: integration-test-docker ## run integration tests and clean up
 wasmcloud-deps: ## start the auxiliary services needed to run wash locally
 	docker-compose -f ../docker-compose.yml up -d registry nats redis
 
-rust_log := debug
+rust_log = debug
+wasmcloud_host_id = $(shell wash ctl get hosts -o json | jq -r '.hosts[0].id')
+codenames_actor_id = $(shell wash ctl get inventory $(wasmcloud_host_id) -o json | jq -r '.inventory.actors[0].id')
 
 wasmcloud-start: wasmcloud-deps ## start a wasmcloud host
 wasmcloud-start: export RUST_LOG=$(rust_log)
@@ -81,13 +83,10 @@ wasmcloud-actor-start: wasmcloud-actor-push ## start the codenames wasmcloud act
 
 .PHONY: wasmcloud-up
 wasmcloud-up: wasmcloud-actor-start wasmcloud-providers-start ## start the wasmcloud actor locally
-	wash ctl link MCW7EHKF5Y4GZ2SDSJTNLFO7U6RZFQ5ZC4ZAXHSUPTKJPHKLPPDR3HEI VAZVC4RX54J2NVCMCW7BPCAHGGG5XZXDBXFUMDUXGESTMQEJLC3YVZWB wasmcloud:keyvalue
-	wash ctl link MCW7EHKF5Y4GZ2SDSJTNLFO7U6RZFQ5ZC4ZAXHSUPTKJPHKLPPDR3HEI VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M wasmcloud:httpserver PORT=8080
-	wash ctl link MCW7EHKF5Y4GZ2SDSJTNLFO7U6RZFQ5ZC4ZAXHSUPTKJPHKLPPDR3HEI VDHPKGFKDI34Y4RN4PWWZHRYZ6373HYRSNNEM4UTDLLOGO5B37TSVREP wasmcloud:extras
-	wash ctl link MCW7EHKF5Y4GZ2SDSJTNLFO7U6RZFQ5ZC4ZAXHSUPTKJPHKLPPDR3HEI VCCANMDC7KONJK435W6T7JFEEL7S3ZG6GUZMZ3FHTBZ32OZHJQR5MJWZ wasmcloud:logging
-
-wasmcloud_host_id := $(shell wash ctl get hosts -o json | jq -r '.hosts[0].id')
-codenames_actor_id := $(shell wash ctl get inventory $(wasmcloud_host_id) -o json | jq -r '.inventory.actors[0].id')
+	wash ctl link $(codenames_actor_id) VAZVC4RX54J2NVCMCW7BPCAHGGG5XZXDBXFUMDUXGESTMQEJLC3YVZWB wasmcloud:keyvalue
+	wash ctl link $(codenames_actor_id) VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M wasmcloud:httpserver PORT=8080
+	wash ctl link $(codenames_actor_id) VDHPKGFKDI34Y4RN4PWWZHRYZ6373HYRSNNEM4UTDLLOGO5B37TSVREP wasmcloud:extras
+	wash ctl link $(codenames_actor_id) VCCANMDC7KONJK435W6T7JFEEL7S3ZG6GUZMZ3FHTBZ32OZHJQR5MJWZ wasmcloud:logging
 
 .PHONY: wasmcloud-update
 wasmcloud-update: wasmcloud-actor-push ## update the running actor in the wasmcloud host
