@@ -38,15 +38,15 @@ build: build-service build-app ## build both the service and app projects
 
 .EXPORT_ALL_VARIABLES:
 
-AWS_ACCOUNT := $(shell aws sts get-caller-identity | jq -r .Account)
-AWS_ECR_URL := ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com
+AWS_ACCOUNT = $(shell aws sts get-caller-identity | jq -r .Account)
+AWS_ECR_URL = ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com
 
-LOCAL_IP := $(shell ifconfig | grep broadcast | head -n 1 | awk '{print $$2}')
-SERVICE_PORT := 8080
-APP_PORT := 3000
+LOCAL_IP = $(shell ifconfig | grep broadcast | head -n 1 | awk '{print $$2}')
+SERVICE_PORT = 8080
+APP_PORT = 3000
 
-API_URL := http://$(LOCAL_IP):${SERVICE_PORT}
-HOST := ${LOCAL_IP}
+API_URL = http://$(LOCAL_IP):${SERVICE_PORT}
+HOST = ${LOCAL_IP}
 
 start: ## start fully functioning stack locally via docker
 	docker-compose up -d app
@@ -76,4 +76,10 @@ push-app-image: ## push app image
 	docker push ${AWS_ECR_URL}/codenames_app
 
 push-images: push-service-image push-app-image ## push both images
+
+build-wash:
+	docker-compose build wash
+
+run-wash:
+	docker-compose run --rm wash
 

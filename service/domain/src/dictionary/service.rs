@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use dyn_clone::DynClone;
+use log::debug;
 
 use crate::dictionary::model::DictionaryType;
 use crate::dictionary::util::get_dictionary_words;
@@ -14,6 +15,7 @@ pub struct Service {
 
 impl Service {
     pub fn new(generator: Box<dyn WordGenerator>) -> StdResult<Service> {
+        debug!("call: dictionary.Service::new");
         let words = get_dictionary_words(DictionaryType::Default)?;
         Ok(Service { words, generator })
     }
@@ -24,6 +26,7 @@ impl Service {
     }
 
     pub fn new_word_pair(&self) -> ServiceResult<(String, String)> {
+        debug!("call: dictionary.Service.new_word_pair)");
         self.generator
             .random_pair(self.words.iter().cloned().collect())
     }

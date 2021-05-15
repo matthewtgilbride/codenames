@@ -1,111 +1,150 @@
 #[macro_use]
 extern crate serde_json;
 extern crate wapc_guest as guest;
+extern crate wasmcloud_actor_logging as logging;
 
-use std::collections::hash_map::RandomState;
-use std::collections::HashSet;
-
-use actor_core as core;
-use actor_http_server as http;
 use guest::prelude::*;
+use log::debug;
+use wasmcloud_actor_core as core;
+use wasmcloud_actor_http_server::{Handlers, Method, Request, Response};
 
-use codenames_domain::dictionary::service::WordGenerator;
-use codenames_domain::game::board::service::BoardGenerator;
-use codenames_domain::game::card::model::Card;
-use codenames_domain::game::dao::{DaoResult, DAO};
-use codenames_domain::game::model::{Game, Team};
+use codenames_domain::game::model::{GuessRequest, NewGameRequest, Player, PlayerRequest};
 use codenames_domain::game::service::Service;
-use codenames_domain::ServiceResult;
+use codenames_domain::ServiceError;
 
-use crate::wasm_routes::WasmRoutes;
+use crate::dictionary::service::WordGeneratorWasmCloud;
+use crate::game::board::service::BoardGeneratorWasmCloud;
+use crate::game::dao::WasmKeyValueDao;
+use urlencoding::decode;
 
-// use wasm_routes::WasmRoutes;
+mod dictionary;
+mod game;
 
-mod wasm_routes;
-
-#[derive(Clone)]
-struct WordStub;
-
-impl WordGenerator for WordStub {
-    fn random_set(&self, _: HashSet<String, RandomState>) -> ServiceResult<[String; 25]> {
-        unimplemented!()
-    }
-
-    fn random_pair(&self, _: HashSet<String, RandomState>) -> ServiceResult<(String, String)> {
-        unimplemented!()
-    }
+#[core::init]
+fn init() {
+    Handlers::register_handle_request(route_request);
+    logging::enable_macros();
 }
 
-#[derive(Clone)]
-struct BoardStub;
-
-impl BoardGenerator for BoardStub {
-    fn random_board(&self, _: [String; 25]) -> ServiceResult<([Card; 25], Team)> {
-        unimplemented!()
-    }
-}
-
-#[derive(Clone)]
-struct DaoStub;
-
-impl DAO for DaoStub {
-    fn get(&mut self, _: String) -> DaoResult<Game> {
-        unimplemented!()
-    }
-    fn keys(&mut self) -> DaoResult<Vec<String>> {
-        unimplemented!()
-    }
-    fn set(&mut self, _: String, _: Game) -> DaoResult<()> {
-        unimplemented!()
-    }
-}
-
-#[no_mangle]
-pub fn wapc_init() {
-    core::Handlers::register_health_request(health);
-    http::Handlers::register_handle_request(route_wrapper);
-}
-
-fn health(_h: core::HealthCheckRequest) -> HandlerResult<core::HealthCheckResponse> {
-    Ok(core::HealthCheckResponse::healthy())
-}
-
-fn route_wrapper(msg: http::Request) -> HandlerResult<http::Response> {
-    let word_generator = Box::new(WordStub);
-    let board_generator = Box::new(BoardStub);
-    let dao = Box::new(DaoStub);
-
+fn route_request(req: Request) -> HandlerResult<Response> {
+    let word_generator = Box::new(WordGeneratorWasmCloud);
+    let board_generator = Box::new(BoardGeneratorWasmCloud);
+    let dao = Box::new(WasmKeyValueDao);
     let service = Service::new(word_generator, board_generator, dao)?;
 
-    let mut routes = WasmRoutes::new(service);
+    debug!("Request received: Path is {}", req.path);
 
-    if msg.path == "/" {
-        return routes.random_name(msg);
-    }
-    if msg.path.starts_with("/game") {
-        if msg.method == "GET" {
-            return routes.get(msg);
+    let method = req.method();
+    let segments = req.path_segments();
+
+    let routing_result: Result<Response, ServiceError> = match (method.clone(), &segments[..]) {
+        // get a random game key
+        (Method::Get, [""]) => {
+            debug_route("random game");
+            let json = json!(service.random_name()?);
+            Ok(Response::json(json, 200, "OK"))
         }
-        if msg.method == "POST" {
-            return routes.new_game(msg);
+
+        // create a game
+        (Method::Post, ["game"]) => {
+            debug_route("create game");
+            let body: NewGameRequest =
+                serde_json::from_str(std::str::from_utf8(req.body.as_slice())?)?;
+            let game = service.new_game(body)?;
+            Ok(Response::json(game, 200, "OK"))
         }
-        if msg.method == "PUT" {
-            if msg.path.ends_with("/join") {
-                return routes.join(msg);
-            }
-            if msg.path.ends_with("/leave") {
-                return routes.leave(msg);
-            }
-            if msg.path.ends_with("/guess") {
-                return routes.guess(msg);
-            }
-            if msg.path.ends_with("/guess/undo") {
-                return routes.undo_guess(msg);
-            }
-            if msg.path.ends_with("/end-turn") {
-                return routes.end_turn(msg);
+
+        // get a list of all games
+        (Method::Get, ["game"]) => {
+            debug_route("get all games");
+            let games = service.clone().find()?;
+            Ok(Response::json(games, 200, "OK"))
+        }
+
+        // get an existing game
+        (Method::Get, ["game", game_key]) => {
+            debug_route("get game");
+            let game = service.clone().get(game_key.to_string(), None)?;
+            Ok(Response::json(game, 200, "OK"))
+        }
+
+        // join a game as a player
+        (Method::Put, ["game", game_key, "join"]) => {
+            debug_route("join");
+            let player: Player = serde_json::from_str(std::str::from_utf8(req.body.as_slice())?)?;
+            let updated_game = service.join(game_key.to_string(), player)?;
+            Ok(Response::json(updated_game, 200, "OK"))
+        }
+
+        // undo a guess
+        (Method::Put, ["game", game_key, "guess", "undo"]) => {
+            debug_route("undo guess");
+            let updated_game = service.undo_guess(game_key.to_string())?;
+            Ok(Response::json(updated_game, 200, "OK"))
+        }
+
+        // end the current team's turn
+        (Method::Put, ["game", game_key, "end-turn"]) => {
+            debug_route("end turn");
+            let updated_game = service.end_turn(game_key.to_string())?;
+            Ok(Response::json(updated_game, 200, "OK"))
+        }
+
+        // get a player's view of the game
+        (Method::Get, ["game", game_key, player_name_encoded]) => {
+            debug_route("get player game");
+            let player_name = decode(player_name_encoded)?;
+            let game = service.clone().get(
+                game_key.to_string(),
+                Some(PlayerRequest::new(player_name.as_str())),
+            )?;
+            Ok(Response::json(game, 200, "OK"))
+        }
+
+        // guess a word
+        (Method::Put, ["game", game_key, player_name_encoded, "guess", index]) => {
+            debug_route("guess");
+            let player_name = decode(player_name_encoded)?;
+            let board_index_result = index.parse::<usize>();
+            match board_index_result {
+                Ok(board_index) => {
+                    let updated_game = service.guess(
+                        game_key.to_string(),
+                        GuessRequest::new(player_name.as_str(), board_index),
+                    )?;
+                    Ok(Response::json(updated_game, 200, "OK"))
+                }
+                Err(e) => Err(ServiceError::BadRequest(e.to_string())),
             }
         }
-    }
-    Ok(http::Response::not_found())
+
+        // leave a game
+        (Method::Put, ["game", game_key, player_name_encoded, "leave"]) => {
+            debug_route("leave");
+            let player_name = decode(player_name_encoded)?;
+            let updated_game = service.clone().leave(
+                game_key.to_string(),
+                PlayerRequest::new(player_name.as_str()),
+            )?;
+            Ok(Response::json(updated_game, 200, "OK"))
+        }
+
+        _ => Ok(Response::not_found()),
+    };
+
+    Ok(routing_result.unwrap_or_else(|se| {
+        Response::json(
+            se.clone(),
+            match se {
+                ServiceError::BadRequest(_) => 400,
+                ServiceError::NotFound(_) => 404,
+                ServiceError::Unknown(_) => 500,
+            },
+            "ServiceError",
+        )
+    }))
+}
+
+fn debug_route(msg: &str) {
+    debug!("matched route: {}", msg)
 }

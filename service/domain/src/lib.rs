@@ -5,6 +5,8 @@ use std::error::Error;
 use std::fmt;
 use std::fmt::Formatter;
 
+use serde::Serialize;
+
 use crate::game::dao::DaoError;
 use crate::game::model::GameError;
 
@@ -40,7 +42,7 @@ impl fmt::Display for UniqueError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Clone)]
 pub enum ServiceError {
     BadRequest(String),
     NotFound(String),
@@ -74,6 +76,12 @@ impl From<DaoError> for ServiceError {
             DaoError::NotFound(msg) => ServiceError::NotFound(msg),
             DaoError::Unknown(msg) => ServiceError::Unknown(msg),
         }
+    }
+}
+
+impl From<serde_json::Error> for ServiceError {
+    fn from(serde_err: serde_json::Error) -> Self {
+        ServiceError::BadRequest(serde_err.to_string())
     }
 }
 
