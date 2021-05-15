@@ -36,23 +36,16 @@ fn route_request(req: Request) -> HandlerResult<Response> {
     let method = req.method();
     let segments = req.path_segments();
 
-    let routing_result: Result<Response, ServiceError> = match (
-        method.clone(),
-        segments.get(0),
-        segments.get(1),
-        segments.get(2),
-        segments.get(3),
-        segments.get(4),
-    ) {
+    let routing_result: Result<Response, ServiceError> = match (method.clone(), &segments[..]) {
         // get a random game key
-        (Method::Get, Some(&""), None, None, None, None) => {
+        (Method::Get, [""]) => {
             debug_route("random game");
             let json = json!(service.random_name()?);
             Ok(Response::json(json, 200, "OK"))
         }
 
         // create a game
-        (Method::Post, Some(&"game"), None, None, None, None) => {
+        (Method::Post, ["game"]) => {
             debug_route("create game");
             let body: NewGameRequest =
                 serde_json::from_str(std::str::from_utf8(req.body.as_slice())?)?;
@@ -61,14 +54,14 @@ fn route_request(req: Request) -> HandlerResult<Response> {
         }
 
         // get an existing game
-        (Method::Get, Some(&"game"), Some(&game_key), None, None, None) => {
+        (Method::Get, ["game", game_key]) => {
             debug_route("get game");
             let game = service.clone().get(game_key.to_string(), None)?;
             Ok(Response::json(game, 200, "OK"))
         }
 
         // join a game as a player
-        (Method::Put, Some(&"game"), Some(&game_key), Some(&"join"), None, None) => {
+        (Method::Put, ["game", game_key, "join"]) => {
             debug_route("join");
             let player: Player = serde_json::from_str(std::str::from_utf8(req.body.as_slice())?)?;
             let updated_game = service.join(game_key.to_string(), player)?;
@@ -76,21 +69,21 @@ fn route_request(req: Request) -> HandlerResult<Response> {
         }
 
         // undo a guess
-        (Method::Put, Some(&"game"), Some(&game_key), Some(&"guess"), Some(&"undo"), None) => {
+        (Method::Put, ["game", game_key, "guess"]) => {
             debug_route("undo guess");
             let updated_game = service.undo_guess(game_key.to_string())?;
             Ok(Response::json(updated_game, 200, "OK"))
         }
 
         // end the current team's turn
-        (Method::Put, Some(&"game"), Some(&game_key), Some(&"end-turn"), None, None) => {
+        (Method::Put, ["game", game_key, "end-turn"]) => {
             debug_route("end turn");
             let updated_game = service.end_turn(game_key.to_string())?;
             Ok(Response::json(updated_game, 200, "OK"))
         }
 
         // get a player's view of the game
-        (Method::Get, Some(&"game"), Some(&game_key), Some(&player_name), None, None) => {
+        (Method::Get, ["game", game_key, player_name]) => {
             debug_route("get player game");
             let game = service
                 .clone()
@@ -99,14 +92,7 @@ fn route_request(req: Request) -> HandlerResult<Response> {
         }
 
         // guess a word
-        (
-            Method::Put,
-            Some(&"game"),
-            Some(&game_key),
-            Some(&player_name),
-            Some(&"guess"),
-            Some(&index),
-        ) => {
+        (Method::Put, ["game", game_key, player_name, "guess", index]) => {
             debug_route("guess");
             let board_index_result = index.parse::<usize>();
             match board_index_result {
@@ -122,7 +108,7 @@ fn route_request(req: Request) -> HandlerResult<Response> {
         }
 
         // leave a game
-        (Method::Put, Some(&"game"), Some(&game_key), Some(&player_name), Some(&"leave"), None) => {
+        (Method::Put, ["game", game_key, player_name, "leave"]) => {
             debug_route("leave");
             let updated_game = service
                 .clone()
