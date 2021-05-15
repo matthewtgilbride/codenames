@@ -49,7 +49,7 @@ wasmcloud-deps: ## start the auxiliary services needed to run wash locally
 
 rust_log = debug
 wasmcloud_host_id = $(shell wash ctl get hosts -o json | jq -r '.hosts[0].id')
-codenames_actor_id = $(shell wash ctl get inventory $(wasmcloud_host_id) -o json | jq -r '.inventory.actors[0].id')
+codenames_actor_id = $(shell wash claims inspect ./codenames.wasm -o json | jq -r .module)
 
 wasmcloud-start: wasmcloud-deps ## start a wasmcloud host
 wasmcloud-start: export RUST_LOG=$(rust_log)
@@ -98,3 +98,15 @@ wasmcloud_process = $(shell ps | grep wasmcloud | awk '{print $$1}')
 wasmcloud-down: kill-local## tear down wasmcloud and it's dependencies
 	docker-compose down
 	-kill $(wasmcloud_process)
+
+.PHONY: wasmcloud-start-manifest
+wasmcloud-start-manifest: export ACTOR_ID=$(codenames_actor_id)
+wasmcloud-start-manifest: export RUST_LOG=$(rust_log)
+wasmcloud-start-manifest: wasmcloud-actor-sign
+	wasmcloud --allowed-insecure localhost:5000 -m wasm/manifest.yaml
+
+.PHONY: wash-start-manifest
+wash-start-manifest: export ACTOR_ID=$(codenames_actor_id)
+wash-start-manifest: export RUST_LOG=$(rust_log)
+wash-start-manifest: wasmcloud-actor-sign
+	wash up -m wasm/manifest.yaml
