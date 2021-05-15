@@ -15,6 +15,7 @@ use codenames_domain::ServiceError;
 use crate::dictionary::service::WordGeneratorWasmCloud;
 use crate::game::board::service::BoardGeneratorWasmCloud;
 use crate::game::dao::WasmKeyValueDao;
+use urlencoding::decode;
 
 mod dictionary;
 mod game;
@@ -53,6 +54,13 @@ fn route_request(req: Request) -> HandlerResult<Response> {
             Ok(Response::json(game, 200, "OK"))
         }
 
+        // get a list of all games
+        (Method::Get, ["game"]) => {
+            debug_route("get all games");
+            let games = service.clone().find()?;
+            Ok(Response::json(games, 200, "OK"))
+        }
+
         // get an existing game
         (Method::Get, ["game", game_key]) => {
             debug_route("get game");
@@ -83,23 +91,26 @@ fn route_request(req: Request) -> HandlerResult<Response> {
         }
 
         // get a player's view of the game
-        (Method::Get, ["game", game_key, player_name]) => {
+        (Method::Get, ["game", game_key, player_name_encoded]) => {
             debug_route("get player game");
-            let game = service
-                .clone()
-                .get(game_key.to_string(), Some(PlayerRequest::new(player_name)))?;
+            let player_name = decode(player_name_encoded)?;
+            let game = service.clone().get(
+                game_key.to_string(),
+                Some(PlayerRequest::new(player_name.as_str())),
+            )?;
             Ok(Response::json(game, 200, "OK"))
         }
 
         // guess a word
-        (Method::Put, ["game", game_key, player_name, "guess", index]) => {
+        (Method::Put, ["game", game_key, player_name_encoded, "guess", index]) => {
             debug_route("guess");
+            let player_name = decode(player_name_encoded)?;
             let board_index_result = index.parse::<usize>();
             match board_index_result {
                 Ok(board_index) => {
                     let updated_game = service.guess(
                         game_key.to_string(),
-                        GuessRequest::new(player_name, board_index),
+                        GuessRequest::new(player_name.as_str(), board_index),
                     )?;
                     Ok(Response::json(updated_game, 200, "OK"))
                 }
@@ -108,11 +119,13 @@ fn route_request(req: Request) -> HandlerResult<Response> {
         }
 
         // leave a game
-        (Method::Put, ["game", game_key, player_name, "leave"]) => {
+        (Method::Put, ["game", game_key, player_name_encoded, "leave"]) => {
             debug_route("leave");
-            let updated_game = service
-                .clone()
-                .leave(game_key.to_string(), PlayerRequest::new(player_name))?;
+            let player_name = decode(player_name_encoded)?;
+            let updated_game = service.clone().leave(
+                game_key.to_string(),
+                PlayerRequest::new(player_name.as_str()),
+            )?;
             Ok(Response::json(updated_game, 200, "OK"))
         }
 
