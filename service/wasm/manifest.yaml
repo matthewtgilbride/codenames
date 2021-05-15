@@ -27,4 +27,4 @@ links:
   - actor: ${ACTOR_ID:MBYBQF7OEZPC7S5SKYSLTHHHYHUKZXM6O6K7G54QRP2JSMJ27ZFGYWKC}
     contract_id: wasmcloud:logging
     provider_id: VCCANMDC7KONJK435W6T7JFEEL7S3ZG6GUZMZ3FHTBZ32OZHJQR5MJWZ
-    link_name: logging
+    link_name: default
