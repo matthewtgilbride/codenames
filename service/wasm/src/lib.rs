@@ -69,7 +69,7 @@ fn route_request(req: Request) -> HandlerResult<Response> {
         }
 
         // undo a guess
-        (Method::Put, ["game", game_key, "guess"]) => {
+        (Method::Put, ["game", game_key, "guess", "undo"]) => {
             debug_route("undo guess");
             let updated_game = service.undo_guess(game_key.to_string())?;
             Ok(Response::json(updated_game, 200, "OK"))

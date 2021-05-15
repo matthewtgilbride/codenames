@@ -1,5 +1,8 @@
 include ../help.mk
 
+# Force make to use bash to ensure a consistent shell across machines
+SHELL := /bin/bash
+
 clean: ## cargo clean
 	cargo clean
 
@@ -51,62 +54,36 @@ rust_log = debug
 wasmcloud_host_id = $(shell wash ctl get hosts -o json | jq -r '.hosts[0].id')
 codenames_actor_id = $(shell wash claims inspect ./codenames.wasm -o json | jq -r .module)
 
-wasmcloud-start: wasmcloud-deps ## start a wasmcloud host
-wasmcloud-start: export RUST_LOG=$(rust_log)
-wasmcloud-start:
-	wasmcloud --allowed-insecure localhost:5000
-
-.PHONY: wasmcloud-start-background
-wasmcloud-start-background: ## start and detach from the wasmcloud host process
-	$(MAKE) wasmcloud-start &
-
 wasmcloud-actor-build: build-wasm ## compile and build wasmcloud actor mosule
 
 wasmcloud-actor-sign: wasmcloud-actor-build ## sign the built wasmcloud actor
 	wash claims sign target/wasm32-unknown-unknown/release/codenames_wasm.wasm --keyvalue --http_server --logging --cap wasmcloud:extras --name "codenames" --destination ./codenames.wasm
 
 codenames.wasm: build-wasm wasmcloud-actor-sign
+$(wildcard ./wasm/src/**/*): codenames.wasm
 
 .PHONY: wasmcloud-actor-push
 wasmcloud-actor-push: codenames.wasm ## push the built wasmcloud module to a local registry
 	wash reg push localhost:5000/codenames:v1 codenames.wasm --insecure
 
-.PHONY: wasmcloud-providers-start
-wasmcloud-providers-start: ## start providers on the local machine
-	wash ctl start provider wasmcloud.azurecr.io/redis:0.11.2
-	wash ctl start provider wasmcloud.azurecr.io/httpserver:0.12.1
-	wash ctl start provider wasmcloud.azurecr.io/logging:0.9.3
-
-.PHONY: wasmcloud-actor-start
-wasmcloud-actor-start: wasmcloud-actor-push ## start the codenames wasmcloud actor
-	wash ctl start actor localhost:5000/codenames:v1
-
-.PHONY: wasmcloud-up
-wasmcloud-up: wasmcloud-actor-start wasmcloud-providers-start ## start the wasmcloud actor locally
-	wash ctl link $(codenames_actor_id) VAZVC4RX54J2NVCMCW7BPCAHGGG5XZXDBXFUMDUXGESTMQEJLC3YVZWB wasmcloud:keyvalue
-	wash ctl link $(codenames_actor_id) VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M wasmcloud:httpserver PORT=8080
-	wash ctl link $(codenames_actor_id) VDHPKGFKDI34Y4RN4PWWZHRYZ6373HYRSNNEM4UTDLLOGO5B37TSVREP wasmcloud:extras
-	wash ctl link $(codenames_actor_id) VCCANMDC7KONJK435W6T7JFEEL7S3ZG6GUZMZ3FHTBZ32OZHJQR5MJWZ wasmcloud:logging
-
-.PHONY: wasmcloud-update
-wasmcloud-update: wasmcloud-actor-push ## update the running actor in the wasmcloud host
+.PHONY: wasmcloud-actor-update
+wasmcloud-actor-update: wasmcloud-actor-push ## update the running actor in the wasmcloud host
 	wash ctl update actor $(wasmcloud_host_id) $(codenames_actor_id) localhost:5000/codenames:v1
 
-wasmcloud_process = $(shell ps | grep wasmcloud | awk '{print $$1}')
+.PHONY: wasmcloud-up
+wasmcloud-up: export ACTOR_ID=$(codenames_actor_id)
+wasmcloud-up: export RUST_LOG=$(rust_log)
+wasmcloud-up: wasmcloud-deps codenames.wasm ## start the wasmcloud actor locally
+	wasmcloud --allowed-insecure localhost:5000 -m wasm/manifest.yaml
 
+wasmcloud_process = $(shell ps | grep wasmcloud | awk '{print $$1}')
 .PHONY: wasmcloud-down
-wasmcloud-down: kill-local## tear down wasmcloud and it's dependencies
+wasmcloud-down: kill-local ## tear down wasmcloud and it's dependencies
 	docker-compose down
 	-kill $(wasmcloud_process)
 
-.PHONY: wasmcloud-start-manifest
-wasmcloud-start-manifest: export ACTOR_ID=$(codenames_actor_id)
-wasmcloud-start-manifest: export RUST_LOG=$(rust_log)
-wasmcloud-start-manifest: wasmcloud-actor-sign
-	wasmcloud --allowed-insecure localhost:5000 -m wasm/manifest.yaml
-
-.PHONY: wash-start-manifest
-wash-start-manifest: export ACTOR_ID=$(codenames_actor_id)
-wash-start-manifest: export RUST_LOG=$(rust_log)
-wash-start-manifest: wasmcloud-actor-sign
+.PHONY: wash-up ## start the wasmcloud actor in a wash REPL
+wash-up: export ACTOR_ID=$(codenames_actor_id)
+wash-up: export RUST_LOG=$(rust_log)
+wash-up: codenames.wasm
 	wash up -m wasm/manifest.yaml

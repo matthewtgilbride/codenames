@@ -1,5 +1,6 @@
 use std::convert::TryInto;
 
+use log::debug;
 use wasmcloud_actor_extras as extras;
 
 use codenames_domain::game::board::model::Board;
@@ -25,14 +26,17 @@ impl BoardGeneratorWasmCloud {
 
 impl BoardGenerator for BoardGeneratorWasmCloud {
     fn random_board(&self, words: [String; 25]) -> ServiceResult<(Board, Team)> {
+        debug!("call: board.BoardGenerator.random_board");
         let first_team = self.random_team()?;
 
         let mut indices: Vec<usize> = Vec::new();
         while indices.len() < 25 {
             let rand = extras::default()
-                .request_random(0, 24)
+                .request_random(0, 25)
                 .map_err(|_| ServiceError::Unknown("could not get random number".into()))?
                 as usize;
+
+            debug!("selected index: {}", rand);
 
             if !indices.contains(&rand) {
                 indices.push(rand)
