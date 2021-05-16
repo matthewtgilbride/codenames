@@ -49,7 +49,7 @@ API_URL ?= http://$(LOCAL_IP):${SERVICE_PORT}
 HOST ?= ${LOCAL_IP}
 
 start: ## start fully functioning stack locally via docker
-	docker compose up -d app
+	docker-compose up -d app
 
 deploy-infra: ## deploy AWS infrastructure
 	${MAKE} -C infra deploy-registry
