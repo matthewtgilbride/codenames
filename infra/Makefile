@@ -30,17 +30,32 @@ destroy-cluster: ## destroy ECS cluster
 
 public_ip = $(shell dig +short myip.opendns.com @resolver1.opendns.com)
 
-synth-instance: export DEPLOY_TYPE=instance
-synth-instance: export PUBLIC_IP=$(public_ip)
-synth-instance: ## validate cfn for development EC2 x86 instance
+synth-dev-instance: export DEPLOY_TYPE=app-instance
+synth-dev-instance: export PUBLIC_IP=$(public_ip)
+synth-dev-instance: ## validate cfn for development EC2 x86 instance
 	yarn cdk synth
 
-deploy-instance: export DEPLOY_TYPE=instance
-deploy-instance: export PUBLIC_IP=$(public_ip)
-deploy-instance: ## deploy development EC2 instance
+deploy-dev-instance: export DEPLOY_TYPE=app-instance
+deploy-dev-instance: export PUBLIC_IP=$(public_ip)
+deploy-dev-instance: ## deploy development EC2 instance
 	yarn cdk deploy
 
-destroy-instance: export DEPLOY_TYPE=instance
-destroy-instance: export PUBLIC_IP=$(public_ip)
-destroy-instance: ## destroy development EC2 instance
+destroy-dev-instance: export DEPLOY_TYPE=app-instance
+destroy-dev-instance: export PUBLIC_IP=$(public_ip)
+destroy-dev-instance: ## destroy development EC2 instance
+	yarn cdk destroy
+
+synth-app-instance: export DEPLOY_TYPE=app-instance
+synth-app-instance: export PUBLIC_IP=$(public_ip)
+synth-app-instance: ## validate cfn for development EC2 x86 instance
+	yarn cdk synth
+
+deploy-app-instance: export DEPLOY_TYPE=app-instance
+deploy-app-instance: export PUBLIC_IP=$(public_ip)
+deploy-app-instance: ## deploy development EC2 instance
+	yarn cdk deploy
+
+destroy-app-instance: export DEPLOY_TYPE=app-instance
+destroy-app-instance: export PUBLIC_IP=$(public_ip)
+destroy-app-instance: ## destroy development EC2 instance
 	yarn cdk destroy

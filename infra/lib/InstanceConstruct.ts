@@ -15,7 +15,7 @@ import {
 import { readFileSync } from 'fs';
 import * as path from 'path';
 
-export class DevelopmentInstanceConstruct extends Construct {
+export class InstanceConstruct extends Construct {
   constructor(
     scope: Construct,
     id: string,
@@ -26,15 +26,17 @@ export class DevelopmentInstanceConstruct extends Construct {
     const vpc = Vpc.fromLookup(this, 'default-vpc', { isDefault: true });
 
     const securityGroup = new SecurityGroup(this, 'local-ssh-sg', {
-      securityGroupName: `codenames local ssh security group`,
+      securityGroupName: `codenames security group`,
       vpc,
     });
 
     securityGroup.addIngressRule(Peer.ipv4(`${publicIp}/32`), Port.tcp(22));
+    securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(3000));
+    securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(8080));
 
     const userData = UserData.forLinux();
     const installScript = readFileSync(
-      path.resolve(process.cwd(), 'dev_user_data.sh'),
+      path.resolve(process.cwd(), 'app_user_data.sh'),
       { encoding: 'utf-8' },
     );
     userData.addCommands(installScript);
@@ -43,7 +45,7 @@ export class DevelopmentInstanceConstruct extends Construct {
       name: 'ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20210223',
     });
 
-    new Instance(this, 'codenames development instance', {
+    new Instance(this, 'codenames instance', {
       vpc,
       userData,
       machineImage,

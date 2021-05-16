@@ -18,12 +18,12 @@ services:
       - "6379:6379"
 
   service:
-    image: ${AWS_ECR_URL}/codenames_service
+    #image: ${AWS_ECR_URL}/codenames_service
     build:
       context: service
       dockerfile: Dockerfile.local
     ports:
-      - "8080:8080"
+      - "${SERVICE_PORT}:${SERVICE_PORT}"
     depends_on:
       - redis
     environment:
@@ -52,11 +52,11 @@ services:
       - "8080:8080"
 
   app:
-    image: ${AWS_ECR_URL}/codenames_app
+    #image: ${AWS_ECR_URL}/codenames_app
     build:
       context: app
     ports:
-      - "3000:3000"
+      - "${APP_PORT}:${APP_PORT}"
     depends_on:
       - service
     environment:

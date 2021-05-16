@@ -4,8 +4,9 @@ import { App, Construct, Stack } from '@aws-cdk/core';
 import { ClusterConstruct } from '../lib/ClusterConstruct';
 import { RepositoryConstruct } from '../lib/RepositoryConstruct';
 import { DevelopmentInstanceConstruct } from '../lib/DevelopmentInstanceConstruct';
+import { InstanceConstruct } from '../lib/InstanceConstruct';
 
-type DeployType = 'instance' | 'cluster' | 'registry';
+type DeployType = 'app-instance' | 'dev-instance' | 'cluster' | 'registry';
 
 class CodenamesStack extends Stack {
   constructor(scope: Construct, id: string, deployType: DeployType) {
@@ -24,7 +25,7 @@ class CodenamesStack extends Stack {
       case 'registry':
         new RepositoryConstruct(this, `${id}-Repositories`);
         break;
-      case 'instance':
+      case 'dev-instance':
         if (!process.env.PUBLIC_IP) {
           throw new Error(
             `PUBLIC_IP environment variable must be provided to deploy dev EC2 instance`,
@@ -34,9 +35,19 @@ class CodenamesStack extends Stack {
           publicIp: process.env.PUBLIC_IP,
         });
         break;
+      case 'app-instance':
+        if (!process.env.PUBLIC_IP) {
+          throw new Error(
+            `PUBLIC_IP environment variable must be provided to deploy dev EC2 instance`,
+          );
+        }
+        new InstanceConstruct(this, `${id}-AppInstance`, {
+          publicIp: process.env.PUBLIC_IP,
+        });
+        break;
       default:
         throw new Error(
-          `expected DEPLOY_TYPE of instance, registry, or cluster but got ${deployType}`,
+          `expected DEPLOY_TYPE of app-instance, dev-instance, registry, or cluster but got ${deployType}`,
         );
     }
   }

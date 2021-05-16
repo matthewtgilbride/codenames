@@ -42,14 +42,14 @@ AWS_ACCOUNT = $(shell aws sts get-caller-identity | jq -r .Account)
 AWS_ECR_URL = ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com
 
 LOCAL_IP = $(shell ifconfig | grep broadcast | head -n 1 | awk '{print $$2}')
-SERVICE_PORT = 8080
-APP_PORT = 3000
+SERVICE_PORT ?= 8080
+APP_PORT ?= 3000
 
-API_URL = http://$(LOCAL_IP):${SERVICE_PORT}
-HOST = ${LOCAL_IP}
+API_URL ?= http://$(LOCAL_IP):${SERVICE_PORT}
+HOST ?= ${LOCAL_IP}
 
 start: ## start fully functioning stack locally via docker
-	docker-compose up -d app
+	docker compose up -d app
 
 deploy-infra: ## deploy AWS infrastructure
 	${MAKE} -C infra deploy-registry
