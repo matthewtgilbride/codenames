@@ -54,6 +54,6 @@ git checkout remove-alb
 
 git pull
 
-make ecs-login
+make ecr-login
 
 make start
