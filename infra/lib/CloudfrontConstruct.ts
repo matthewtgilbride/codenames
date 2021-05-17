@@ -32,7 +32,7 @@ export class CloudfrontConstruct extends Construct {
     const appDnsRecord = `codenames.${domainName}`;
     const serviceDnsRecord = `codenamesapi.${domainName}`;
 
-    new Distribution(this, 'AppDist', {
+    const appDist = new Distribution(this, 'AppDist', {
       certificate,
       defaultBehavior: {
         origin: new HttpOrigin(instanceDnsName, {
@@ -43,7 +43,7 @@ export class CloudfrontConstruct extends Construct {
       domainNames: [appDnsRecord],
     });
 
-    const dist = new Distribution(this, 'ServiceDist', {
+    const serviceDist = new Distribution(this, 'ServiceDist', {
       certificate,
       defaultBehavior: {
         origin: new HttpOrigin(instanceDnsName, {
@@ -54,13 +54,22 @@ export class CloudfrontConstruct extends Construct {
       domainNames: [serviceDnsRecord],
     });
 
-    new RecordSet(this, 'ZM-rs', {
+    new RecordSet(this, 'app-rs', {
+      zone,
+      recordName: appDnsRecord,
+      recordType: RecordType.CNAME,
+      // todo: make longer once stable
+      ttl: Duration.seconds(60),
+      target: RecordTarget.fromValues(appDist.distributionDomainName),
+    });
+
+    new RecordSet(this, 'service-rs', {
       zone,
       recordName: serviceDnsRecord,
       recordType: RecordType.CNAME,
       // todo: make longer once stable
       ttl: Duration.seconds(60),
-      target: RecordTarget.fromValues(dist.distributionDomainName),
+      target: RecordTarget.fromValues(serviceDist.distributionDomainName),
     });
   }
 }
