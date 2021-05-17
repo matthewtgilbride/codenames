@@ -45,3 +45,15 @@ apt-get install net-tools -y
 # clone codenames
 cd /home/ubuntu
 git clone https://github.com/matthewtgilbride/codenames.git
+
+cd /home/ubuntu/codenames
+
+git fetch
+
+git checkout remove-alb
+
+git pull
+
+make ecs-login
+
+make start

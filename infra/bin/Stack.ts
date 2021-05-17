@@ -5,6 +5,7 @@ import { ClusterConstruct } from '../lib/ClusterConstruct';
 import { RepositoryConstruct } from '../lib/RepositoryConstruct';
 import { DevelopmentInstanceConstruct } from '../lib/DevelopmentInstanceConstruct';
 import { InstanceConstruct } from '../lib/InstanceConstruct';
+import { CloudfrontConstruct } from '../lib/CloudfrontConstruct';
 
 type DeployType = 'app-instance' | 'dev-instance' | 'cluster' | 'registry';
 
@@ -44,6 +45,7 @@ class CodenamesStack extends Stack {
         new InstanceConstruct(this, `${id}-AppInstance`, {
           publicIp: process.env.PUBLIC_IP,
         });
+        new CloudfrontConstruct(this, `${id}-Cloudfront`);
         break;
       default:
         throw new Error(

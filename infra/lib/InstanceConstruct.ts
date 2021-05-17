@@ -14,6 +14,7 @@ import {
 } from '@aws-cdk/aws-ec2';
 import { readFileSync } from 'fs';
 import * as path from 'path';
+import { ManagedPolicy, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
 
 export class InstanceConstruct extends Construct {
   constructor(
@@ -59,6 +60,14 @@ export class InstanceConstruct extends Construct {
           volume: BlockDeviceVolume.ebs(8),
         },
       ],
+      role: new Role(this, 'ecr-role', {
+        managedPolicies: [
+          ManagedPolicy.fromAwsManagedPolicyName(
+            'AmazonEC2ContainerRegistryReadOnly',
+          ),
+        ],
+        assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
+      }),
     });
   }
 }
