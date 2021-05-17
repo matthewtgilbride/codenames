@@ -17,6 +17,8 @@ import * as path from 'path';
 import { ManagedPolicy, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
 
 export class InstanceConstruct extends Construct {
+  public instanceDnsName: string;
+
   constructor(
     scope: Construct,
     id: string,
@@ -46,7 +48,7 @@ export class InstanceConstruct extends Construct {
       name: 'ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20210223',
     });
 
-    new Instance(this, 'codenames instance', {
+    const instance = new Instance(this, 'codenames instance', {
       vpc,
       userData,
       machineImage,
@@ -69,5 +71,7 @@ export class InstanceConstruct extends Construct {
         assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
       }),
     });
+
+    this.instanceDnsName = instance.instancePublicDnsName;
   }
 }

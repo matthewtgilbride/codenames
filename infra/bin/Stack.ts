@@ -42,10 +42,15 @@ class CodenamesStack extends Stack {
             `PUBLIC_IP environment variable must be provided to deploy dev EC2 instance`,
           );
         }
-        new InstanceConstruct(this, `${id}-AppInstance`, {
-          publicIp: process.env.PUBLIC_IP,
-        });
-        new CloudfrontConstruct(this, `${id}-Cloudfront`);
+        // eslint-disable-next-line no-case-declarations
+        const { instanceDnsName } = new InstanceConstruct(
+          this,
+          `${id}-AppInstance`,
+          {
+            publicIp: process.env.PUBLIC_IP,
+          },
+        );
+        new CloudfrontConstruct(this, `${id}-Cloudfront`, instanceDnsName);
         break;
       default:
         throw new Error(
