@@ -18,7 +18,7 @@ services:
       - "6379:6379"
 
   service:
-    #image: ${AWS_ECR_URL}/codenames_service
+    image: ${AWS_ECR_URL}/codenames_service
     build:
       context: service
       dockerfile: Dockerfile.local
@@ -52,7 +52,7 @@ services:
       - "8080:8080"
 
   app:
-    #image: ${AWS_ECR_URL}/codenames_app
+    image: ${AWS_ECR_URL}/codenames_app
     build:
       context: app
     ports:
