@@ -1,5 +1,12 @@
 import { Construct, Duration } from '@aws-cdk/core';
-import { Distribution, OriginProtocolPolicy } from '@aws-cdk/aws-cloudfront';
+import {
+  AllowedMethods,
+  CacheHeaderBehavior,
+  CachePolicy,
+  Distribution,
+  OriginProtocolPolicy,
+  ViewerProtocolPolicy,
+} from '@aws-cdk/aws-cloudfront';
 import { HttpOrigin } from '@aws-cdk/aws-cloudfront-origins';
 import { StringParameter } from '@aws-cdk/aws-ssm';
 import { Certificate } from '@aws-cdk/aws-certificatemanager';
@@ -9,6 +16,7 @@ import {
   RecordTarget,
   RecordType,
 } from '@aws-cdk/aws-route53';
+import { constants } from 'http2';
 
 export class CloudfrontConstruct extends Construct {
   constructor(scope: Construct, id: string, instanceDnsName: string) {
@@ -39,6 +47,7 @@ export class CloudfrontConstruct extends Construct {
           protocolPolicy: OriginProtocolPolicy.HTTP_ONLY,
           httpPort: 3000,
         }),
+        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       domainNames: [appDnsRecord],
     });
@@ -49,6 +58,17 @@ export class CloudfrontConstruct extends Construct {
         origin: new HttpOrigin(instanceDnsName, {
           protocolPolicy: OriginProtocolPolicy.HTTP_ONLY,
           httpPort: 8080,
+        }),
+        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        allowedMethods: AllowedMethods.ALLOW_ALL,
+        cachePolicy: new CachePolicy(this, 'Codenames-Api-Cache-Policy', {
+          headerBehavior: CacheHeaderBehavior.allowList(
+            'Origin',
+            'Access-Control-Request-Method',
+            'Access-Control-Request-Headers',
+            'Access-Control-Allow-Origin',
+            'Access-Control-Allow-Method',
+          ),
         }),
       },
       domainNames: [serviceDnsRecord],

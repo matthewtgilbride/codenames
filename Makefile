@@ -52,7 +52,7 @@ start: ## start fully functioning stack locally via docker
 	docker-compose up -d app
 
 start-aws: ## start fully functioning stack on EC2
-	docker-compose up -f docker-compose-aws.yml -d app
+	docker-compose -f docker-compose-aws.yml up -d app
 
 deploy-infra: ## deploy AWS infrastructure
 	${MAKE} -C infra deploy-registry
