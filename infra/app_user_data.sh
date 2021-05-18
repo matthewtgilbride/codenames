@@ -56,4 +56,4 @@ git pull
 
 make ecr-login
 
-make start
+make start-aws
