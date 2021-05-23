@@ -48,6 +48,7 @@ export class CloudfrontConstruct extends Construct {
           httpPort: 3000,
         }),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        cachePolicy: CachePolicy.CACHING_DISABLED,
       },
       domainNames: [appDnsRecord],
     });
@@ -69,6 +70,8 @@ export class CloudfrontConstruct extends Construct {
             'Access-Control-Allow-Origin',
             'Access-Control-Allow-Method',
           ),
+          minTtl: Duration.seconds(0),
+          defaultTtl: Duration.seconds(0),
         }),
       },
       domainNames: [serviceDnsRecord],
