@@ -67,8 +67,6 @@ export class CloudfrontConstruct extends Construct {
             'Origin',
             'Access-Control-Request-Method',
             'Access-Control-Request-Headers',
-            'Access-Control-Allow-Origin',
-            'Access-Control-Allow-Method',
           ),
           minTtl: Duration.seconds(0),
           defaultTtl: Duration.seconds(0),
