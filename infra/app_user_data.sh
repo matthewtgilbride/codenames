@@ -50,8 +50,6 @@ cd /home/ubuntu/codenames
 
 git fetch
 
-git checkout remove-alb
-
 git pull
 
 make ecr-login
