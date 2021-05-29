@@ -3,6 +3,8 @@ include ../help.mk
 # Force make to use bash to ensure a consistent shell across machines
 SHELL := /bin/bash
 
+##@ Rust
+
 clean: ## cargo clean
 	cargo clean
 
@@ -21,6 +23,8 @@ test: ## test all subprojects
 	cargo test --all
 
 check: format build test ## format, build, and test
+
+##@ Local Development
 
 redis-up: ## bring up a local redis container
 	docker-compose -f ../docker-compose.yml up -d redis
@@ -44,13 +48,15 @@ integration-test-local: ## run newman tests locally
 integration-test-docker: check ## check code, build newman test container, and run it
 	docker-compose -f ../docker-compose.yml up --build --exit-code-from service-test service-test
 
-integration-test: integration-test-docker ## run integration tests and clean up
+integration-test: integration-test-docker ## run docker integration tests and clean up
 	docker-compose -f ../docker-compose.yml down
+
+##@ Wasmcloud
 
 wasmcloud-deps: ## start the auxiliary services needed to run wash locally
 	docker-compose -f ../docker-compose.yml up -d registry nats redis
 
-rust_log = debug
+rust_log = info
 wasmcloud_host_id = $(shell wash ctl get hosts -o json | jq -r '.hosts[0].id')
 codenames_actor_id = $(shell wash claims inspect ./codenames.wasm -o json | jq -r .module)
 

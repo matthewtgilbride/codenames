@@ -1,5 +1,7 @@
 include help.mk
 
+##@ Backend (Rust REST Service)
+
 build-service: ## compile the rust REST service project
 	$(MAKE) -C service build
 
@@ -20,6 +22,8 @@ integration-test-service: ## run the newman integration test suite on the servic
 
 integration-test: integration-test-service ## as of now, there are only integration tests for the service
 
+##@ Frontend (Typescript/NextJS Web App)
+
 build-app: ## build the web UI
 	$(MAKE) -C app build
 
@@ -32,33 +36,36 @@ check-app: ## build and lint the web UI
 start-app: ## start the web UI locally
 	$(MAKE) -C app start
 
+##@ Check, Build, and Start both
+
 check: check-service check-app ## check both the service and app projects
 
 build: build-service build-app ## build both the service and app projects
 
 .EXPORT_ALL_VARIABLES:
-
 AWS_ACCOUNT = $(shell aws sts get-caller-identity | jq -r .Account)
 AWS_ECR_URL = ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com
 
 LOCAL_IP = $(shell ifconfig | grep broadcast | head -n 1 | awk '{print $$2}')
-SERVICE_PORT = 8080
-APP_PORT = 3000
+SERVICE_PORT ?= 8080
+APP_PORT ?= 3000
 
-API_URL = http://$(LOCAL_IP):${SERVICE_PORT}
-HOST = ${LOCAL_IP}
+API_URL ?= http://$(LOCAL_IP):${SERVICE_PORT}
+HOST ?= ${LOCAL_IP}
 
 start: ## start fully functioning stack locally via docker
 	docker-compose up -d app
 
+##@ Infrastructure (AWS CDK)
+
 deploy-infra: ## deploy AWS infrastructure
 	${MAKE} -C infra deploy-registry
-	${MAKE} -C infra deploy-cluster
+	${MAKE} -C infra deploy-app
 
 destroy-infra: ## tear down AWS infrastructure
-	${MAKE} -C infra destroy-cluster
+	${MAKE} -C infra destroy-app
 
-build-service-image: ## build docker image for the service - CAREFUL - this needs to be done from an AMD powered machine (not Apple M1 silicon)
+build-service-image: ## build docker image for the service - CAREFUL - this needs to be done from an x86 powered machine (not Apple M1 silicon)
 	docker-compose build service
 
 build-app-image: ## build docker image for the web ui
@@ -77,9 +84,10 @@ push-app-image: ## push app image
 
 push-images: push-service-image push-app-image ## push both images
 
-build-wash:
-	docker-compose build wash
-
-run-wash:
-	docker-compose run --rm wash
-
+start-aws: export SERVICE_PORT=8080
+start-aws: export APP_PORT=3000
+start-aws: export ALLOWED_ORIGINS=https://codenames.mattgilbride.com
+start-aws: export API_URL=https://codenamesapi.mattgilbride.com
+start-aws: ## start fully functioning stack on EC2
+	docker-compose pull redis service app
+	docker-compose up -d app

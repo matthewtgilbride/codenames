@@ -1,0 +1,28 @@
+version: "3"
+services:
+  redis:
+    image: redis:6.0.9
+    ports:
+      - "6379:6379"
+
+  service:
+    image: ${AWS_ECR_URL}/codenames_service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    environment:
+      - PORT=8080
+      - REDIS_HOST=redis
+      - ALLOWED_ORIGINS=https://codenames.mattgilbride.com
+
+  app:
+    image: ${AWS_ECR_URL}/codenames_app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - service
+    environment:
+      - PORT=3000
+      - API_URL=https://codenamesapi.mattgilbride.com
+
