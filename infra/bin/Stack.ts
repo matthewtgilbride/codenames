@@ -7,7 +7,7 @@ import { DevelopmentInstanceConstruct } from '../lib/DevelopmentInstanceConstruc
 import { InstanceConstruct } from '../lib/InstanceConstruct';
 import { CloudfrontConstruct } from '../lib/CloudfrontConstruct';
 
-type DeployType = 'app-instance' | 'dev-instance' | 'cluster' | 'registry';
+type DeployType = 'app' | 'dev' | 'registry' | 'cluster';
 
 class CodenamesStack extends Stack {
   constructor(scope: Construct, id: string, deployType: DeployType) {
@@ -20,23 +20,7 @@ class CodenamesStack extends Stack {
     });
 
     switch (deployType) {
-      case 'cluster':
-        new ClusterConstruct(this, `${id}-Cluster`);
-        break;
-      case 'registry':
-        new RepositoryConstruct(this, `${id}-Repositories`);
-        break;
-      case 'dev-instance':
-        if (!process.env.PUBLIC_IP) {
-          throw new Error(
-            `PUBLIC_IP environment variable must be provided to deploy dev EC2 instance`,
-          );
-        }
-        new DevelopmentInstanceConstruct(this, `${id}-DevelopmentInstance`, {
-          publicIp: process.env.PUBLIC_IP,
-        });
-        break;
-      case 'app-instance':
+      case 'app':
         if (!process.env.PUBLIC_IP) {
           throw new Error(
             `PUBLIC_IP environment variable must be provided to deploy dev EC2 instance`,
@@ -51,6 +35,22 @@ class CodenamesStack extends Stack {
           },
         );
         new CloudfrontConstruct(this, `${id}-Cloudfront`, instanceDnsName);
+        break;
+      case 'dev':
+        if (!process.env.PUBLIC_IP) {
+          throw new Error(
+            `PUBLIC_IP environment variable must be provided to deploy dev EC2 instance`,
+          );
+        }
+        new DevelopmentInstanceConstruct(this, `${id}-DevelopmentInstance`, {
+          publicIp: process.env.PUBLIC_IP,
+        });
+        break;
+      case 'registry':
+        new RepositoryConstruct(this, `${id}-Repositories`);
+        break;
+      case 'cluster':
+        new ClusterConstruct(this, `${id}-Cluster`);
         break;
       default:
         throw new Error(

@@ -19,17 +19,17 @@ services:
 
   service:
     image: ${AWS_ECR_URL}/codenames_service
-    #build:
-    #  context: service
-    #  dockerfile: Dockerfile.local
+    build:
+      context: service
+      dockerfile: Dockerfile.local
     ports:
-      - "${SERVICE_PORT}:${SERVICE_PORT}"
+      - ${SERVICE_PORT:-8080}:${SERVICE_PORT:-8080}
     depends_on:
       - redis
     environment:
-      - PORT=${SERVICE_PORT}
+      - PORT=${SERVICE_PORT:-8080}
       - REDIS_HOST=redis
-      - ALLOWED_ORIGINS=service-test,app,http://localhost:${APP_PORT},http://${HOST}:${APP_PORT}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
 
   service-test:
     build:
@@ -38,28 +38,15 @@ services:
     depends_on:
       - service
 
-  wash:
-    build:
-      context: service
-      dockerfile: Dockerfile.wash
-    depends_on:
-      - nats
-      - redis
-      - registry
-    environment:
-      - WASH_RPC_HOST=nats
-    ports:
-      - "8080:8080"
-
   app:
     image: ${AWS_ECR_URL}/codenames_app
-    #build:
-    #  context: app
+    build:
+      context: app
     ports:
-      - "${APP_PORT}:${APP_PORT}"
+      - ${APP_PORT:-3000}:${APP_PORT:-3000}
     depends_on:
       - service
     environment:
-      - PORT=${APP_PORT}
-      - API_URL=http://${HOST}:${SERVICE_PORT}
+      - PORT=${APP_PORT:-3000}
+      - API_URL=${API_URL:-http://localhost:8080}
 
