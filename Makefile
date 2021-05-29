@@ -43,7 +43,6 @@ check: check-service check-app ## check both the service and app projects
 build: build-service build-app ## build both the service and app projects
 
 .EXPORT_ALL_VARIABLES:
-
 AWS_ACCOUNT = $(shell aws sts get-caller-identity | jq -r .Account)
 AWS_ECR_URL = ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com
 
@@ -90,4 +89,5 @@ start-aws: export APP_PORT=3000
 start-aws: export ALLOWED_ORIGINS=https://codenames.mattgilbride.com
 start-aws: export API_URL=https://codenamesapi.mattgilbride.com
 start-aws: ## start fully functioning stack on EC2
+	docker-compose pull redis service app
 	docker-compose up -d app
