@@ -60,7 +60,7 @@ impl GameDao for RedisDao {
 
     fn set(&mut self, key: String, game: Game) -> DaoResult<()> {
         self.con
-            .set(key, json!(game).to_string())
+            .set_ex(key, json!(game).to_string(), 86400)
             .map_err(|e| DaoError::Unknown(e.to_string()))
     }
 }
