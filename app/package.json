@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start -p $PORT",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "dependencies": {
     "next": "10.0.3",
@@ -18,11 +20,17 @@
     "styled-reset": "^4.3.4"
   },
   "devDependencies": {
+    "@babel/core": "^7.14.3",
+    "@storybook/addon-actions": "^6.2.9",
+    "@storybook/addon-essentials": "^6.2.9",
+    "@storybook/addon-links": "^6.2.9",
+    "@storybook/react": "^6.2.9",
     "@types/node": "^14.14.27",
     "@types/react": "^17.0.2",
     "@types/styled-components": "^5.1.7",
     "@typescript-eslint/eslint-plugin": "^4.15.0",
     "@typescript-eslint/parser": "^4.15.0",
+    "babel-loader": "^8.2.2",
     "eslint": "^7.20.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-airbnb-typescript": "^12.3.1",
