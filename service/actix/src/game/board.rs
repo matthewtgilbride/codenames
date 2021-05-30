@@ -3,9 +3,8 @@ use std::convert::TryInto;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-use codenames_domain::game::board::model::Board;
-use codenames_domain::game::board::service::BoardGenerator;
-use codenames_domain::game::card::model::{Card, CardColor, CardState};
+use codenames_domain::game::board::{Board, BoardGenerator};
+use codenames_domain::game::card::{Card, CardColor, CardState};
 use codenames_domain::game::model::Team;
 use codenames_domain::ServiceResult;
 
@@ -70,20 +69,19 @@ impl BoardGenerator for BoardGeneratorRand {
 
 #[cfg(test)]
 mod tests {
-    use codenames_domain::dictionary::service::Service as DictionaryService;
-    use codenames_domain::game::board::service::Service;
-    use codenames_domain::game::board::util::card_color_count;
-    use codenames_domain::game::card::model::CardColor;
+    use codenames_domain::dictionary::DictionaryService;
+    use codenames_domain::game::board::{card_color_count, BoardService};
+    use codenames_domain::game::card::CardColor;
     use codenames_domain::game::model::Team;
 
-    use crate::dictionary::service::WordGeneratorRand;
-    use crate::game::board::service::BoardGeneratorRand;
+    use crate::dictionary::WordGeneratorRand;
+    use crate::game::board::BoardGeneratorRand;
 
     #[test]
     fn new_board() {
         let test_dictionary_service =
             DictionaryService::new(Box::new(WordGeneratorRand {})).unwrap();
-        let test_service = Service::new(Box::new(BoardGeneratorRand {}));
+        let test_service = BoardService::new(Box::new(BoardGeneratorRand {}));
 
         let (board, first_team) = test_service
             .new_board(test_dictionary_service.new_word_set().unwrap())

@@ -3,7 +3,7 @@ use actix_web::{get, post, put, web, Responder, Scope};
 use codenames_domain::game::model::NewGameRequest;
 use codenames_domain::game::model::Player;
 
-use crate::game::player::routes as player_routes;
+use crate::game::player_routes::player_routes;
 use crate::util::respond;
 use crate::AppData;
 
@@ -11,7 +11,7 @@ pub fn routes(path: &str) -> Scope {
     web::scope(path)
         .service(find_games)
         .service(new_game)
-        .service(id_routes())
+        .service(game_routes())
 }
 
 #[get("")]
@@ -24,7 +24,7 @@ async fn new_game(body: web::Json<NewGameRequest>, data: web::Data<AppData>) -> 
     respond(&data.service.new_game(body.into_inner()))
 }
 
-fn id_routes() -> Scope {
+fn game_routes() -> Scope {
     web::scope("/{id}")
         .service(get_game)
         .service(join_game)

@@ -1,5 +1,33 @@
-use crate::game::card::model::{Card, CardColor};
+use dyn_clone::DynClone;
+
+use crate::game::card::{Card, CardColor, CardState};
 use crate::game::model::Team;
+use crate::ServiceResult;
+
+pub const BOARD_SIZE: usize = 25;
+pub type Board = [Card; BOARD_SIZE];
+pub type BoardState = [CardState; BOARD_SIZE];
+
+#[derive(Clone)]
+pub struct BoardService {
+    generator: Box<dyn BoardGenerator>,
+}
+
+impl BoardService {
+    pub fn new(generator: Box<dyn BoardGenerator>) -> BoardService {
+        BoardService { generator }
+    }
+
+    pub fn new_board(&self, words: [String; 25]) -> ServiceResult<(Board, Team)> {
+        self.generator.random_board(words)
+    }
+}
+
+pub trait BoardGenerator: DynClone + Send + Sync {
+    fn random_board(&self, words: [String; 25]) -> ServiceResult<(Board, Team)>;
+}
+
+dyn_clone::clone_trait_object!(BoardGenerator);
 
 pub fn max_card_color(card_color: &CardColor, first_team: &Team) -> usize {
     match card_color {
@@ -23,7 +51,7 @@ pub fn card_color_count(partial_board: &Vec<Card>, color: &CardColor) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use crate::game::card::model::CardColor;
+    use crate::game::card::CardColor;
     use crate::game::model::Team;
 
     #[test]

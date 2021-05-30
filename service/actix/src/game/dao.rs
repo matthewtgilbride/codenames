@@ -1,9 +1,9 @@
 use redis::Connection;
 use redis::{Commands, Value};
 
-use codenames_domain::game::dao::{DaoError, DaoResult, DAO};
+use codenames_domain::game::dao::GameDao;
 use codenames_domain::game::model::Game;
-use codenames_domain::StdResult;
+use codenames_domain::{DaoError, DaoResult, StdResult};
 
 pub struct RedisDao {
     con: Connection,
@@ -24,7 +24,7 @@ impl RedisDao {
     }
 }
 
-impl DAO for RedisDao {
+impl GameDao for RedisDao {
     fn get(&mut self, key: String) -> DaoResult<Game> {
         let value: Value = self
             .con

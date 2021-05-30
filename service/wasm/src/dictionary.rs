@@ -4,8 +4,8 @@ use std::convert::TryInto;
 use log::debug;
 use wasmcloud_actor_extras as extras;
 
-use codenames_domain::dictionary::model::MINIMUM_DICTIONARY_SIZE;
-use codenames_domain::dictionary::service::WordGenerator;
+use codenames_domain::dictionary::WordGenerator;
+use codenames_domain::dictionary::MINIMUM_DICTIONARY_SIZE;
 use codenames_domain::{ServiceError, ServiceResult};
 
 #[derive(Clone)]

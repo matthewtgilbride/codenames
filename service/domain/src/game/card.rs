@@ -78,7 +78,7 @@ pub struct CardState {
 
 #[cfg(test)]
 mod tests {
-    use crate::game::card::model::CardColor;
+    use crate::game::card::CardColor;
     use crate::game::model::Team;
 
     #[test]

@@ -1,5 +1,5 @@
 [package]
-name = "codenames-local"
+name = "codenames-actix"
 version = "0.1.0"
 authors = ["Matthew T. Gilbride <mgilbride@chariotsolutions.com>"]
 edition = "2018"

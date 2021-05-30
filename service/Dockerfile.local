@@ -1,7 +1,7 @@
 FROM rust:slim-buster
 
 COPY domain domain
-COPY local local
+COPY actix actix
 # because we have a wasm directory in the top level cargo but we won't build it here
 COPY wasm wasm
 COPY Cargo.toml .

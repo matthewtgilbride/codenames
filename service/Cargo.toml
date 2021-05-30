@@ -1,11 +1,11 @@
 [workspace]
 default-members = [
     "domain",
-    "local",
+    "actix",
 ]
 members = [
     "domain",
-    "local",
+    "actix",
     "wasm"
 ]
 

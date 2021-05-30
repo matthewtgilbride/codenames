@@ -464,19 +464,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
-name = "codenames-domain"
-version = "0.1.0"
-dependencies = [
- "dyn-clone",
- "enum-display-derive",
- "log",
- "serde",
- "serde_derive",
- "serde_json",
-]
-
-[[package]]
-name = "codenames-local"
+name = "codenames-actix"
 version = "0.1.0"
 dependencies = [
  "actix-cors",
@@ -486,6 +474,18 @@ dependencies = [
  "env_logger",
  "rand 0.8.3",
  "redis",
+ "serde",
+ "serde_derive",
+ "serde_json",
+]
+
+[[package]]
+name = "codenames-domain"
+version = "0.1.0"
+dependencies = [
+ "dyn-clone",
+ "enum-display-derive",
+ "log",
  "serde",
  "serde_derive",
  "serde_json",

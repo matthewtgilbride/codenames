@@ -3,9 +3,8 @@ use std::convert::TryInto;
 use log::debug;
 use wasmcloud_actor_extras as extras;
 
-use codenames_domain::game::board::model::Board;
-use codenames_domain::game::board::service::BoardGenerator;
-use codenames_domain::game::card::model::{Card, CardColor, CardState};
+use codenames_domain::game::board::{Board, BoardGenerator};
+use codenames_domain::game::card::{Card, CardColor, CardState};
 use codenames_domain::game::model::Team;
 use codenames_domain::{ServiceError, ServiceResult};
 

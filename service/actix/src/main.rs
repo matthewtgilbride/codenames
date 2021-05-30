@@ -6,10 +6,10 @@ use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 
-use codenames_domain::game::service::Service;
+use codenames_domain::game::service::GameService;
 
-use crate::dictionary::service::WordGeneratorRand;
-use crate::game::board::service::BoardGeneratorRand;
+use crate::dictionary::WordGeneratorRand;
+use crate::game::board::BoardGeneratorRand;
 use crate::game::dao::RedisDao;
 use crate::game::routes::routes as game_routes;
 
@@ -19,7 +19,7 @@ mod util;
 
 #[derive(Clone)]
 pub struct AppData {
-    service: Service,
+    service: GameService,
 }
 
 #[actix_web::main]
@@ -31,7 +31,7 @@ async fn main() -> std::io::Result<()> {
     let board_generator = Box::new(BoardGeneratorRand);
     let dao = Box::new(RedisDao::new().unwrap());
 
-    let service = Service::new(word_generator, board_generator, dao).unwrap();
+    let service = GameService::new(word_generator, board_generator, dao).unwrap();
 
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".into());
     let allowed_origins: Vec<String> = std::env::var("ALLOWED_ORIGINS")

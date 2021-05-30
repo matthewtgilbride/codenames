@@ -3,21 +3,19 @@ use std::collections::HashSet;
 use dyn_clone::DynClone;
 use log::debug;
 
-use crate::dictionary::model::DictionaryType;
-use crate::dictionary::util::get_dictionary_words;
 use crate::{ServiceResult, StdResult};
 
 #[derive(Clone)]
-pub struct Service {
+pub struct DictionaryService {
     words: HashSet<String>,
     generator: Box<dyn WordGenerator>,
 }
 
-impl Service {
-    pub fn new(generator: Box<dyn WordGenerator>) -> StdResult<Service> {
+impl DictionaryService {
+    pub fn new(generator: Box<dyn WordGenerator>) -> StdResult<DictionaryService> {
         debug!("call: dictionary.Service::new");
         let words = get_dictionary_words(DictionaryType::Default)?;
-        Ok(Service { words, generator })
+        Ok(DictionaryService { words, generator })
     }
 
     pub fn new_word_set(&self) -> ServiceResult<[String; 25]> {
@@ -38,3 +36,19 @@ pub trait WordGenerator: DynClone + Send + Sync {
 }
 
 dyn_clone::clone_trait_object!(WordGenerator);
+
+pub fn get_dictionary_words(_dictionary_type: DictionaryType) -> StdResult<HashSet<String>> {
+    debug!("call: util.get_dictionary_words");
+    // todo: pass dict type to select from a set of available dictionaries
+    Ok(std::str::from_utf8(include_bytes!("default.txt"))?
+        .split("\n")
+        .into_iter()
+        .map(|s| s.to_string())
+        .collect())
+}
+
+pub const MINIMUM_DICTIONARY_SIZE: usize = 25;
+
+pub enum DictionaryType {
+    Default,
+}

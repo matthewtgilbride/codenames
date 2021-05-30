@@ -1,31 +1,32 @@
 use log::{debug, info, warn};
 
-use crate::dictionary::service::{Service as DictionaryService, WordGenerator};
-use crate::game::board::service::{BoardGenerator, Service as BoardService};
-use crate::game::dao::{DaoError, DAO};
+use crate::dictionary::{DictionaryService, WordGenerator};
+use crate::game::board::BoardGenerator;
+use crate::game::board::BoardService;
+use crate::game::dao::GameDao;
 use crate::game::model::{
     Game, GameList, GameVariant, GuessRequest, NewGameRequest, PlayerRequest,
 };
 use crate::game::model::{GameState, Player};
-use crate::{ServiceError, ServiceResult, StdResult};
+use crate::{DaoError, ServiceError, ServiceResult, StdResult};
 
 #[derive(Clone)]
-pub struct Service {
+pub struct GameService {
     board_service: BoardService,
     dictionary_service: DictionaryService,
-    dao: Box<dyn DAO>,
+    dao: Box<dyn GameDao>,
 }
 
-impl Service {
+impl GameService {
     pub fn new(
         word_generator: Box<dyn WordGenerator>,
         board_generator: Box<dyn BoardGenerator>,
-        dao: Box<dyn DAO + Send + Sync>,
-    ) -> StdResult<Service> {
+        dao: Box<dyn GameDao + Send + Sync>,
+    ) -> StdResult<GameService> {
         debug!("call: game.Service::new");
         let dictionary_service = DictionaryService::new(word_generator)?;
         let board_service = BoardService::new(board_generator);
-        Ok(Service {
+        Ok(GameService {
             board_service,
             dictionary_service,
             dao,

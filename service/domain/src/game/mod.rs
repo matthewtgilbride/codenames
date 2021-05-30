@@ -8,7 +8,7 @@ pub mod service;
 mod tests {
     use std::convert::TryInto;
 
-    use crate::game::card::model::{Card, CardColor};
+    use crate::game::card::{Card, CardColor};
     use crate::game::model::{Game, GuessRequest, Player, Team};
 
     fn test_game() -> Game {

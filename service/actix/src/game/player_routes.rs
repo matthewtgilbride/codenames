@@ -5,7 +5,7 @@ use codenames_domain::game::model::{GuessRequest, PlayerRequest};
 use crate::util::respond;
 use crate::AppData;
 
-pub fn routes(path: &str) -> Scope {
+pub fn player_routes(path: &str) -> Scope {
     web::scope(path)
         .service(get_player_game)
         .service(guess)

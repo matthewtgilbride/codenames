@@ -5,17 +5,17 @@ extern crate wasmcloud_actor_logging as logging;
 
 use guest::prelude::*;
 use log::debug;
+use urlencoding::decode;
 use wasmcloud_actor_core as core;
 use wasmcloud_actor_http_server::{Handlers, Method, Request, Response};
 
 use codenames_domain::game::model::{GuessRequest, NewGameRequest, Player, PlayerRequest};
-use codenames_domain::game::service::Service;
+use codenames_domain::game::service::GameService;
 use codenames_domain::ServiceError;
 
-use crate::dictionary::service::WordGeneratorWasmCloud;
-use crate::game::board::service::BoardGeneratorWasmCloud;
+use crate::dictionary::WordGeneratorWasmCloud;
+use crate::game::board::BoardGeneratorWasmCloud;
 use crate::game::dao::WasmKeyValueDao;
-use urlencoding::decode;
 
 mod dictionary;
 mod game;
@@ -30,7 +30,7 @@ fn route_request(req: Request) -> HandlerResult<Response> {
     let word_generator = Box::new(WordGeneratorWasmCloud);
     let board_generator = Box::new(BoardGeneratorWasmCloud);
     let dao = Box::new(WasmKeyValueDao);
-    let service = Service::new(word_generator, board_generator, dao)?;
+    let service = GameService::new(word_generator, board_generator, dao)?;
 
     debug!("Request received: Path is {}", req.path);
 

@@ -4,8 +4,8 @@ use std::convert::TryInto;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-use codenames_domain::dictionary::model::MINIMUM_DICTIONARY_SIZE;
-use codenames_domain::dictionary::service::WordGenerator;
+use codenames_domain::dictionary::WordGenerator;
+use codenames_domain::dictionary::MINIMUM_DICTIONARY_SIZE;
 use codenames_domain::ServiceResult;
 
 #[derive(Clone)]

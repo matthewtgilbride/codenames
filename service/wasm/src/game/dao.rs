@@ -1,14 +1,15 @@
 use wasmcloud_actor_keyvalue as kv;
 
-use codenames_domain::game::dao::{DaoError, DaoResult, DAO};
+use codenames_domain::game::dao::GameDao;
 use codenames_domain::game::model::Game;
+use codenames_domain::{DaoError, DaoResult};
 
 const ALL_GAMES_KEY: &str = "GAME_KEYS";
 
 #[derive(Clone)]
 pub struct WasmKeyValueDao;
 
-impl DAO for WasmKeyValueDao {
+impl GameDao for WasmKeyValueDao {
     fn get(&mut self, key: String) -> DaoResult<Game> {
         let result = kv::default()
             .get(key.clone())

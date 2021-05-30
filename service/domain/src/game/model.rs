@@ -8,10 +8,10 @@ use std::fmt::Formatter;
 use log::info;
 use serde::{Deserialize, Serialize};
 
-use crate::game::board::model::{Board, BoardState};
-use crate::game::card::model::CardState;
+use crate::game::board::{Board, BoardState};
+use crate::game::card::CardState;
 use crate::game::model::GameError::{InvalidGuess, PlayerNotFound};
-use crate::UniqueError;
+use crate::{ServiceError, UniqueError};
 
 #[derive(Display, Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Team {
@@ -239,6 +239,16 @@ impl fmt::Display for GameError {
                 "Guess must be made by an operative on the current team: {}",
                 msg
             ),
+        }
+    }
+}
+
+impl From<GameError> for ServiceError {
+    fn from(game_error: GameError) -> Self {
+        match game_error {
+            GameError::UniquePlayerName(ue) => ServiceError::BadRequest(ue.to_string()),
+            GameError::UniqueGuess(ue) => ServiceError::BadRequest(ue.to_string()),
+            e => ServiceError::BadRequest(e.to_string()),
         }
     }
 }
