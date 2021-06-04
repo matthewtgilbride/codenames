@@ -1,22 +1,33 @@
-import { FC, useState } from 'react';
+/* eslint-disable no-alert,no-restricted-globals */
+import { FC, MouseEventHandler, useCallback, useState } from 'react';
 import styled from 'styled-components';
+import { useRouter } from 'next/router';
 import { Breakpoints } from '../../design/responsive';
 import { Palette } from '../../design/color';
 import { Card } from './Card';
-import { Join } from './Join';
-import { GameState, Team } from '../../model';
-import { Play } from './Play';
+import { GameState, Player, Team } from '../../model';
+import { GameInfo } from './GameInfo';
 import { usePoll } from '../../hooks/usePoll';
+import { PlayerList } from './PlayerList';
+import { jsonHeaders, voidFetch } from '../../utils/fetch';
+import { GuessLog } from './GuessLog';
 
 const { tabletPortrait } = Breakpoints;
 
-const Container = styled.div<{ first_team: Team }>`
+const Container = styled.div<{ first_team: Team; turn: Team }>`
   text-align: center;
+
   & h2 {
     color: ${(props) =>
       props.first_team === 'Blue' ? Palette.blue : Palette.red};
-    margin: 0;
+    margin-bottom: 0;
   }
+
+  & h3 {
+    color: ${(props) => (props.turn === 'Blue' ? Palette.blue : Palette.red)};
+    font-weight: bold;
+  }
+
   & p {
     color: ${Palette.neutral};
   }
@@ -37,32 +48,92 @@ const Grid = styled.div`
 const ThreeColumnGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  align-items: center;
+
   margin: 1rem auto;
   max-width: ${tabletPortrait}px;
 `;
 
-const PlayerList = styled.div<{ color: Team }>`
-  display: flex;
-  flex-direction: column;
-  color: ${(props) => (props.color === 'Blue' ? Palette.blue : Palette.red)};
-  h2 {
-    margin: 0;
-  }
-  li {
-    margin: 1rem 0;
-  }
-`;
-
-export type GameProps = {
+export interface GameContainerProps {
   API_URL: string;
   currentPlayer?: string;
   game: GameState;
+}
+
+export type GameProps = GameContainerProps & {
+  player?: Player;
+  onGuess: (word: string) => MouseEventHandler;
+  onJoin: (name: string, team: Team, isSpyMaster: boolean) => void;
 };
 
-export const Game: FC<GameProps> = ({ API_URL, currentPlayer, game }) => {
-  const [selectedWord, setSelectedWord] = useState<string | undefined>();
-  const onClick = (word: string) => () => setSelectedWord(word);
+export const Game: FC<GameProps> = ({
+  player,
+  onGuess,
+  onJoin,
+  API_URL,
+  game,
+  game: { guesses, first_team, board, name, turn, players },
+}) => (
+  <Container first_team={first_team} turn={turn}>
+    <h2>{name}</h2>
+    <Grid>
+      {board.map((card) => (
+        <Card
+          key={card.word}
+          card={card}
+          player={player}
+          turn={turn}
+          onClick={onGuess(card.word)}
+        />
+      ))}
+    </Grid>
+    <ThreeColumnGrid>
+      <div>
+        <PlayerList
+          isSpyMaster={false}
+          team="Blue"
+          players={players}
+          currentPlayer={player?.name}
+          onJoin={onJoin}
+        />
+        <PlayerList
+          isSpyMaster
+          team="Blue"
+          players={players}
+          currentPlayer={player?.name}
+          onJoin={onJoin}
+        />
+      </div>
+      <div>
+        <h3>{turn} Team&apos;s Turn</h3>
+        {player && <GameInfo API_URL={API_URL} player={player} game={game} />}
+        <GuessLog board={board} guesses={guesses} />
+      </div>
+      <div>
+        <PlayerList
+          isSpyMaster={false}
+          team="Red"
+          players={players}
+          currentPlayer={player?.name}
+          onJoin={onJoin}
+        />
+        <PlayerList
+          isSpyMaster
+          team="Red"
+          players={players}
+          currentPlayer={player?.name}
+          onJoin={onJoin}
+        />
+      </div>
+    </ThreeColumnGrid>
+  </Container>
+);
+
+export const GameContainer: FC<GameContainerProps> = ({
+  API_URL,
+  currentPlayer,
+  game,
+}) => {
+  const router = useRouter();
 
   const [gameState, setGameState] = useState(game);
   usePoll<GameState>({
@@ -74,63 +145,50 @@ export const Game: FC<GameProps> = ({ API_URL, currentPlayer, game }) => {
     onSuccess: (newGame: GameState) => setGameState(newGame),
   });
 
-  const { players, first_team, board, turn, name } = gameState;
+  const { players } = gameState;
   const player = players[currentPlayer?.toLowerCase() ?? ''];
 
+  const onJoin = useCallback(
+    (name: string, team: Team, isSpyMaster: boolean) => {
+      const newPlayer: Player = {
+        name,
+        team,
+        is_spy_master: isSpyMaster,
+      };
+      voidFetch({
+        url: `${API_URL}/game/${gameState.name}/join`,
+        init: {
+          method: 'PUT',
+          body: JSON.stringify(newPlayer),
+          headers: jsonHeaders,
+        },
+        onSuccess: () => router.push(`/game/${gameState.name}/${name}`),
+        onError: () => alert('error joining game'),
+      });
+    },
+    [API_URL, gameState, router],
+  );
+
+  const onGuess = (word: string) => () => {
+    const confirmed = confirm(`Are you sure you want to guess ${word}?`);
+    if (confirmed) {
+      const index = gameState.board.map((c) => c.word).indexOf(word);
+      voidFetch({
+        url: `${API_URL}/game/${gameState.name}/${player.name}/guess/${index}`,
+        init: { method: 'PUT' },
+        onSuccess: () => router.reload(),
+        onError: () => alert('error making guess'),
+      });
+    }
+  };
+
   return (
-    <Container first_team={first_team}>
-      <Grid>
-        {board.map((card) => (
-          <Card
-            key={card.word}
-            card={card}
-            player={player}
-            turn={turn}
-            onClick={onClick(card.word)}
-          />
-        ))}
-      </Grid>
-      <ThreeColumnGrid>
-        <p>Blue Team {turn === 'Blue' && '(•_•)'}</p>
-        <h2>{name}</h2>
-        <p>Red Team {turn === 'Red' && '(•_•)'}</p>
-      </ThreeColumnGrid>
-      <ThreeColumnGrid>
-        <PlayerList color="Blue">
-          <ul>
-            {Object.values(players)
-              .filter((p) => p.team === 'Blue')
-              .map((p) => (
-                <li key={p.name}>
-                  {p.is_spy_master && '⌐■-■  '}
-                  {p.name}
-                </li>
-              ))}
-          </ul>
-        </PlayerList>
-        {player ? (
-          <Play
-            API_URL={API_URL}
-            player={player}
-            word={selectedWord}
-            game={gameState}
-          />
-        ) : (
-          <Join game={name} API_URL={API_URL} />
-        )}
-        <PlayerList color="Red">
-          <ul>
-            {Object.values(players)
-              .filter((p) => p.team === 'Red')
-              .map((p) => (
-                <li key={p.name}>
-                  {p.is_spy_master && '⌐■-■  '}
-                  {p.name}
-                </li>
-              ))}
-          </ul>
-        </PlayerList>
-      </ThreeColumnGrid>
-    </Container>
+    <Game
+      API_URL={API_URL}
+      game={gameState}
+      onGuess={onGuess}
+      onJoin={onJoin}
+      player={player}
+    />
   );
 };

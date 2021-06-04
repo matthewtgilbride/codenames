@@ -1,10 +1,12 @@
 import { FC } from 'react';
 import { GetServerSideProps } from 'next';
-import { Game, GameProps } from '../../components/game/Game';
+import { GameContainer, GameContainerProps } from '../../components/game/Game';
 
-const GameLanding: FC<GameProps> = (props) => <Game {...props} />;
+const GameLanding: FC<GameContainerProps> = (props) => (
+  <GameContainer {...props} />
+);
 
-export const getServerSideProps: GetServerSideProps<GameProps> = async ({
+export const getServerSideProps: GetServerSideProps<GameContainerProps> = async ({
   params,
 }) => {
   const game = params?.name;
@@ -13,7 +15,7 @@ export const getServerSideProps: GetServerSideProps<GameProps> = async ({
   const result = await fetch(url);
   const json = await result.json();
 
-  return { props: { game: json, API_URL } as GameProps };
+  return { props: { game: json, API_URL } as GameContainerProps };
 };
 
 export default GameLanding;

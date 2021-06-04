@@ -9,7 +9,7 @@ export interface Player {
 export type CardType = 'Neutral' | 'Death' | 'Blue' | 'Red';
 
 export interface CardColor {
-  color?: CardType;
+  color: CardType | null;
   word: string;
 }
 

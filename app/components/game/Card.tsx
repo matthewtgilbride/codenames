@@ -3,7 +3,7 @@ import { Palette } from '../../design/color';
 import { beginAt, Breakpoints } from '../../design/responsive';
 import { CardColor, CardType, Player, Team } from '../../model';
 
-const { neutral, death, blue, red, contrast } = Palette;
+const { neutral, death, blue, red, contrast, gray } = Palette;
 const { phoneLg, tabletPortrait } = Breakpoints;
 
 const CardColorMap: { [key in CardType]: string } = {
@@ -40,6 +40,13 @@ export const Card: FC<CardProps> = ({
         padding: 0.75rem 0.1rem;
         word-break: break-all;
         font-size: ${size}px;
+        cursor: ${isDisabled(turn, color, player) ? undefined : 'pointer'};
+        :hover {
+          color: ${isDisabled(turn, color, player) ? undefined : 'white'};
+          background-color: ${isDisabled(turn, color, player)
+            ? undefined
+            : gray};
+        }
         ${beginAt(phoneLg)} {
           font-size: ${size * 1.5}px;
         }
@@ -54,7 +61,11 @@ export const Card: FC<CardProps> = ({
   );
 };
 
-function isDisabled(turn: Team, color?: CardType, player?: Player): boolean {
+function isDisabled(
+  turn: Team,
+  color: CardType | null,
+  player?: Player,
+): boolean {
   if (color) return true;
   if (!player) return true;
   if (player.is_spy_master) return true;

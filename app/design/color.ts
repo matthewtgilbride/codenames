@@ -1,6 +1,6 @@
 export const Palette = {
   primary: '#799a8f',
-  contrast: '#08231a',
+  contrast: '#0d4141',
   neutral: '#fefcbd',
   death: '#3d3d3b',
   red: '#da4352',

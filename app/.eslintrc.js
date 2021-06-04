@@ -39,6 +39,10 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'react/jsx-no-bind': 'error',
     'import/prefer-default-export': 'off',
+    'import/no-extraneous-dependencies': [
+      'error',
+      { devDependencies: ['**/*.stories.tsx'] },
+    ],
     '@typescript-eslint/no-use-before-define': ['error', { functions: false }],
     '@typescript-eslint/naming-convention': 'off',
   },

@@ -13,33 +13,8 @@ export interface PlayProps {
   game: GameState;
 }
 
-export const Play: FC<PlayProps> = ({
-  game: { board, turn, name },
-  player,
-  word,
-  API_URL,
-}) => {
+export const GameInfo: FC<PlayProps> = ({ game: { turn, name }, API_URL }) => {
   const router = useRouter();
-
-  const onGuess = () => {
-    if (!word) {
-      alert(
-        'Tap on a word to select it, and then tap here to confirm your guess.',
-      );
-    } else {
-      const confirmed = confirm(`Are you sure you want to guess ${word}?`);
-      if (confirmed) {
-        const index = board.map((c) => c.word).indexOf(word);
-        voidFetch({
-          url: `${API_URL}/game/${name}/${player.name}/guess/${index}`,
-          init: { method: 'PUT' },
-          onSuccess: () => router.reload(),
-          onError: () => alert('error making guess'),
-        });
-      }
-    }
-  };
-
   const onEndTurn = () => {
     const confirmed = confirm(
       `Are you sure you want to end ${turn} team's turn?`,
@@ -65,29 +40,6 @@ export const Play: FC<PlayProps> = ({
         }
       `}
     >
-      {!player.is_spy_master && player.team === turn && (
-        <>
-          <p>guess</p>
-          <button
-            onClick={onGuess}
-            type="button"
-            css={`
-              background: transparent;
-              border-color: ${Palette.neutral};
-              border-radius: 0.25rem;
-              padding: 0.5rem;
-              margin: 0 0.5rem 0.5rem;
-              width: 5rem;
-              color: ${player.team === 'Blue' ? Palette.blue : Palette.red};
-              :focus {
-                outline: none;
-              }
-            `}
-          >
-            {word ?? '?'}
-          </button>
-        </>
-      )}
       <button
         type="button"
         onClick={onEndTurn}

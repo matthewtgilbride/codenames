@@ -69,7 +69,11 @@ const Subtitle = styled.p`
 export const Layout: FC = ({ children }) => (
   <Container>
     <Title>
-      (•_•) ( •_•)<Link href="/">Codenames</Link>⌐■-■ (⌐■_■)
+      (•_•) ( •_•)
+      <Link prefetch={!process.env.STORYBOOK} href="/">
+        Codenames
+      </Link>
+      ⌐■-■ (⌐■_■)
     </Title>
     <Subtitle>
       brought to you by your{' '}
