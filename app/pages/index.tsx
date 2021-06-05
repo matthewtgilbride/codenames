@@ -1,4 +1,3 @@
-import type {} from 'styled-components/cssprop'; // eslint-disable-line
 import { FC } from 'react';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';

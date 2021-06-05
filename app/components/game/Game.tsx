@@ -1,6 +1,6 @@
 /* eslint-disable no-alert,no-restricted-globals */
 import { FC, MouseEventHandler, useCallback, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useRouter } from 'next/router';
 import { Breakpoints } from '../../design/responsive';
 import { Palette } from '../../design/color';

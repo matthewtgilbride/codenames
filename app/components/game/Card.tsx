@@ -1,4 +1,5 @@
 import { FC, MouseEventHandler } from 'react';
+import { css } from '@emotion/css';
 import { Palette } from '../../design/color';
 import { beginAt, Breakpoints } from '../../design/responsive';
 import { CardColor, CardType, Player, Team } from '../../model';
@@ -32,7 +33,7 @@ export const Card: FC<CardProps> = ({
       type="button"
       onClick={onClick}
       disabled={isDisabled(turn, color, player)}
-      css={`
+      className={css`
         background-color: ${color ? CardColorMap[color] : 'white'};
         box-shadow: 0 0 2px 1px ${Palette.blue};
         color: ${color === 'Death' ? neutral : contrast};

@@ -1,4 +1,5 @@
 import React, { FC } from 'react';
+import { css } from '@emotion/css';
 import { GameState } from '../../model';
 import { Palette } from '../../design/color';
 
@@ -6,7 +7,7 @@ export type GuessLogProps = Pick<GameState, 'board' | 'guesses'>;
 
 export const GuessLog: FC<GuessLogProps> = ({ board, guesses }) => (
   <div
-    css={`
+    className={css`
       display: flex;
       flex-direction: column;
       color: ${Palette.neutral};

@@ -2,6 +2,7 @@
 import { lighten } from 'polished';
 import { FC } from 'react';
 import { useRouter } from 'next/router';
+import { css } from '@emotion/css';
 import { Palette } from '../../design/color';
 import { GameState, Player } from '../../model';
 import { voidFetch } from '../../utils/fetch';
@@ -31,7 +32,7 @@ export const GameInfo: FC<PlayProps> = ({ game: { turn, name }, API_URL }) => {
 
   return (
     <div
-      css={`
+      className={css`
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -43,7 +44,7 @@ export const GameInfo: FC<PlayProps> = ({ game: { turn, name }, API_URL }) => {
       <button
         type="button"
         onClick={onEndTurn}
-        css={`
+        className={css`
           background-color: ${Palette.neutral};
           padding: 0.5rem;
           border-radius: 0.25rem;

@@ -1,5 +1,5 @@
 import React, { FC, useCallback } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { Palette } from '../../design/color';
 import { GameState, Team } from '../../model';
 
