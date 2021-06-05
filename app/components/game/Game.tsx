@@ -10,7 +10,6 @@ import { GameInfo } from './GameInfo';
 import { usePoll } from '../../hooks/usePoll';
 import { PlayerList } from './PlayerList';
 import { jsonHeaders, voidFetch } from '../../utils/fetch';
-import { GuessLog } from './GuessLog';
 
 const { tabletPortrait } = Breakpoints;
 
@@ -71,7 +70,7 @@ export const Game: FC<GameProps> = ({
   onJoin,
   API_URL,
   game,
-  game: { guesses, first_team, board, name, turn, players },
+  game: { first_team, board, name, turn, players },
 }) => (
   <Container first_team={first_team} turn={turn}>
     <h2>{name}</h2>
@@ -103,11 +102,7 @@ export const Game: FC<GameProps> = ({
           onJoin={onJoin}
         />
       </div>
-      <div>
-        <h3>{turn} Team&apos;s Turn</h3>
-        {player && <GameInfo API_URL={API_URL} player={player} game={game} />}
-        <GuessLog board={board} guesses={guesses} />
-      </div>
+      <GameInfo API_URL={API_URL} player={player} game={game} />
       <div>
         <PlayerList
           isSpyMaster={false}

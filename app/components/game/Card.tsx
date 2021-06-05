@@ -1,10 +1,11 @@
 import { FC, MouseEventHandler } from 'react';
 import { css } from '@emotion/css';
+import { darken } from 'polished';
 import { Palette } from '../../design/color';
 import { beginAt, Breakpoints } from '../../design/responsive';
 import { CardColor, CardType, Player, Team } from '../../model';
 
-const { neutral, death, blue, red, contrast, gray } = Palette;
+const { neutral, death, blue, red, contrast } = Palette;
 const { phoneLg, tabletPortrait } = Breakpoints;
 
 const CardColorMap: { [key in CardType]: string } = {
@@ -34,7 +35,7 @@ export const Card: FC<CardProps> = ({
       onClick={onClick}
       disabled={isDisabled(turn, color, player)}
       className={css`
-        background-color: ${color ? CardColorMap[color] : 'white'};
+        background-color: ${color ? CardColorMap[color] : Palette.light};
         box-shadow: 0 0 2px 1px ${Palette.blue};
         color: ${color === 'Death' ? neutral : contrast};
         border-radius: 0.25rem;
@@ -43,10 +44,9 @@ export const Card: FC<CardProps> = ({
         font-size: ${size}px;
         cursor: ${isDisabled(turn, color, player) ? undefined : 'pointer'};
         :hover {
-          color: ${isDisabled(turn, color, player) ? undefined : 'white'};
           background-color: ${isDisabled(turn, color, player)
             ? undefined
-            : gray};
+            : darken(0.1, Palette.light)};
         }
         ${beginAt(phoneLg)} {
           font-size: ${size * 1.5}px;

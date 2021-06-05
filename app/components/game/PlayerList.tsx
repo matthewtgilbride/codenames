@@ -1,15 +1,19 @@
 import React, { FC, useCallback } from 'react';
 import styled from '@emotion/styled';
+import { lighten } from 'polished';
+import { css } from '@emotion/css';
 import { Palette } from '../../design/color';
 import { GameState, Team } from '../../model';
+import { beginAt } from '../../design/responsive';
 
 const StyledContainer = styled.div<{ color: Team }>`
   display: flex;
   border-radius: 0.5rem;
-  padding: 1rem;
+  padding: 0.5rem;
   margin: 1rem;
+  font-size: 0.5rem;
   flex-direction: column;
-  color: ${Palette.death};
+  color: ${Palette.contrast};
   background-color: ${({ color }) =>
     color === 'Blue' ? Palette.blue : Palette.red};
 
@@ -19,19 +23,41 @@ const StyledContainer = styled.div<{ color: Team }>`
 
   ul {
     display: flex;
-    padding: 0 0.5rem;
+    flex-wrap: wrap;
+    padding-left: 0.75rem;
   }
 
   li {
-    margin: 1rem 0;
+    margin: 0.25rem 0;
     padding-right: 0.5rem;
   }
 
   button {
     padding: 0.5rem;
     border-radius: 0.5rem;
+    font-size: 0.5rem;
     background-color: ${Palette.neutral};
+    cursor: pointer;
+    :hover {
+      background-color: ${lighten(0.1, Palette.neutral)};
+    }
+    ${beginAt(375)} {
+      font-size: .75rem;
+    }
+
+    ${beginAt(768)} {
+      font-size: 1rem;
+    }
   }
+  
+  ${beginAt(375)} {
+    font-size: .75rem;
+  }
+
+  ${beginAt(768)} {
+    font-size: 1rem;
+  }
+}
 `;
 
 export interface PlayerListProps {
@@ -58,7 +84,14 @@ export const PlayerList: FC<PlayerListProps> = ({
   }, [team, isSpyMaster, onJoin]);
   return (
     <StyledContainer color={team}>
-      <div>{isSpyMaster ? 'Spymaster' : 'Operative'}(s)</div>
+      <div
+        className={css`
+          align-self: flex-start;
+          font-weight: bold;
+        `}
+      >
+        {isSpyMaster ? 'Spymaster' : 'Operative'}(s)
+      </div>
       <ul>
         {playerNames.length > 0 ? (
           playerNames.map((p) => (
@@ -89,5 +122,6 @@ function getPlayerNames(
 ): string[] {
   return Object.values(players)
     .filter((p) => p.team === team && p.is_spy_master === isSpyMaster)
-    .map((p) => p.name);
+    .map((p) => p.name)
+    .sort((a, b) => a.localeCompare(b));
 }
