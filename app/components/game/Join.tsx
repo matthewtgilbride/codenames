@@ -8,6 +8,7 @@ import {
   useState,
 } from 'react';
 import { useRouter } from 'next/router';
+import { css } from '@emotion/css';
 import { Palette } from '../../design/color';
 import { Player } from '../../model';
 import { jsonHeaders, voidFetch } from '../../utils/fetch';
@@ -56,7 +57,7 @@ export const Join: FC<JoinProps> = ({ game, API_URL }) => {
 
   return (
     <div
-      css={`
+      className={css`
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -72,7 +73,7 @@ export const Join: FC<JoinProps> = ({ game, API_URL }) => {
       <button
         type="button"
         onClick={togglePlayerType}
-        css={`
+        className={css`
           background: transparent;
           border-color: ${Palette.neutral};
           border-radius: 0.25rem;
@@ -89,12 +90,12 @@ export const Join: FC<JoinProps> = ({ game, API_URL }) => {
       <input
         value={player.name}
         onChange={onChange}
-        css={`
+        className={css`
           border-radius: 0.25rem;
         `}
       />
       <button
-        css={`
+        className={css`
           background-color: ${Palette.neutral};
           padding: 0.5rem;
           border-radius: 0.25rem;

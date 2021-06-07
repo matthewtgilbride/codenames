@@ -105,9 +105,10 @@ impl Game {
     }
 
     pub fn leave(self, player_name: &str) -> GameResult {
+        let key = player_name.to_lowercase();
         let mut new_players = self.players.clone();
         new_players
-            .remove(player_name)
+            .remove(key.clone().as_str())
             .map(|_| Game {
                 players: new_players.clone(),
                 ..self.clone()

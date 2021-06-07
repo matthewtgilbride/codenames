@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { Palette } from '../design/color';
 import { Breakpoints } from '../design/responsive';
 

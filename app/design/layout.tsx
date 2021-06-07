@@ -1,19 +1,23 @@
-import { reset } from 'styled-reset';
-import styled, { createGlobalStyle } from 'styled-components';
+import reset from 'emotion-reset';
 import { FC } from 'react';
 import Link from 'next/link';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { Palette } from './color';
 import { beginAt, Breakpoints } from './responsive';
 
 const { phoneMd, phoneLg, tabletPortrait } = Breakpoints;
 
-export const GlobalStyle = createGlobalStyle`
+export const GlobalStyle = css`
   ${reset};
   body {
     font-family: Montserrat, 'Arial CE', Arial, sans-serif;
-    & * { box-sizing: border-box; }
+    & * {
+      box-sizing: border-box;
+    }
   }
-  button, input {
+  button,
+  input {
     border-style: solid;
   }
   h1 {
@@ -69,7 +73,11 @@ const Subtitle = styled.p`
 export const Layout: FC = ({ children }) => (
   <Container>
     <Title>
-      (•_•) ( •_•)<Link href="/">Codenames</Link>⌐■-■ (⌐■_■)
+      (•_•) ( •_•)
+      <Link prefetch={!process.env.STORYBOOK} href="/">
+        Codenames
+      </Link>
+      ⌐■-■ (⌐■_■)
     </Title>
     <Subtitle>
       brought to you by your{' '}
