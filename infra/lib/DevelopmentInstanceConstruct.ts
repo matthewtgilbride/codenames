@@ -14,6 +14,7 @@ import {
 } from '@aws-cdk/aws-ec2';
 import { readFileSync } from 'fs';
 import * as path from 'path';
+import { ManagedPolicy, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
 
 export class DevelopmentInstanceConstruct extends Construct {
   constructor(
@@ -47,10 +48,18 @@ export class DevelopmentInstanceConstruct extends Construct {
       vpc,
       userData,
       machineImage,
-      instanceType: InstanceType.of(InstanceClass.T2, InstanceSize.MICRO),
+      instanceType: InstanceType.of(InstanceClass.T2, InstanceSize.SMALL),
       availabilityZone: 'us-east-1b',
       keyName: 'aws_ssh',
       securityGroup,
+      role: new Role(this, 'ecr-role', {
+        managedPolicies: [
+          ManagedPolicy.fromAwsManagedPolicyName(
+            'AmazonEC2ContainerRegistryFullAccess',
+          ),
+        ],
+        assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
+      }),
       blockDevices: [
         {
           deviceName: '/dev/sda1',
