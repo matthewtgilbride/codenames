@@ -34,22 +34,22 @@ mod tests {
             Player {
                 team: Team::Blue,
                 name: "foo".to_string(),
-                is_spy_master: true,
+                spymaster_secret: Some("".into()),
             },
             Player {
                 team: Team::Blue,
                 name: "bar".to_string(),
-                is_spy_master: false,
+                spymaster_secret: None,
             },
             Player {
                 team: Team::Red,
                 name: "baz".to_string(),
-                is_spy_master: true,
+                spymaster_secret: Some("".into()),
             },
             Player {
                 team: Team::Red,
                 name: "buzz".to_string(),
-                is_spy_master: false,
+                spymaster_secret: None,
             },
         ];
 
@@ -66,7 +66,7 @@ mod tests {
             .join(Player {
                 team: Team::Blue,
                 name: "quz".to_string(),
-                is_spy_master: false,
+                spymaster_secret: None,
             })
             .unwrap();
 
@@ -75,7 +75,7 @@ mod tests {
         let failed_update = updated_game.join(Player {
             team: Team::Red,
             name: "quz".to_string(),
-            is_spy_master: true,
+            spymaster_secret: Some("".into()),
         });
 
         assert!(failed_update.is_err())
@@ -106,7 +106,7 @@ mod tests {
         let player_name = game
             .players
             .iter()
-            .find(|(_, p)| p.team == game.turn && !p.is_spy_master)
+            .find(|(_, p)| p.team == game.turn && p.spymaster_secret.is_none())
             .map(|(_, p)| p)
             .unwrap()
             .clone()

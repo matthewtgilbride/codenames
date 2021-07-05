@@ -1,3 +1,5 @@
+pub mod player;
+
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::error::Error;
@@ -10,6 +12,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::game::board::{Board, BoardState};
 use crate::game::card::CardState;
+pub use crate::game::model::player::Player;
 use crate::game::model::GameError::{InvalidGuess, PlayerNotFound};
 use crate::{ServiceError, UniqueError};
 
@@ -17,13 +20,6 @@ use crate::{ServiceError, UniqueError};
 pub enum Team {
     Blue,
     Red,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct Player {
-    pub team: Team,
-    pub name: String,
-    pub is_spy_master: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -53,10 +49,17 @@ pub enum GameVariant {
 }
 
 impl From<(Player, Game)> for GameVariant {
-    fn from((Player { is_spy_master, .. }, g): (Player, Game)) -> Self {
-        match is_spy_master {
-            true => GameVariant::Data(g.clone()),
-            false => GameVariant::State(g.clone().into()),
+    fn from(
+        (
+            Player {
+                spymaster_secret, ..
+            },
+            g,
+        ): (Player, Game),
+    ) -> Self {
+        match spymaster_secret {
+            Some(_) => GameVariant::Data(g.clone()),
+            _ => GameVariant::State(g.clone().into()),
         }
     }
 }
@@ -120,16 +123,13 @@ impl Game {
         match maybe_player {
             None => Err(PlayerNotFound(guess_request.player_name)),
             Some(Player {
-                team,
-                is_spy_master,
+                spymaster_secret: Some(_),
                 ..
-            }) => {
-                if *is_spy_master {
-                    return Err(InvalidGuess(format!(
-                        "{} is a spy master",
-                        guess_request.player_name
-                    )));
-                }
+            }) => Err(InvalidGuess(format!(
+                "{} is a spy master",
+                guess_request.player_name
+            ))),
+            Some(Player { team, .. }) => {
                 if *team != self.turn {
                     return Err(InvalidGuess(format!("{} team is not up", team)));
                 }
