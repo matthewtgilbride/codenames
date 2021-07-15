@@ -5,7 +5,7 @@ use crate::game::board::BoardGenerator;
 use crate::game::board::BoardService;
 use crate::game::dao::GameDao;
 use crate::game::model::{
-    Game, GameList, GameVariant, GuessRequest, NewGameRequest, PlayerRequest,
+    GameData, GameList, GameVariant, GuessRequest, NewGameRequest, PlayerRequest,
 };
 use crate::game::model::{GameState, Player};
 use crate::{DaoError, ServiceError, ServiceResult, StdResult};
@@ -45,7 +45,7 @@ impl GameService {
         let words = self.dictionary_service.new_word_set()?;
         let (board, first_team) = self.board_service.new_board(words)?;
 
-        let game = Game::new(request.game_name, board, first_team);
+        let game = GameData::new(request.game_name, board, first_team);
         let _ = &self.clone().save(game.clone())?;
 
         Ok(game.clone().into())
@@ -86,7 +86,7 @@ impl GameService {
         Ok(updated_game.clone().into())
     }
 
-    fn _get(&mut self, key: String) -> ServiceResult<Game> {
+    fn _get(&mut self, key: String) -> ServiceResult<GameData> {
         self.dao.get(key.to_lowercase()).map_err(|e| {
             info!("{}", e);
             e.into()
@@ -99,6 +99,7 @@ impl GameService {
             None => Ok(GameVariant::State(data.into())),
             Some(PlayerRequest { player_name }) => {
                 let player = data
+                    .info
                     .players
                     .get(player_name.to_lowercase().as_str())
                     .ok_or(ServiceError::NotFound(format!("player: {}", player_name)))?;
@@ -117,8 +118,8 @@ impl GameService {
         Ok(GameList { games })
     }
 
-    fn save(&mut self, game: Game) -> ServiceResult<()> {
-        let key = game.name.to_lowercase();
+    fn save(&mut self, game: GameData) -> ServiceResult<()> {
+        let key = game.info.name.to_lowercase();
         self.dao.set(key, game).map_err(|e| {
             warn!("{}", e);
             e.into()

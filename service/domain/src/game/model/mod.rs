@@ -23,39 +23,67 @@ pub enum Team {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Game {
+pub struct GameInfo {
     pub name: String,
-    pub board: Board,
     pub first_team: Team,
     pub turn: Team,
     pub players: HashMap<String, Player>,
     pub guesses: Vec<usize>,
 }
 
+impl GameInfo {
+    pub fn replace_players(&self, new_players: HashMap<String, Player>) -> Self {
+        Self {
+            players: new_players,
+            ..self.clone()
+        }
+    }
+
+    pub fn replace_guesses(&self, new_guesses: Vec<usize>) -> Self {
+        Self {
+            guesses: new_guesses,
+            ..self.clone()
+        }
+    }
+
+    pub fn toggle_turn(&self) -> Self {
+        Self {
+            turn: match self.turn {
+                Team::Blue => Team::Red,
+                _ => Team::Blue,
+            },
+            ..self.clone()
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GameData {
+    pub info: GameInfo,
+    pub board: Board,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GameState {
-    pub name: String,
+    pub info: GameInfo,
     pub board: BoardState,
-    pub turn: Team,
-    pub players: HashMap<String, Player>,
-    pub guesses: Vec<usize>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum GameVariant {
-    Data(Game),
+    Data(GameData),
     State(GameState),
 }
 
-impl From<(Player, Game)> for GameVariant {
+impl From<(Player, GameData)> for GameVariant {
     fn from(
         (
             Player {
                 spymaster_secret, ..
             },
             g,
-        ): (Player, Game),
+        ): (Player, GameData),
     ) -> Self {
         match spymaster_secret {
             Some(_) => GameVariant::Data(g.clone()),
@@ -64,23 +92,25 @@ impl From<(Player, Game)> for GameVariant {
     }
 }
 
-pub type GameResult = Result<Game, GameError>;
+pub type GameResult = Result<GameData, GameError>;
 
-impl Game {
-    pub fn new(name: String, board: Board, first_team: Team) -> Game {
-        Game {
-            name,
+impl GameData {
+    pub fn new(name: String, board: Board, first_team: Team) -> GameData {
+        GameData {
+            info: GameInfo {
+                name,
+                first_team,
+                turn: first_team,
+                players: HashMap::new(),
+                guesses: Vec::new(),
+            },
             board,
-            first_team,
-            turn: first_team,
-            players: HashMap::new(),
-            guesses: Vec::new(),
         }
     }
 
     pub fn join(self, player: Player) -> GameResult {
         let key = player.name.to_lowercase();
-        self.players
+        self.info.players
             .get(key.as_str())
             .map(|p| {
                 let error = GameError::unique_player(p.clone());
@@ -88,38 +118,35 @@ impl Game {
                 Err(error)
             })
             .unwrap_or_else(|| {
-                let mut new_players = self.players.clone();
+                let mut new_players = self.info.players.clone();
                 new_players.insert(key, player.clone());
-                Ok(Game {
-                    players: new_players,
+                Ok(GameData {
+                    info: self.info.replace_players(new_players),
                     ..self.clone()
                 })
             })
     }
 
-    pub fn end_turn(self) -> Game {
-        Game {
-            turn: match self.turn {
-                Team::Blue => Team::Red,
-                _ => Team::Blue,
-            },
+    pub fn end_turn(self) -> GameData {
+        GameData {
+            info: self.info.toggle_turn(),
             ..self.clone()
         }
     }
 
     pub fn leave(self, player_name: &str) -> GameResult {
-        let mut new_players = self.players.clone();
+        let mut new_players = self.info.players.clone();
         new_players
             .remove(player_name)
-            .map(|_| Game {
-                players: new_players.clone(),
+            .map(|_| GameData {
+                info: self.info.replace_players(new_players.clone()),
                 ..self.clone()
             })
             .ok_or_else(|| PlayerNotFound(player_name.to_string()))
     }
 
     pub fn guess(self, guess_request: GuessRequest) -> GameResult {
-        let maybe_player = self.players.get(&guess_request.player_name.to_lowercase());
+        let maybe_player = self.info.players.get(&guess_request.player_name.to_lowercase());
         match maybe_player {
             None => Err(PlayerNotFound(guess_request.player_name)),
             Some(Player {
@@ -130,10 +157,10 @@ impl Game {
                 guess_request.player_name
             ))),
             Some(Player { team, .. }) => {
-                if *team != self.turn {
+                if *team != self.info.turn {
                     return Err(InvalidGuess(format!("{} team is not up", team)));
                 }
-                self.guesses
+                self.info.guesses
                     .iter()
                     .find(|&index| *index == guess_request.board_index)
                     .map(|g| {
@@ -142,8 +169,8 @@ impl Game {
                         Err(error)
                     })
                     .unwrap_or_else(|| {
-                        Ok(Game {
-                            guesses: [&[guess_request.board_index], &self.guesses[..]].concat(),
+                        Ok(GameData {
+                            info: self.info.replace_guesses([&[guess_request.board_index], &self.info.guesses[..]].concat()),
                             ..self.clone()
                         })
                     })
@@ -151,15 +178,15 @@ impl Game {
         }
     }
 
-    pub fn undo_guess(self) -> Game {
-        Game {
-            guesses: self.guesses[1..].iter().cloned().collect(),
+    pub fn undo_guess(self) -> GameData {
+        GameData {
+            info: self.info.replace_guesses(self.info.guesses[1..].iter().cloned().collect()),
             ..self.clone()
         }
     }
 }
 
-impl Into<BoardState> for Game {
+impl Into<BoardState> for GameData {
     fn into(self) -> BoardState {
         let cards: Vec<CardState> = self
             .board
@@ -167,6 +194,7 @@ impl Into<BoardState> for Game {
             .enumerate()
             .map(|(index, card)| {
                 let maybe_card_color = self
+                    .info
                     .guesses
                     .iter()
                     .find(|board_index| *board_index == &index)
@@ -181,20 +209,14 @@ impl Into<BoardState> for Game {
     }
 }
 
-impl Into<GameState> for Game {
+impl Into<GameState> for GameData {
     fn into(self) -> GameState {
-        let Game {
-            name,
-            turn,
-            players,
-            guesses,
+        let GameData {
+            info,
             ..
         } = self.clone();
         GameState {
-            name,
-            turn,
-            players,
-            guesses,
+            info,
             board: self.clone().into(),
         }
     }

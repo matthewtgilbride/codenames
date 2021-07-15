@@ -9,9 +9,9 @@ mod tests {
     use std::convert::TryInto;
 
     use crate::game::card::{Card, CardColor};
-    use crate::game::model::{Game, GuessRequest, Player, Team};
+    use crate::game::model::{GameData, GuessRequest, Player, Team};
 
-    fn test_game() -> Game {
+    fn test_game() -> GameData {
         let cards: Vec<Card> = (0..25)
             .into_iter()
             .map(|i| {
@@ -28,7 +28,7 @@ mod tests {
             })
             .collect();
 
-        let game = Game::new("test".to_string(), cards.try_into().unwrap(), Team::Blue);
+        let game = GameData::new("test".to_string(), cards.try_into().unwrap(), Team::Blue);
 
         let players: Vec<Player> = vec![
             Player {
@@ -100,7 +100,7 @@ mod tests {
 
     #[test]
     fn guess() {
-        let game: Game = test_game();
+        let game: GameData = test_game();
         let game_clone = game.clone();
 
         let player_name = game
