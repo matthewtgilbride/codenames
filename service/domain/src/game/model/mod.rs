@@ -1,26 +1,23 @@
-pub mod player;
-
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::error::Error;
 use std::fmt;
-use std::fmt::Display;
 use std::fmt::Formatter;
 
 use log::info;
 use serde::{Deserialize, Serialize};
 
-use crate::game::board::{Board, BoardState};
-use crate::game::card::CardState;
-pub use crate::game::model::player::Player;
-use crate::game::model::GameError::{InvalidGuess, PlayerNotFound};
+pub use board::*;
+pub use card::*;
+pub use player::*;
+pub use team::*;
+
 use crate::{ServiceError, UniqueError};
 
-#[derive(Display, Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum Team {
-    Blue,
-    Red,
-}
+mod board;
+mod card;
+mod player;
+mod team;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GameInfo {
@@ -110,7 +107,8 @@ impl GameData {
 
     pub fn join(self, player: Player) -> GameResult {
         let key = player.name.to_lowercase();
-        self.info.players
+        self.info
+            .players
             .get(key.as_str())
             .map(|p| {
                 let error = GameError::unique_player(p.clone());
@@ -142,25 +140,29 @@ impl GameData {
                 info: self.info.replace_players(new_players.clone()),
                 ..self.clone()
             })
-            .ok_or_else(|| PlayerNotFound(player_name.to_string()))
+            .ok_or_else(|| GameError::PlayerNotFound(player_name.to_string()))
     }
 
     pub fn guess(self, guess_request: GuessRequest) -> GameResult {
-        let maybe_player = self.info.players.get(&guess_request.player_name.to_lowercase());
+        let maybe_player = self
+            .info
+            .players
+            .get(&guess_request.player_name.to_lowercase());
         match maybe_player {
-            None => Err(PlayerNotFound(guess_request.player_name)),
+            None => Err(GameError::PlayerNotFound(guess_request.player_name)),
             Some(Player {
                 spymaster_secret: Some(_),
                 ..
-            }) => Err(InvalidGuess(format!(
+            }) => Err(GameError::InvalidGuess(format!(
                 "{} is a spy master",
                 guess_request.player_name
             ))),
             Some(Player { team, .. }) => {
                 if *team != self.info.turn {
-                    return Err(InvalidGuess(format!("{} team is not up", team)));
+                    return Err(GameError::InvalidGuess(format!("{} team is not up", team)));
                 }
-                self.info.guesses
+                self.info
+                    .guesses
                     .iter()
                     .find(|&index| *index == guess_request.board_index)
                     .map(|g| {
@@ -170,7 +172,9 @@ impl GameData {
                     })
                     .unwrap_or_else(|| {
                         Ok(GameData {
-                            info: self.info.replace_guesses([&[guess_request.board_index], &self.info.guesses[..]].concat()),
+                            info: self.info.replace_guesses(
+                                [&[guess_request.board_index], &self.info.guesses[..]].concat(),
+                            ),
                             ..self.clone()
                         })
                     })
@@ -180,7 +184,9 @@ impl GameData {
 
     pub fn undo_guess(self) -> GameData {
         GameData {
-            info: self.info.replace_guesses(self.info.guesses[1..].iter().cloned().collect()),
+            info: self
+                .info
+                .replace_guesses(self.info.guesses[1..].iter().cloned().collect()),
             ..self.clone()
         }
     }
@@ -211,10 +217,7 @@ impl Into<BoardState> for GameData {
 
 impl Into<GameState> for GameData {
     fn into(self) -> GameState {
-        let GameData {
-            info,
-            ..
-        } = self.clone();
+        let GameData { info, .. } = self.clone();
         GameState {
             info,
             board: self.clone().into(),

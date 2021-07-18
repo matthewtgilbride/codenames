@@ -1,5 +1,4 @@
-pub mod board;
-pub mod card;
+pub mod board_service;
 pub mod dao;
 pub mod model;
 pub mod service;
@@ -8,7 +7,7 @@ pub mod service;
 mod tests {
     use std::convert::TryInto;
 
-    use crate::game::card::{Card, CardColor};
+    use crate::game::model::{Card, CardColor};
     use crate::game::model::{GameData, GuessRequest, Player, Team};
 
     fn test_game() -> GameData {
@@ -70,7 +69,10 @@ mod tests {
             })
             .unwrap();
 
-        assert_eq!(game_clone.players.len() + 1, updated_game.players.len());
+        assert_eq!(
+            game_clone.info.players.len() + 1,
+            updated_game.info.players.len()
+        );
 
         let failed_update = updated_game.join(Player {
             team: Team::Red,
@@ -87,7 +89,10 @@ mod tests {
         let game_clone = game.clone();
         let updated_game = game.leave("foo").unwrap();
 
-        assert_eq!(game_clone.players.len() - 1, updated_game.players.len())
+        assert_eq!(
+            game_clone.info.players.len() - 1,
+            updated_game.info.players.len()
+        )
     }
 
     #[test]
@@ -104,9 +109,10 @@ mod tests {
         let game_clone = game.clone();
 
         let player_name = game
+            .info
             .players
             .iter()
-            .find(|(_, p)| p.team == game.turn && p.spymaster_secret.is_none())
+            .find(|(_, p)| p.team == game.info.turn && p.spymaster_secret.is_none())
             .map(|(_, p)| p)
             .unwrap()
             .clone()
@@ -118,7 +124,10 @@ mod tests {
             })
             .unwrap();
 
-        assert_eq!(game_clone.guesses.len() + 1, updated_game.guesses.len());
+        assert_eq!(
+            game_clone.info.guesses.len() + 1,
+            updated_game.info.guesses.len()
+        );
 
         let failed_update = updated_game.guess(GuessRequest {
             board_index: 0,

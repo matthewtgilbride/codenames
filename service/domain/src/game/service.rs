@@ -1,8 +1,8 @@
 use log::{debug, info, warn};
 
 use crate::dictionary::{DictionaryService, WordGenerator};
-use crate::game::board::BoardGenerator;
-use crate::game::board::BoardService;
+use crate::game::board_service::BoardGenerator;
+use crate::game::board_service::BoardService;
 use crate::game::dao::GameDao;
 use crate::game::model::{
     GameData, GameList, GameVariant, GuessRequest, NewGameRequest, PlayerRequest,
