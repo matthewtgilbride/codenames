@@ -15,53 +15,6 @@ mod player;
 mod team;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct GameInfo {
-    pub name: String,
-    pub first_team: Team,
-    pub turn: Team,
-    pub players: HashMap<String, Player>,
-    pub guesses: Vec<usize>,
-}
-
-impl GameInfo {
-    pub fn replace_players(&self, new_players: HashMap<String, Player>) -> Self {
-        Self {
-            players: new_players,
-            ..self.clone()
-        }
-    }
-
-    pub fn replace_guesses(&self, new_guesses: Vec<usize>) -> Self {
-        Self {
-            guesses: new_guesses,
-            ..self.clone()
-        }
-    }
-
-    pub fn toggle_turn(&self) -> Self {
-        Self {
-            turn: match self.turn {
-                Team::Blue => Team::Red,
-                _ => Team::Blue,
-            },
-            ..self.clone()
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct GameData {
-    pub info: GameInfo,
-    pub board: Board,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct GameState {
-    pub info: GameInfo,
-    pub board: BoardState,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum Game {
     Data(GameData),
@@ -85,6 +38,18 @@ impl From<(Player, GameData)> for Game {
 }
 
 pub type GameResult = Result<GameData, GameError>;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GameState {
+    pub info: GameInfo,
+    pub board: BoardState,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GameData {
+    pub info: GameInfo,
+    pub board: Board,
+}
 
 impl GameData {
     pub fn new(name: String, board: Board, first_team: Team) -> GameData {
@@ -210,6 +175,41 @@ impl Into<GameState> for GameData {
         GameState {
             info: self.info,
             board,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GameInfo {
+    pub name: String,
+    pub first_team: Team,
+    pub turn: Team,
+    pub players: HashMap<String, Player>,
+    pub guesses: Vec<usize>,
+}
+
+impl GameInfo {
+    pub fn replace_players(&self, new_players: HashMap<String, Player>) -> Self {
+        Self {
+            players: new_players,
+            ..self.clone()
+        }
+    }
+
+    pub fn replace_guesses(&self, new_guesses: Vec<usize>) -> Self {
+        Self {
+            guesses: new_guesses,
+            ..self.clone()
+        }
+    }
+
+    pub fn toggle_turn(&self) -> Self {
+        Self {
+            turn: match self.turn {
+                Team::Blue => Team::Red,
+                _ => Team::Blue,
+            },
+            ..self.clone()
         }
     }
 }
