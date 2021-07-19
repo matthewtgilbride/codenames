@@ -1,8 +1,6 @@
-use std::fmt;
-use std::fmt::Display;
+use std::{fmt, fmt::Display};
 
-use serde::de::Visitor;
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{de, de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::game::model::Team;
 
@@ -78,8 +76,7 @@ pub struct CardState {
 
 #[cfg(test)]
 mod tests {
-    use crate::game::model::card::CardColor;
-    use crate::game::model::Team;
+    use crate::game::model::{card::CardColor, Team};
 
     #[test]
     fn serialize_card_color() {

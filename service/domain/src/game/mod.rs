@@ -7,8 +7,7 @@ pub mod service;
 mod tests {
     use std::convert::TryInto;
 
-    use crate::game::model::{Card, CardColor};
-    use crate::game::model::{GameData, GuessRequest, Player, Team};
+    use crate::game::model::{Card, CardColor, GameData, GuessRequest, Player, Team};
 
     fn test_game() -> GameData {
         let cards: Vec<Card> = (0..25)

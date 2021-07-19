@@ -1,9 +1,7 @@
 #[macro_use]
 extern crate enum_display_derive;
 
-use std::error::Error;
-use std::fmt;
-use std::fmt::Formatter;
+use std::{error::Error, fmt, fmt::Formatter};
 
 use serde::Serialize;
 

@@ -1,15 +1,10 @@
-use std::collections::HashMap;
-use std::convert::TryInto;
-use std::error::Error;
-use std::fmt;
-use std::fmt::Formatter;
-
-use log::info;
-use serde::{Deserialize, Serialize};
+use std::{collections::HashMap, convert::TryInto, error::Error, fmt, fmt::Formatter};
 
 pub use board::*;
 pub use card::*;
+use log::info;
 pub use player::*;
+use serde::{Deserialize, Serialize};
 pub use team::*;
 
 use crate::{ServiceError, UniqueError};

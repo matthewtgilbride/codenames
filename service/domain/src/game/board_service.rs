@@ -1,7 +1,9 @@
 use dyn_clone::DynClone;
 
-use crate::game::model::{Board, Card, CardColor, Team};
-use crate::ServiceResult;
+use crate::{
+    game::model::{Board, Card, CardColor, Team},
+    ServiceResult,
+};
 
 #[derive(Clone)]
 pub struct BoardService {

@@ -1,14 +1,17 @@
 use log::{debug, info, warn};
 
-use crate::dictionary::{DictionaryService, WordGenerator};
-use crate::game::board_service::BoardGenerator;
-use crate::game::board_service::BoardService;
-use crate::game::dao::GameDao;
-use crate::game::model::{
-    GameData, GameList, GameVariant, GuessRequest, NewGameRequest, PlayerRequest,
+use crate::{
+    dictionary::{DictionaryService, WordGenerator},
+    game::{
+        board_service::{BoardGenerator, BoardService},
+        dao::GameDao,
+        model::{
+            GameData, GameList, GameState, GameVariant, GuessRequest, NewGameRequest, Player,
+            PlayerRequest,
+        },
+    },
+    DaoError, ServiceError, ServiceResult, StdResult,
 };
-use crate::game::model::{GameState, Player};
-use crate::{DaoError, ServiceError, ServiceResult, StdResult};
 
 #[derive(Clone)]
 pub struct GameService {

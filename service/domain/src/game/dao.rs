@@ -1,7 +1,6 @@
 use dyn_clone::DynClone;
 
-use crate::game::model::GameData;
-use crate::DaoResult;
+use crate::{game::model::GameData, DaoResult};
 
 pub trait GameDao: DynClone + Send + Sync {
     fn get(&mut self, key: String) -> DaoResult<GameData>;
