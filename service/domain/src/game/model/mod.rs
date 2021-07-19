@@ -1,16 +1,16 @@
-use std::{collections::HashMap, convert::TryInto, error::Error, fmt, fmt::Formatter};
+use std::{collections::HashMap, convert::TryInto};
 
 pub use board::*;
 pub use card::*;
+pub use error::*;
 use log::info;
 pub use player::*;
 use serde::{Deserialize, Serialize};
 pub use team::*;
 
-use crate::{ServiceError, UniqueError};
-
 mod board;
 mod card;
+mod error;
 mod player;
 mod team;
 
@@ -62,13 +62,13 @@ pub struct GameState {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GameVariant {
+#[serde(tag = "type")]
+pub enum Game {
     Data(GameData),
     State(GameState),
 }
 
-impl From<(Player, GameData)> for GameVariant {
+impl From<(Player, GameData)> for Game {
     fn from(
         (
             Player {
@@ -78,8 +78,8 @@ impl From<(Player, GameData)> for GameVariant {
         ): (Player, GameData),
     ) -> Self {
         match spymaster_secret {
-            Some(_) => GameVariant::Data(g.clone()),
-            _ => GameVariant::State(g.clone().into()),
+            Some(_) => Game::Data(g.clone()),
+            _ => Game::State(g.clone().into()),
         }
     }
 }
@@ -187,8 +187,8 @@ impl GameData {
     }
 }
 
-impl Into<BoardState> for GameData {
-    fn into(self) -> BoardState {
+impl Into<GameState> for GameData {
+    fn into(self) -> GameState {
         let cards: Vec<CardState> = self
             .board
             .iter()
@@ -206,74 +206,13 @@ impl Into<BoardState> for GameData {
                 }
             })
             .collect();
-        cards.try_into().unwrap()
-    }
-}
-
-impl Into<GameState> for GameData {
-    fn into(self) -> GameState {
-        let GameData { info, .. } = self.clone();
+        let board = cards.try_into().unwrap();
         GameState {
-            info,
-            board: self.clone().into(),
+            info: self.info,
+            board,
         }
     }
 }
-
-#[derive(Debug)]
-pub enum GameError {
-    UniquePlayerName(UniqueError),
-    PlayerNotFound(String),
-    UniqueGuess(UniqueError),
-    InvalidGuess(String),
-}
-
-impl GameError {
-    fn entity_name() -> String {
-        "Game".to_string()
-    }
-    pub fn unique_player(player: Player) -> GameError {
-        GameError::UniquePlayerName(UniqueError::new(
-            GameError::entity_name(),
-            "player.name".to_string(),
-            player.name,
-        ))
-    }
-    pub fn unique_guess(guess: usize) -> GameError {
-        GameError::UniqueGuess(UniqueError::new(
-            GameError::entity_name(),
-            "guesses".to_string(),
-            guess.to_string(),
-        ))
-    }
-}
-
-impl fmt::Display for GameError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            GameError::UniquePlayerName(u) => u.fmt(f),
-            GameError::UniqueGuess(u) => u.fmt(f),
-            GameError::PlayerNotFound(name) => write!(f, "player not found: {}", name),
-            GameError::InvalidGuess(msg) => write!(
-                f,
-                "Guess must be made by an operative on the current team: {}",
-                msg
-            ),
-        }
-    }
-}
-
-impl From<GameError> for ServiceError {
-    fn from(game_error: GameError) -> Self {
-        match game_error {
-            GameError::UniquePlayerName(ue) => ServiceError::BadRequest(ue.to_string()),
-            GameError::UniqueGuess(ue) => ServiceError::BadRequest(ue.to_string()),
-            e => ServiceError::BadRequest(e.to_string()),
-        }
-    }
-}
-
-impl Error for GameError {}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NewGameRequest {

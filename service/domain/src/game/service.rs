@@ -6,7 +6,7 @@ use crate::{
         board_service::{BoardGenerator, BoardService},
         dao::GameDao,
         model::{
-            GameData, GameList, GameState, GameVariant, GuessRequest, NewGameRequest, Player,
+            Game, GameData, GameList, GameState, GuessRequest, NewGameRequest, Player,
             PlayerRequest,
         },
     },
@@ -54,7 +54,7 @@ impl GameService {
         Ok(game.clone().into())
     }
 
-    pub fn join(&self, key: String, player: Player) -> ServiceResult<GameVariant> {
+    pub fn join(&self, key: String, player: Player) -> ServiceResult<Game> {
         let game = &self.clone()._get(key)?;
         let updated_game = game.clone().join(player.clone())?;
         let _ = &self.clone().save(updated_game.clone())?;
@@ -96,10 +96,10 @@ impl GameService {
         })
     }
 
-    pub fn get(&mut self, key: String, req: Option<PlayerRequest>) -> ServiceResult<GameVariant> {
+    pub fn get(&mut self, key: String, req: Option<PlayerRequest>) -> ServiceResult<Game> {
         let data = self._get(key)?;
         match req {
-            None => Ok(GameVariant::State(data.into())),
+            None => Ok(Game::State(data.into())),
             Some(PlayerRequest { player_name }) => {
                 let player = data
                     .info
