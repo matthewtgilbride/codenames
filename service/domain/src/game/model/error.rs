@@ -5,9 +5,10 @@ use crate::{game::model::Player, ServiceError, UniqueError};
 #[derive(Debug)]
 pub enum GameError {
     UniquePlayerName(UniqueError),
-    PlayerNotFound(String),
     UniqueGuess(UniqueError),
+    PlayerNotFound(String),
     InvalidGuess(String),
+    InvalidTurnState(String),
 }
 
 impl GameError {
@@ -38,9 +39,10 @@ impl fmt::Display for GameError {
             GameError::PlayerNotFound(name) => write!(f, "player not found: {}", name),
             GameError::InvalidGuess(msg) => write!(
                 f,
-                "Guess must be made by an operative on the current team: {}",
+                "Guess must be made when a turn is in progress by an operative on the correct team: {}",
                 msg
             ),
+            GameError::InvalidTurnState(msg) => write!(f, "turn is not in the correct state: {}", msg)
         }
     }
 }

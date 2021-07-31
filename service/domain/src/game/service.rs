@@ -5,10 +5,7 @@ use crate::{
     game::{
         board_service::{BoardGenerator, BoardService},
         dao::GameDao,
-        model::{
-            Game, GameData, GameList, GameState, GuessRequest, NewGameRequest, Player,
-            PlayerRequest,
-        },
+        model::{Game, GameData, GameList, GameState, NewGameRequest, Player, PlayerRequest},
     },
     DaoError, ServiceError, ServiceResult, StdResult,
 };
@@ -68,16 +65,9 @@ impl GameService {
         Ok(updated_game.clone().into())
     }
 
-    pub fn guess(&self, key: String, guess: GuessRequest) -> ServiceResult<GameState> {
+    pub fn guess(&self, key: String, guess: (&str, usize)) -> ServiceResult<GameState> {
         let game = &self.clone()._get(key)?;
         let updated_game = game.clone().guess(guess)?;
-        let _ = &self.clone().save(updated_game.clone())?;
-        Ok(updated_game.clone().into())
-    }
-
-    pub fn undo_guess(&self, key: String) -> ServiceResult<GameState> {
-        let game = &self.clone()._get(key)?;
-        let updated_game = game.clone().undo_guess();
         let _ = &self.clone().save(updated_game.clone())?;
         Ok(updated_game.clone().into())
     }
@@ -103,8 +93,10 @@ impl GameService {
             Some(PlayerRequest { player_name }) => {
                 let player = data
                     .info
-                    .players
-                    .get(player_name.to_lowercase().as_str())
+                    .players()
+                    .iter()
+                    .find(|&p| p.name.to_lowercase() == player_name.to_lowercase())
+                    .cloned()
                     .ok_or(ServiceError::NotFound(format!("player: {}", player_name)))?;
                 Ok((player.clone(), data).into())
             }
@@ -122,7 +114,7 @@ impl GameService {
     }
 
     fn save(&mut self, game: GameData) -> ServiceResult<()> {
-        let key = game.info.name.to_lowercase();
+        let key = game.info.name().to_lowercase();
         self.dao.set(key, game).map_err(|e| {
             warn!("{}", e);
             e.into()

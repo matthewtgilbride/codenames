@@ -99,3 +99,18 @@ impl fmt::Display for UniqueError {
         ))
     }
 }
+
+pub struct Lowercase {
+    value: String,
+}
+
+impl Lowercase {
+    pub fn new(value: String) -> Self {
+        Self {
+            value: value.to_lowercase(),
+        }
+    }
+    pub fn value(&self) -> &str {
+        self.value.as_str()
+    }
+}
