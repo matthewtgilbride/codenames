@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 pub use team::*;
 pub use turn::*;
 
-use crate::UniqueError;
+use crate::{Lowercase, UniqueError};
 
 mod board;
 mod card;
@@ -92,7 +92,7 @@ impl GameData {
             .unwrap_or(
                 self.info
                     .players
-                    .get(player_name.to_lowercase().as_str())
+                    .get(&Lowercase::new(player_name))
                     .ok_or(GameError::PlayerNotFound(player_name.to_string())),
             )?;
 
@@ -151,7 +151,7 @@ impl Into<GameState> for GameData {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GameInfo {
     name: String,
-    players: HashMap<String, Player>,
+    players: HashMap<Lowercase, Player>,
     turns: Vec<Turn>,
 }
 
@@ -168,8 +168,8 @@ impl GameInfo {
         &self.name
     }
 
-    pub fn players(&self) -> Vec<Player> {
-        self.players.values().cloned().collect()
+    pub fn players(&self) -> Vec<&Player> {
+        self.players.values().collect()
     }
 
     pub fn turns(&self) -> &[Turn] {
@@ -189,7 +189,7 @@ impl GameInfo {
     ) -> Result<Self, GameError> {
         let head = self.current_turn();
         let tail = self.turns[1..].to_vec();
-        let maybe_player = self.players.get(spymaster_name.to_lowercase().as_str());
+        let maybe_player = self.players.get(&Lowercase::new(spymaster_name.as_str()));
 
         match (maybe_player, head) {
             (_, Turn::InProgress(_)) => {
@@ -234,17 +234,15 @@ impl GameInfo {
             Team::Blue => Team::Red,
         });
 
-        let turns = [vec![new_turn, head], tail].concat();
-
         Self {
-            turns,
+            turns: [vec![new_turn, head], tail].concat(),
             ..self.clone()
         }
     }
 
     pub fn add_player(&self, player: Player) -> Result<Self, GameError> {
-        let key = player.name.to_lowercase();
-        match self.players.contains_key(key.as_str()) {
+        let key = Lowercase::new(player.name.as_str());
+        match self.players.contains_key(&key) {
             true => Err(GameError::UniquePlayerName(UniqueError {
                 entity_name: "player".to_string(),
                 field_name: "name".to_string(),
@@ -264,8 +262,8 @@ impl GameInfo {
     }
 
     pub fn remove_player(&self, player_name: &str) -> Result<Self, GameError> {
-        let key = player_name.to_lowercase();
-        match self.players.contains_key(key.as_str()) {
+        let key = Lowercase::new(player_name);
+        match self.players.contains_key(&key) {
             false => Err(GameError::PlayerNotFound(player_name.to_string())),
             true => Ok(Self {
                 players: self

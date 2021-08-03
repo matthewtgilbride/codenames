@@ -3,7 +3,7 @@ extern crate enum_display_derive;
 
 use std::{error::Error, fmt, fmt::Formatter};
 
-use serde::Serialize;
+use serde::{de, de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 
 pub mod dictionary;
 pub mod game;
@@ -100,17 +100,53 @@ impl fmt::Display for UniqueError {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Lowercase {
     value: String,
 }
 
 impl Lowercase {
-    pub fn new(value: String) -> Self {
+    pub fn new(value: &str) -> Self {
         Self {
             value: value.to_lowercase(),
         }
     }
     pub fn value(&self) -> &str {
         self.value.as_str()
+    }
+}
+
+impl Serialize for Lowercase {
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(self.value())
+    }
+}
+
+impl<'de> Deserialize<'de> for Lowercase {
+    fn deserialize<D>(deserializer: D) -> Result<Lowercase, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_any(LowercaseVisitor)
+    }
+}
+
+struct LowercaseVisitor;
+
+impl<'de> Visitor<'de> for LowercaseVisitor {
+    type Value = Lowercase;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("a string which will be transformed to lowercase")
+    }
+
+    fn visit_str<E>(self, value: &str) -> Result<Lowercase, E>
+    where
+        E: de::Error,
+    {
+        Ok(Lowercase::new(value).clone())
     }
 }

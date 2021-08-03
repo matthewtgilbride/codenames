@@ -7,7 +7,7 @@ use crate::{
         dao::GameDao,
         model::{Game, GameData, GameList, GameState, NewGameRequest, Player, PlayerRequest},
     },
-    DaoError, ServiceError, ServiceResult, StdResult,
+    DaoError, Lowercase, ServiceError, ServiceResult, StdResult,
 };
 
 #[derive(Clone)]
@@ -80,7 +80,7 @@ impl GameService {
     }
 
     fn _get(&mut self, key: String) -> ServiceResult<GameData> {
-        self.dao.get(key.to_lowercase()).map_err(|e| {
+        self.dao.get(Lowercase::new(key.as_str())).map_err(|e| {
             info!("{}", e);
             e.into()
         })
@@ -104,17 +104,21 @@ impl GameService {
     }
 
     pub fn find(&mut self) -> ServiceResult<GameList> {
-        let games = self.dao.keys().map_err(|e| {
-            warn!("{}", e);
-            let de: DaoError = e.into();
-            de
-        })?;
+        let games = self
+            .dao
+            .keys()
+            .map(|ls| ls.iter().map(|l| l.value().to_string()).collect())
+            .map_err(|e| {
+                warn!("{}", e);
+                let de: DaoError = e.into();
+                de
+            })?;
 
         Ok(GameList { games })
     }
 
     fn save(&mut self, game: GameData) -> ServiceResult<()> {
-        let key = game.info.name().to_lowercase();
+        let key = Lowercase::new(game.info.name());
         self.dao.set(key, game).map_err(|e| {
             warn!("{}", e);
             e.into()
