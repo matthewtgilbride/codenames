@@ -69,8 +69,8 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            game_clone.info.players.len() + 1,
-            updated_game.info.players.len()
+            game_clone.info.players().len() + 1,
+            updated_game.info.players().len()
         );
 
         let failed_update = updated_game.join(Player {
@@ -89,8 +89,8 @@ mod tests {
         let updated_game = game.leave("foo").unwrap();
 
         assert_eq!(
-            game_clone.info.players.len() - 1,
-            updated_game.info.players.len()
+            game_clone.info.players().len() - 1,
+            updated_game.info.players().len()
         )
     }
 
@@ -109,29 +109,22 @@ mod tests {
 
         let player_name = game
             .info
-            .players
+            .players()
             .iter()
-            .find(|(_, p)| p.team == game.info.turn && p.spymaster_secret.is_none())
-            .map(|(_, p)| p)
+            .find(|&p| &p.team == game.info.current_turn().team() && p.spymaster_secret.is_none())
+            .cloned()
             .unwrap()
             .clone()
             .name;
-        let updated_game = game
-            .guess(GuessRequest {
-                board_index: 0,
-                player_name: player_name.clone(),
-            })
-            .unwrap();
+
+        let updated_game = game.guess((player_name.as_str(), 0)).unwrap();
 
         assert_eq!(
-            game_clone.info.guesses.len() + 1,
-            updated_game.info.guesses.len()
+            game_clone.info.guesses().len() + 1,
+            updated_game.info.guesses().len()
         );
 
-        let failed_update = updated_game.guess(GuessRequest {
-            board_index: 0,
-            player_name: player_name.clone(),
-        });
+        let failed_update = updated_game.guess((player_name.as_str(), 0));
 
         assert!(failed_update.is_err())
     }
