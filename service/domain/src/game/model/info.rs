@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     game::model::{GameError, Player, Team, Turn, TurnData},
-    Lowercase, UniqueError,
+    Lowercase,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -111,11 +111,7 @@ impl GameInfo {
     pub fn add_player(self, player: Player) -> Result<Self, GameError> {
         let key = Lowercase::new(player.name.as_str());
         if self.players.contains_key(&key) {
-            return Err(GameError::UniquePlayerName(UniqueError {
-                entity_name: "player".to_string(),
-                field_name: "name".to_string(),
-                value: player.name.to_string(),
-            }));
+            return Err(GameError::unique_player(player.name));
         }
         Ok(Self {
             players: [
@@ -145,22 +141,41 @@ impl GameInfo {
         })
     }
 
-    pub fn add_guess(self, guess: (Player, usize)) -> Result<Self, GameError> {
+    pub fn add_guess(self, guess: (&str, usize)) -> Result<Self, GameError> {
+        let (player_name, board_index) = guess;
+        let player = self.players.get(&Lowercase::new(player_name));
         let head = self.current_turn();
         let tail = self.turns[1..].to_vec();
 
-        match head {
-            Turn::Pending(_) => Err(GameError::TurnInProgress),
-            Turn::InProgress(TurnData { spymaster, .. })
-                if spymaster.team != head.team().clone() =>
+        match (player, head) {
+            (_, Turn::Pending(_)) => Err(GameError::TurnPending),
+            (None, _) => Err(GameError::PlayerNotFound(player_name.to_string())),
+            (Some(player), Turn::InProgress(TurnData { spymaster, .. }))
+                if spymaster.team != player.team =>
             {
-                Err(GameError::InvalidGuess(guess.0.name))
+                Err(GameError::WrongTeam(spymaster.clone().name))
             }
-            Turn::InProgress(turn_data) => Ok(Self {
+            (
+                Some(Player {
+                    spymaster_secret: Some(_),
+                    name,
+                    ..
+                }),
+                _,
+            ) => Err(GameError::NotAnOperative(name.clone())),
+            (
+                Some(player),
+                Turn::InProgress(TurnData {
+                    clue,
+                    guesses,
+                    spymaster,
+                }),
+            ) => Ok(Self {
                 turns: [
                     vec![Turn::InProgress(TurnData {
-                        guesses: [vec![guess], turn_data.clone().guesses].concat(),
-                        ..turn_data.clone()
+                        guesses: [vec![(player.clone(), board_index)], guesses.clone()].concat(),
+                        clue: clue.clone(),
+                        spymaster: spymaster.clone(),
                     })],
                     tail,
                 ]
@@ -172,5 +187,5 @@ impl GameInfo {
 }
 
 #[cfg(test)]
-#[path = "info_test.rs"]
-mod test;
+#[path = "info_tests.rs"]
+mod tests;

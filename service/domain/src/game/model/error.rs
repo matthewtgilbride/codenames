@@ -1,6 +1,6 @@
 use std::{error::Error, fmt, fmt::Formatter};
 
-use crate::{game::model::Player, ServiceError, UniqueError};
+use crate::{ServiceError, UniqueError};
 
 #[derive(Debug, PartialEq)]
 pub enum GameError {
@@ -12,17 +12,18 @@ pub enum GameError {
     NotAnOperative(String),
     InvalidGuess(String),
     TurnInProgress,
+    TurnPending,
 }
 
 impl GameError {
     fn entity_name() -> String {
         "Game".to_string()
     }
-    pub fn unique_player(player: Player) -> GameError {
+    pub fn unique_player(player_name: String) -> GameError {
         GameError::UniquePlayerName(UniqueError::new(
             GameError::entity_name(),
             "info.players.name".to_string(),
-            player.name,
+            player_name,
         ))
     }
     pub fn unique_guess(guess: usize) -> GameError {
@@ -48,7 +49,8 @@ impl fmt::Display for GameError {
                 "Guess must be made when a turn is in progress by an operative on the correct team: {}",
                 msg
             ),
-            GameError::TurnInProgress => write!(f, "turn is already in progress")
+            GameError::TurnInProgress => write!(f, "turn is already in progress"),
+            GameError::TurnPending => write!(f, "turn is not started")
         }
     }
 }

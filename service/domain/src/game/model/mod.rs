@@ -9,8 +9,6 @@ use serde::{Deserialize, Serialize};
 pub use team::*;
 pub use turn::*;
 
-use crate::UniqueError;
-
 mod board;
 mod card;
 mod error;
@@ -79,23 +77,14 @@ impl GameData {
     pub fn guess(self, guess: (&str, usize)) -> GameResult {
         let (player_name, board_index) = guess;
         let GameData { info, board } = self;
-        let player = info
-            .guesses()
+
+        info.guesses()
             .iter()
             .find(|&(_, index)| *index == board_index)
-            .map(|_| {
-                Err(GameError::UniqueGuess(UniqueError::new(
-                    "Game".to_string(),
-                    "guesses".to_string(),
-                    board_index.to_string(),
-                )))
-            })
-            .unwrap_or(
-                info.player(player_name)
-                    .ok_or(GameError::PlayerNotFound(player_name.to_string())),
-            )?;
+            .map(|_| Err(GameError::unique_guess(board_index)))
+            .unwrap_or(Ok(()))?;
 
-        let info = info.clone().add_guess((player.clone(), board_index))?;
+        let info = info.clone().add_guess((player_name, board_index))?;
 
         Ok(Self { info, board })
     }
