@@ -117,7 +117,11 @@ mod tests {
             .clone()
             .name;
 
-        let updated_game = game.guess((player_name.as_str(), 0)).unwrap();
+        let started_game = game
+            .start_turn("foo".to_string(), ("bar".to_string(), 1))
+            .unwrap();
+
+        let updated_game = started_game.guess((player_name.as_str(), 0)).unwrap();
 
         assert_eq!(
             game_clone.info.guesses().len() + 1,

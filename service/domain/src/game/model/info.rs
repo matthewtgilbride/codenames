@@ -45,8 +45,19 @@ impl GameInfo {
             .expect("Encountered GameInfo with empty list of Turns. This should never happen...")
     }
 
+    pub fn guesses(&self) -> Vec<(Player, usize)> {
+        self.turns
+            .iter()
+            .filter_map(|t| match t {
+                Turn::InProgress(data) => Some(data.guesses.clone()),
+                _ => None,
+            })
+            .flatten()
+            .collect()
+    }
+
     pub fn start_turn(
-        &self,
+        self,
         spymaster_name: String,
         clue: (String, usize),
     ) -> Result<Self, GameError> {
@@ -67,11 +78,7 @@ impl GameInfo {
             }
             (Some(player), _) => Ok(Self {
                 turns: [
-                    vec![Turn::InProgress(TurnData {
-                        spymaster: player.clone(),
-                        clue,
-                        guesses: Vec::new(),
-                    })],
+                    vec![Turn::InProgress(TurnData::new(player.clone(), clue))],
                     tail,
                 ]
                 .concat(),
@@ -80,7 +87,7 @@ impl GameInfo {
         }
     }
 
-    pub fn end_turn(&self) -> Self {
+    pub fn end_turn(self) -> Self {
         let head = self.current_turn().clone();
         let tail = self.turns[1..].to_vec();
 
@@ -103,7 +110,7 @@ impl GameInfo {
         }
     }
 
-    pub fn add_player(&self, player: Player) -> Result<Self, GameError> {
+    pub fn add_player(self, player: Player) -> Result<Self, GameError> {
         let key = Lowercase::new(player.name.as_str());
         if self.players.contains_key(&key) {
             return Err(GameError::UniquePlayerName(UniqueError {
@@ -124,7 +131,7 @@ impl GameInfo {
         })
     }
 
-    pub fn remove_player(&self, player_name: &str) -> Result<Self, GameError> {
+    pub fn remove_player(self, player_name: &str) -> Result<Self, GameError> {
         let key = Lowercase::new(player_name);
         if !self.players.contains_key(&key) {
             return Err(GameError::PlayerNotFound(player_name.to_string()));
@@ -140,7 +147,7 @@ impl GameInfo {
         })
     }
 
-    pub fn add_guess(&self, guess: (Player, usize)) -> Result<Self, GameError> {
+    pub fn add_guess(self, guess: (Player, usize)) -> Result<Self, GameError> {
         let head = self.current_turn();
         let tail = self.turns[1..].to_vec();
 
@@ -163,16 +170,5 @@ impl GameInfo {
                 ..self.clone()
             }),
         }
-    }
-
-    pub fn guesses(&self) -> Vec<(Player, usize)> {
-        self.turns
-            .iter()
-            .filter_map(|t| match t {
-                Turn::InProgress(data) => Some(data.guesses.clone()),
-                _ => None,
-            })
-            .flatten()
-            .collect()
     }
 }

@@ -9,6 +9,16 @@ pub struct TurnData {
     pub guesses: Vec<(Player, usize)>,
 }
 
+impl TurnData {
+    pub fn new(spymaster: Player, clue: (String, usize)) -> Self {
+        Self {
+            spymaster,
+            clue,
+            guesses: Vec::new(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum Turn {

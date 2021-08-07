@@ -51,32 +51,35 @@ impl GameData {
     }
 
     pub fn join(self, player: Player) -> GameResult {
-        let info = self.info.add_player(player)?;
-        Ok(Self {
-            info,
-            ..self.clone()
-        })
+        let GameData { board, info } = self;
+        let info = info.add_player(player)?;
+        Ok(Self { info, board })
+    }
+
+    pub fn start_turn(self, spymaster_name: String, clue: (String, usize)) -> GameResult {
+        let GameData { board, info } = self;
+        let info = info.start_turn(spymaster_name, clue)?;
+        Ok(Self { info, board })
     }
 
     pub fn end_turn(self) -> GameData {
-        GameData {
-            info: self.info.end_turn(),
-            ..self.clone()
+        let GameData { board, info } = self;
+        Self {
+            info: info.end_turn(),
+            board,
         }
     }
 
     pub fn leave(self, player_name: &str) -> GameResult {
-        let info = self.info.remove_player(player_name)?;
-        Ok(Self {
-            info,
-            ..self.clone()
-        })
+        let GameData { board, info } = self;
+        let info = info.remove_player(player_name)?;
+        Ok(Self { info, board })
     }
 
     pub fn guess(self, guess: (&str, usize)) -> GameResult {
         let (player_name, board_index) = guess;
-        let player = self
-            .info
+        let GameData { info, board } = self;
+        let player = info
             .guesses()
             .iter()
             .find(|&(_, index)| *index == board_index)
@@ -88,17 +91,13 @@ impl GameData {
                 )))
             })
             .unwrap_or(
-                self.info
-                    .player(player_name)
+                info.player(player_name)
                     .ok_or(GameError::PlayerNotFound(player_name.to_string())),
             )?;
 
-        let info = self.info.add_guess((player.clone(), board_index))?;
+        let info = info.clone().add_guess((player.clone(), board_index))?;
 
-        Ok(Self {
-            info,
-            ..self.clone()
-        })
+        Ok(Self { info, board })
     }
 }
 
