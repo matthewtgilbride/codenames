@@ -133,40 +133,6 @@ impl Into<GameState> for GameData {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct NewGameRequest {
-    pub game_name: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct PlayerRequest {
-    pub player_name: String,
-}
-
-impl PlayerRequest {
-    pub fn new(player_name: &str) -> Self {
-        Self {
-            player_name: player_name.to_string(),
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct GuessRequest {
-    pub player_name: String,
-    pub board_index: usize,
-}
-
-impl GuessRequest {
-    pub fn new(player_name: &str, board_index: usize) -> Self {
-        Self {
-            player_name: player_name.to_string(),
-            board_index,
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct GameList {
-    pub games: Vec<String>,
-}
+#[cfg(test)]
+#[path = "mod_tests.rs"]
+mod tests;

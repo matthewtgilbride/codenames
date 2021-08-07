@@ -5,7 +5,7 @@ use crate::{
     game::{
         board_service::{BoardGenerator, BoardService},
         dao::GameDao,
-        model::{Game, GameData, GameList, GameState, NewGameRequest, Player, PlayerRequest},
+        model::{Game, GameData, GameState, Player},
     },
     DaoError, Lowercase, ServiceError, ServiceResult, StdResult,
 };
@@ -33,19 +33,17 @@ impl GameService {
         })
     }
 
-    pub fn random_name(&self) -> ServiceResult<NewGameRequest> {
+    pub fn random_name(&self) -> ServiceResult<String> {
         debug!("call: game.Service.random_name");
         let (first_name, last_name) = self.dictionary_service.new_word_pair()?;
-        Ok(NewGameRequest {
-            game_name: format!("{}-{}", first_name, last_name),
-        })
+        Ok(format!("{}-{}", first_name, last_name))
     }
 
-    pub fn new_game(&self, request: NewGameRequest) -> ServiceResult<GameState> {
+    pub fn new_game(&self, game_name: String) -> ServiceResult<GameState> {
         let words = self.dictionary_service.new_word_set()?;
         let (board, first_team) = self.board_service.new_board(words)?;
 
-        let game = GameData::new(request.game_name, board, first_team);
+        let game = GameData::new(game_name, board, first_team);
         let _ = &self.clone().save(game.clone())?;
 
         Ok(game.clone().into())
@@ -58,9 +56,9 @@ impl GameService {
         Ok((player.clone(), updated_game).into())
     }
 
-    pub fn leave(&self, key: String, req: PlayerRequest) -> ServiceResult<GameState> {
+    pub fn leave(&self, key: String, player_name: &str) -> ServiceResult<GameState> {
         let game = &self.clone()._get(key)?;
-        let updated_game = game.clone().leave(req.player_name.as_str())?;
+        let updated_game = game.clone().leave(player_name)?;
         let _ = &self.clone().save(updated_game.clone())?;
         Ok(updated_game.clone().into())
     }
@@ -86,11 +84,11 @@ impl GameService {
         })
     }
 
-    pub fn get(&mut self, key: String, req: Option<PlayerRequest>) -> ServiceResult<Game> {
+    pub fn get(&mut self, key: String, req: Option<String>) -> ServiceResult<Game> {
         let data = self._get(key)?;
         match req {
             None => Ok(Game::State(data.into())),
-            Some(PlayerRequest { player_name }) => {
+            Some(player_name) => {
                 let player = data
                     .info
                     .players()
@@ -103,7 +101,7 @@ impl GameService {
         }
     }
 
-    pub fn find(&mut self) -> ServiceResult<GameList> {
+    pub fn find(&mut self) -> ServiceResult<Vec<String>> {
         let games = self
             .dao
             .keys()
@@ -114,7 +112,7 @@ impl GameService {
                 de
             })?;
 
-        Ok(GameList { games })
+        Ok(games)
     }
 
     fn save(&mut self, game: GameData) -> ServiceResult<()> {
