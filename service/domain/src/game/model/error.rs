@@ -2,13 +2,16 @@ use std::{error::Error, fmt, fmt::Formatter};
 
 use crate::{game::model::Player, ServiceError, UniqueError};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum GameError {
     UniquePlayerName(UniqueError),
     UniqueGuess(UniqueError),
     PlayerNotFound(String),
+    WrongTeam(String),
+    NotASpymaster(String),
+    NotAnOperative(String),
     InvalidGuess(String),
-    InvalidTurnState(String),
+    TurnInProgress,
 }
 
 impl GameError {
@@ -18,14 +21,14 @@ impl GameError {
     pub fn unique_player(player: Player) -> GameError {
         GameError::UniquePlayerName(UniqueError::new(
             GameError::entity_name(),
-            "player.name".to_string(),
+            "info.players.name".to_string(),
             player.name,
         ))
     }
     pub fn unique_guess(guess: usize) -> GameError {
         GameError::UniqueGuess(UniqueError::new(
             GameError::entity_name(),
-            "guesses".to_string(),
+            "info.turns.guesses".to_string(),
             guess.to_string(),
         ))
     }
@@ -36,13 +39,16 @@ impl fmt::Display for GameError {
         match self {
             GameError::UniquePlayerName(u) => u.fmt(f),
             GameError::UniqueGuess(u) => u.fmt(f),
-            GameError::PlayerNotFound(name) => write!(f, "player not found: {}", name),
+            GameError::PlayerNotFound(name) => write!(f, "{} is not a player in the game", name),
+            GameError::WrongTeam(name) =>  write!(f, "{}'s team is not up", name),
+            GameError::NotASpymaster(name) =>  write!(f, "{} is not a spy master", name),
+            GameError::NotAnOperative(name) =>  write!(f, "{} is not an operative", name),
             GameError::InvalidGuess(msg) => write!(
                 f,
                 "Guess must be made when a turn is in progress by an operative on the correct team: {}",
                 msg
             ),
-            GameError::InvalidTurnState(msg) => write!(f, "turn is not in the correct state: {}", msg)
+            GameError::TurnInProgress => write!(f, "turn is already in progress")
         }
     }
 }

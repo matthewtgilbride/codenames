@@ -66,15 +66,13 @@ impl GameInfo {
         let maybe_player = self.players.get(&Lowercase::new(spymaster_name.as_str()));
 
         match (maybe_player, head) {
-            (_, Turn::InProgress(_)) => {
-                Err(GameError::InvalidTurnState("already started".to_string()))
-            }
+            (_, Turn::InProgress(_)) => Err(GameError::TurnInProgress),
             (None, _) => Err(GameError::PlayerNotFound(spymaster_name)),
             (Some(player), turn) if player.team != *turn.team() => {
-                Err(GameError::PlayerNotFound(spymaster_name))
+                Err(GameError::WrongTeam(spymaster_name))
             }
             (Some(player), _) if player.spymaster_secret.is_none() => {
-                Err(GameError::InvalidTurnState("not a spymaster".to_string()))
+                Err(GameError::NotASpymaster(spymaster_name))
             }
             (Some(player), _) => Ok(Self {
                 turns: [
@@ -152,7 +150,7 @@ impl GameInfo {
         let tail = self.turns[1..].to_vec();
 
         match head {
-            Turn::Pending(_) => Err(GameError::InvalidTurnState("not started".to_string())),
+            Turn::Pending(_) => Err(GameError::TurnInProgress),
             Turn::InProgress(TurnData { spymaster, .. })
                 if spymaster.team != head.team().clone() =>
             {
@@ -172,3 +170,7 @@ impl GameInfo {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "info_test.rs"]
+mod test;

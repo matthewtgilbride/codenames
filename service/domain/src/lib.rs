@@ -74,7 +74,7 @@ impl Error for DaoError {}
 
 pub type DaoResult<T> = Result<T, DaoError>;
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct UniqueError {
     entity_name: String,
     field_name: String,
