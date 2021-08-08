@@ -39,10 +39,10 @@ fn start_turn_in_progress() {
     let info = GameInfo {
         name: TEST_NAME.to_string(),
         players: HashMap::new(),
-        turns: vec![Turn::InProgress(test_turn_data())],
+        turns: vec![Turn::Started(test_turn_data())],
     };
     let result = info.start_turn(TEST_NAME.to_string(), test_clue());
-    assert_eq!(result.err().unwrap(), GameError::TurnInProgress);
+    assert_eq!(result.err().unwrap(), GameError::TurnStarted);
 }
 
 #[test]
@@ -103,7 +103,7 @@ fn start_turn() {
     assert_eq!(
         result.ok().unwrap(),
         GameInfo {
-            turns: vec![Turn::InProgress(TurnData::new(player.clone(), test_clue()))],
+            turns: vec![Turn::Started(TurnData::new(player.clone(), test_clue()))],
             ..info.clone()
         }
     );
@@ -127,14 +127,14 @@ fn end_in_progress_turn() {
     let info = GameInfo {
         name: TEST_NAME.to_string(),
         players: HashMap::new(),
-        turns: vec![Turn::InProgress(test_turn_data())],
+        turns: vec![Turn::Started(test_turn_data())],
     };
     assert_eq!(
         info.end_turn(),
         GameInfo {
             name: TEST_NAME.to_string(),
             players: HashMap::new(),
-            turns: vec![Turn::Pending(Team::Red), Turn::InProgress(test_turn_data())],
+            turns: vec![Turn::Pending(Team::Red), Turn::Started(test_turn_data())],
         }
     )
 }
@@ -144,7 +144,7 @@ fn end_second_turn() {
     let info = GameInfo {
         name: TEST_NAME.to_string(),
         players: HashMap::new(),
-        turns: vec![Turn::Pending(Team::Red), Turn::InProgress(test_turn_data())],
+        turns: vec![Turn::Pending(Team::Red), Turn::Started(test_turn_data())],
     };
     assert_eq!(
         info.end_turn(),
@@ -154,7 +154,7 @@ fn end_second_turn() {
             turns: vec![
                 Turn::Pending(Team::Blue),
                 Turn::Pending(Team::Red),
-                Turn::InProgress(test_turn_data())
+                Turn::Started(test_turn_data())
             ],
         }
     )
@@ -234,7 +234,7 @@ pub fn add_guess_player_not_found() {
         GameInfo {
             name: TEST_NAME.to_string(),
             players: HashMap::new(),
-            turns: vec![Turn::InProgress(test_turn_data())],
+            turns: vec![Turn::Started(test_turn_data())],
         }
         .add_guess((TEST_NAME, 0))
         .err()
@@ -252,7 +252,7 @@ pub fn add_guess_wrong_team() {
                 .iter()
                 .cloned()
                 .collect(),
-            turns: vec![Turn::InProgress(test_turn_data())],
+            turns: vec![Turn::Started(test_turn_data())],
         }
         .add_guess((TEST_NAME, 0))
         .err()
@@ -270,7 +270,7 @@ pub fn add_guess_not_an_operative() {
                 .iter()
                 .cloned()
                 .collect(),
-            turns: vec![Turn::InProgress(test_turn_data())],
+            turns: vec![Turn::Started(test_turn_data())],
         }
         .add_guess((TEST_NAME, 0))
         .err()
@@ -287,12 +287,12 @@ pub fn add_guess() {
             .iter()
             .cloned()
             .collect(),
-        turns: vec![Turn::InProgress(test_turn_data())],
+        turns: vec![Turn::Started(test_turn_data())],
     };
     assert_eq!(
         info.clone().add_guess((TEST_NAME, 0)).ok().unwrap(),
         GameInfo {
-            turns: vec![Turn::InProgress(TurnData {
+            turns: vec![Turn::Started(TurnData {
                 guesses: vec![(test_player(Team::Blue, false), 0)],
                 ..test_turn_data()
             })],

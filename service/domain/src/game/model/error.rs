@@ -11,7 +11,7 @@ pub enum GameError {
     NotASpymaster(String),
     NotAnOperative(String),
     InvalidGuess(String),
-    TurnInProgress,
+    TurnStarted,
     TurnPending,
 }
 
@@ -49,7 +49,7 @@ impl fmt::Display for GameError {
                 "Guess must be made when a turn is in progress by an operative on the correct team: {}",
                 msg
             ),
-            GameError::TurnInProgress => write!(f, "turn is already in progress"),
+            GameError::TurnStarted => write!(f, "turn is already started"),
             GameError::TurnPending => write!(f, "turn is not started")
         }
     }

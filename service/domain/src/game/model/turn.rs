@@ -20,17 +20,17 @@ impl TurnData {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "type")]
+#[serde(tag = "type", content = "data")]
 pub enum Turn {
     Pending(Team),
-    InProgress(TurnData),
+    Started(TurnData),
 }
 
 impl Turn {
     pub fn team(&self) -> &Team {
         match self {
             Turn::Pending(team) => team,
-            Turn::InProgress(TurnData {
+            Turn::Started(TurnData {
                 spymaster: Player { team, .. },
                 ..
             }) => team,

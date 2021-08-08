@@ -1,6 +1,6 @@
 use std::convert::TryInto;
 
-use crate::game::model::{Card, CardColor, GameData, Player, Team};
+use crate::game::model::{Card, CardColor, GameData, Player, Team, Turn, TurnData};
 
 fn test_game() -> GameData {
     let cards: Vec<Card> = (0..25)
@@ -90,9 +90,31 @@ fn leave() {
 #[test]
 fn serialize() {
     let game = test_game();
-    let j = serde_json::to_string(&game).unwrap();
-
+    let j = serde_json::to_string_pretty(&game).unwrap();
     println!("{}", j);
+    let game_started = game
+        .start_turn("foo".to_string(), ("Foo".to_string(), 1))
+        .unwrap();
+    let j = serde_json::to_string_pretty(&game_started).unwrap();
+    println!("{}", j);
+}
+
+#[test]
+fn deserialize() {
+    let game: GameData = serde_json::from_str(GAME_JSON).unwrap();
+    assert_eq!(game.info.current_turn().clone(), Turn::Pending(Team::Blue));
+    let game_started: GameData = serde_json::from_str(GAME_STARTED_JSON).unwrap();
+    assert_eq!(
+        game_started.info.current_turn().clone(),
+        Turn::Started(TurnData::new(
+            Player {
+                name: "foo".to_string(),
+                team: Team::Blue,
+                spymaster_secret: Some("".to_string()),
+            },
+            ("Foo".to_string(), 1)
+        ))
+    );
 }
 
 #[test]
@@ -125,3 +147,286 @@ fn guess() {
 
     assert!(failed_update.is_err())
 }
+
+const GAME_JSON: &str = r#"
+{
+  "name": "test",
+  "players": {
+    "baz": {
+      "team": "Red",
+      "name": "baz",
+      "spymaster_secret": ""
+    },
+    "foo": {
+      "team": "Blue",
+      "name": "foo",
+      "spymaster_secret": ""
+    },
+    "bar": {
+      "team": "Blue",
+      "name": "bar",
+      "spymaster_secret": null
+    },
+    "buzz": {
+      "team": "Red",
+      "name": "buzz",
+      "spymaster_secret": null
+    }
+  },
+  "turns": [
+    {
+      "type": "Pending",
+      "data": "Blue"
+    }
+  ],
+  "board": [
+    {
+      "color": "Blue",
+      "word": "0"
+    },
+    {
+      "color": "Blue",
+      "word": "1"
+    },
+    {
+      "color": "Blue",
+      "word": "2"
+    },
+    {
+      "color": "Blue",
+      "word": "3"
+    },
+    {
+      "color": "Blue",
+      "word": "4"
+    },
+    {
+      "color": "Blue",
+      "word": "5"
+    },
+    {
+      "color": "Blue",
+      "word": "6"
+    },
+    {
+      "color": "Blue",
+      "word": "7"
+    },
+    {
+      "color": "Blue",
+      "word": "8"
+    },
+    {
+      "color": "Red",
+      "word": "9"
+    },
+    {
+      "color": "Red",
+      "word": "10"
+    },
+    {
+      "color": "Red",
+      "word": "11"
+    },
+    {
+      "color": "Red",
+      "word": "12"
+    },
+    {
+      "color": "Red",
+      "word": "13"
+    },
+    {
+      "color": "Red",
+      "word": "14"
+    },
+    {
+      "color": "Red",
+      "word": "15"
+    },
+    {
+      "color": "Red",
+      "word": "16"
+    },
+    {
+      "color": "Death",
+      "word": "17"
+    },
+    {
+      "color": "Neutral",
+      "word": "18"
+    },
+    {
+      "color": "Neutral",
+      "word": "19"
+    },
+    {
+      "color": "Neutral",
+      "word": "20"
+    },
+    {
+      "color": "Neutral",
+      "word": "21"
+    },
+    {
+      "color": "Neutral",
+      "word": "22"
+    },
+    {
+      "color": "Neutral",
+      "word": "23"
+    },
+    {
+      "color": "Neutral",
+      "word": "24"
+    }
+  ]
+}
+"#;
+
+const GAME_STARTED_JSON: &str = r#"
+{
+  "name": "test",
+  "players": {
+    "foo": {
+      "team": "Blue",
+      "name": "foo",
+      "spymaster_secret": ""
+    },
+    "bar": {
+      "team": "Blue",
+      "name": "bar",
+      "spymaster_secret": null
+    },
+    "baz": {
+      "team": "Red",
+      "name": "baz",
+      "spymaster_secret": ""
+    },
+    "buzz": {
+      "team": "Red",
+      "name": "buzz",
+      "spymaster_secret": null
+    }
+  },
+  "turns": [
+    {
+      "type": "Started",
+      "data": {
+        "spymaster": {
+          "team": "Blue",
+          "name": "foo",
+          "spymaster_secret": ""
+        },
+        "clue": [
+          "Foo",
+          1
+        ],
+        "guesses": []
+      }
+    }
+  ],
+  "board": [
+    {
+      "color": "Blue",
+      "word": "0"
+    },
+    {
+      "color": "Blue",
+      "word": "1"
+    },
+    {
+      "color": "Blue",
+      "word": "2"
+    },
+    {
+      "color": "Blue",
+      "word": "3"
+    },
+    {
+      "color": "Blue",
+      "word": "4"
+    },
+    {
+      "color": "Blue",
+      "word": "5"
+    },
+    {
+      "color": "Blue",
+      "word": "6"
+    },
+    {
+      "color": "Blue",
+      "word": "7"
+    },
+    {
+      "color": "Blue",
+      "word": "8"
+    },
+    {
+      "color": "Red",
+      "word": "9"
+    },
+    {
+      "color": "Red",
+      "word": "10"
+    },
+    {
+      "color": "Red",
+      "word": "11"
+    },
+    {
+      "color": "Red",
+      "word": "12"
+    },
+    {
+      "color": "Red",
+      "word": "13"
+    },
+    {
+      "color": "Red",
+      "word": "14"
+    },
+    {
+      "color": "Red",
+      "word": "15"
+    },
+    {
+      "color": "Red",
+      "word": "16"
+    },
+    {
+      "color": "Death",
+      "word": "17"
+    },
+    {
+      "color": "Neutral",
+      "word": "18"
+    },
+    {
+      "color": "Neutral",
+      "word": "19"
+    },
+    {
+      "color": "Neutral",
+      "word": "20"
+    },
+    {
+      "color": "Neutral",
+      "word": "21"
+    },
+    {
+      "color": "Neutral",
+      "word": "22"
+    },
+    {
+      "color": "Neutral",
+      "word": "23"
+    },
+    {
+      "color": "Neutral",
+      "word": "24"
+    }
+  ]
+}
+"#;

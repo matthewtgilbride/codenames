@@ -49,7 +49,7 @@ impl GameInfo {
         self.turns
             .iter()
             .filter_map(|t| match t {
-                Turn::InProgress(data) => Some(data.guesses.clone()),
+                Turn::Started(data) => Some(data.guesses.clone()),
                 _ => None,
             })
             .flatten()
@@ -66,7 +66,7 @@ impl GameInfo {
         let maybe_player = self.players.get(&Lowercase::new(spymaster_name.as_str()));
 
         match (maybe_player, head) {
-            (_, Turn::InProgress(_)) => Err(GameError::TurnInProgress),
+            (_, Turn::Started(_)) => Err(GameError::TurnStarted),
             (None, _) => Err(GameError::PlayerNotFound(spymaster_name)),
             (Some(player), turn) if player.team != *turn.team() => {
                 Err(GameError::WrongTeam(spymaster_name))
@@ -76,7 +76,7 @@ impl GameInfo {
             }
             (Some(player), _) => Ok(Self {
                 turns: [
-                    vec![Turn::InProgress(TurnData::new(player.clone(), clue))],
+                    vec![Turn::Started(TurnData::new(player.clone(), clue))],
                     tail,
                 ]
                 .concat(),
@@ -91,7 +91,7 @@ impl GameInfo {
 
         let current_team = match head {
             Turn::Pending(team) => team,
-            Turn::InProgress(TurnData {
+            Turn::Started(TurnData {
                 spymaster: Player { team, .. },
                 ..
             }) => team,
@@ -150,7 +150,7 @@ impl GameInfo {
         match (player, head) {
             (_, Turn::Pending(_)) => Err(GameError::TurnPending),
             (None, _) => Err(GameError::PlayerNotFound(player_name.to_string())),
-            (Some(player), Turn::InProgress(TurnData { spymaster, .. }))
+            (Some(player), Turn::Started(TurnData { spymaster, .. }))
                 if spymaster.team != player.team =>
             {
                 Err(GameError::WrongTeam(spymaster.clone().name))
@@ -165,14 +165,14 @@ impl GameInfo {
             ) => Err(GameError::NotAnOperative(name.clone())),
             (
                 Some(player),
-                Turn::InProgress(TurnData {
+                Turn::Started(TurnData {
                     clue,
                     guesses,
                     spymaster,
                 }),
             ) => Ok(Self {
                 turns: [
-                    vec![Turn::InProgress(TurnData {
+                    vec![Turn::Started(TurnData {
                         guesses: [vec![(player.clone(), board_index)], guesses.clone()].concat(),
                         clue: clue.clone(),
                         spymaster: spymaster.clone(),
