@@ -1,7 +1,6 @@
 use actix_web::{HttpResponse, Responder};
-use serde::{Deserialize, Serialize};
-
 use codenames_domain::{ServiceError, ServiceResult};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 struct ErrorResponse {

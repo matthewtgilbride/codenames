@@ -3,15 +3,13 @@ extern crate env_logger;
 extern crate serde_json;
 
 use actix_cors::Cors;
-use actix_web::middleware::Logger;
-use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-
+use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
 use codenames_domain::game::service::GameService;
 
-use crate::dictionary::WordGeneratorRand;
-use crate::game::board::BoardGeneratorRand;
-use crate::game::dao::RedisDao;
-use crate::game::routes::routes as game_routes;
+use crate::{
+    dictionary::WordGeneratorRand,
+    game::{board::BoardGeneratorRand, dao::RedisDao, routes::routes as game_routes},
+};
 
 mod dictionary;
 mod game;

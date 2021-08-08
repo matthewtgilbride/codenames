@@ -1,12 +1,10 @@
-use std::collections::HashSet;
-use std::convert::TryInto;
+use std::{collections::HashSet, convert::TryInto};
 
-use rand::seq::SliceRandom;
-use rand::thread_rng;
-
-use codenames_domain::dictionary::WordGenerator;
-use codenames_domain::dictionary::MINIMUM_DICTIONARY_SIZE;
-use codenames_domain::ServiceResult;
+use codenames_domain::{
+    dictionary::{WordGenerator, MINIMUM_DICTIONARY_SIZE},
+    ServiceResult,
+};
+use rand::{seq::SliceRandom, thread_rng};
 
 #[derive(Clone)]
 pub struct WordGeneratorRand;
