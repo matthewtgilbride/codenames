@@ -1,10 +1,11 @@
 use actix_web::{get, put, web, Responder, Scope};
 
-use crate::{util::respond, AppData};
+use crate::{util::respond, AppData, ClueBody};
 
 pub fn player_routes(path: &str) -> Scope {
     web::scope(path)
         .service(get_player_game)
+        .service(start_turn)
         .service(guess)
         .service(leave_game)
 }
@@ -16,6 +17,13 @@ async fn get_player_game(
 ) -> impl Responder {
     let (key, player_name) = path.clone();
     respond(&data.service.clone().get(key, Some(player_name)))
+}
+
+#[put("start-turn")]
+async fn start_turn(path: web::Path<(String, String)>, body: web::Json<ClueBody>, data: web::Data<AppData>,) -> impl Responder {
+    let (key, player_name) = path.clone();
+    let ClueBody { word, amount } = body.into_inner();
+    respond(&data.service.clone().start_turn(key, player_name, (word, amount)))
 }
 
 #[put("/guess/{index}")]

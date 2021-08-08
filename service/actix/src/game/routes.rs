@@ -1,8 +1,8 @@
-use actix_web::{get, post, put, web, Responder, Scope};
-use codenames_domain::game::model::Player;
-use serde::{Deserialize, Serialize};
+use actix_web::{get, post, put, Responder, Scope, web};
 
-use crate::{game::player_routes::player_routes, util::respond, AppData};
+use codenames_domain::game::model::Player;
+
+use crate::{AppData, game::player_routes::player_routes, util::respond, GameNameBody, GameListBody};
 
 pub fn routes(path: &str) -> Scope {
     web::scope(path)
@@ -13,16 +13,12 @@ pub fn routes(path: &str) -> Scope {
 
 #[get("")]
 async fn find_games(data: web::Data<AppData>) -> impl Responder {
-    respond(&data.service.clone().find())
+    respond(&data.service.clone().find().map(|keys| GameListBody::new(keys)))
 }
 
-#[derive(Serialize, Deserialize)]
-struct NewGameRequest {
-    game_name: String,
-}
 
 #[post("")]
-async fn new_game(body: web::Json<NewGameRequest>, data: web::Data<AppData>) -> impl Responder {
+async fn new_game(body: web::Json<GameNameBody>, data: web::Data<AppData>) -> impl Responder {
     respond(&data.service.new_game(body.into_inner().game_name))
 }
 

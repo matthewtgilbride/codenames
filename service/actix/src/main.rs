@@ -6,6 +6,8 @@ use actix_cors::Cors;
 use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
 use codenames_domain::game::service::GameService;
 
+use serde::{Deserialize, Serialize};
+
 use crate::{
     dictionary::WordGeneratorRand,
     game::{board::BoardGeneratorRand, dao::RedisDao, routes::routes as game_routes},
@@ -63,5 +65,29 @@ async fn main() -> std::io::Result<()> {
 
 #[get("/")]
 pub async fn random_name(data: web::Data<AppData>) -> impl Responder {
-    HttpResponse::Ok().json(&data.service.random_name().unwrap())
+    HttpResponse::Ok().json(&data.service.random_name().map(|g| GameNameBody::new(g)).unwrap())
+}
+
+#[derive(Serialize, Deserialize)]
+struct GameNameBody {
+    game_name: String,
+}
+
+impl GameNameBody {
+    pub fn new(game_name: String) -> Self { Self { game_name } }
+}
+
+#[derive(Serialize, Deserialize)]
+struct GameListBody {
+    games: Vec<String>,
+}
+
+impl GameListBody {
+    pub fn new(games: Vec<String>) -> Self { Self { games } }
+}
+
+#[derive(Serialize, Deserialize)]
+struct ClueBody {
+    word: String,
+    amount: usize
 }
