@@ -1,6 +1,12 @@
-FROM postman/newman:5.2-alpine
+FROM python:3.9.6-slim-buster
 
-COPY codenames-service.postman_collection.json .
-COPY codenames-service.postman_environment.docker.json .
+COPY Pipfile .
+COPY Pipfile.lock .
+COPY integration_tests.py .
 
-ENTRYPOINT newman run -e codenames-service.postman_environment.docker.json codenames-service.postman_collection.json
+RUN pip install pipenv
+RUN pipenv install
+
+ENV TEST_HOST service
+
+ENTRYPOINT pipenv run pytest -v -s integration_tests.py

@@ -17,7 +17,7 @@ build-wasm: ## compile and build wasm subproject
 build-all: build build-wasm ## compile and build all projects
 
 format: ## format code
-	cargo fmt
+	cargo +nightly fmt
 
 test: ## test all subprojects
 	cargo test --all
@@ -42,8 +42,12 @@ run-local: ## run the http server locally
 	cargo build
 	cargo run
 
-integration-test-local: ## run newman tests locally
-	yarn test
+integration-test-local: ## run integration tests locally
+	pipenv run pytest -v -s integration_tests.py
+
+.EXPORT_ALL_VARIABLES:
+AWS_ACCOUNT = $(shell aws sts get-caller-identity | jq -r .Account)
+AWS_ECR_URL = ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com
 
 integration-test-docker: check ## check code, build newman test container, and run it
 	docker-compose -f ../docker-compose.yml up --build --exit-code-from service-test service-test

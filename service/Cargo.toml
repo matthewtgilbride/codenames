@@ -5,8 +5,7 @@ default-members = [
 ]
 members = [
     "domain",
-    "actix",
-    "wasm"
+    "actix"
 ]
 
 [profile.release]

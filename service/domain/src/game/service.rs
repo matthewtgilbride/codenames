@@ -70,7 +70,12 @@ impl GameService {
         Ok(updated_game.clone().into())
     }
 
-    pub fn start_turn(&self, key: String, spymaster_name: String, clue: (String, usize)) -> ServiceResult<GameState> {
+    pub fn start_turn(
+        &self,
+        key: String,
+        spymaster_name: String,
+        clue: (String, usize),
+    ) -> ServiceResult<GameState> {
         let game = &self.clone()._get(key)?;
         let updated_game = game.clone().start_turn(spymaster_name, clue)?;
         let _ = &self.clone().save(updated_game.clone())?;

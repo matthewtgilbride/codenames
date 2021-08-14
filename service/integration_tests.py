@@ -1,4 +1,5 @@
 from typing import Optional
+from os import environ
 
 import pytest
 import requests
@@ -7,12 +8,13 @@ import requests
 class TestState:
     game_name: Optional[str] = None
     current_turn: Optional[str] = None
-    host: str = "http://localhost:8080"
 
 
 @pytest.fixture(scope="session")
 def host() -> str:
-    return "http://localhost:8080"
+    host_env = environ.get("TEST_HOST")
+    host = "localhost" if host_env is None else host_env
+    return f"http://{host}:8080"
 
 
 @pytest.fixture(scope="session")

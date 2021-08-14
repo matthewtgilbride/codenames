@@ -1,8 +1,9 @@
-use actix_web::{get, post, put, Responder, Scope, web};
-
+use actix_web::{get, post, put, web, Responder, Scope};
 use codenames_domain::game::model::Player;
 
-use crate::{AppData, game::player_routes::player_routes, util::respond, GameNameBody, GameListBody};
+use crate::{
+    game::player_routes::player_routes, util::respond, AppData, GameListBody, GameNameBody,
+};
 
 pub fn routes(path: &str) -> Scope {
     web::scope(path)
@@ -13,9 +14,14 @@ pub fn routes(path: &str) -> Scope {
 
 #[get("")]
 async fn find_games(data: web::Data<AppData>) -> impl Responder {
-    respond(&data.service.clone().find().map(|keys| GameListBody::new(keys)))
+    respond(
+        &data
+            .service
+            .clone()
+            .find()
+            .map(|keys| GameListBody::new(keys)),
+    )
 }
-
 
 #[post("")]
 async fn new_game(body: web::Json<GameNameBody>, data: web::Data<AppData>) -> impl Responder {
