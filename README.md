@@ -5,11 +5,13 @@ Hi.  This is a personal project that exists for two reasons:
 1. To learn Rust
 2. To make my own version of [codenames](https://codenames.game/) that I can play with friends and family (inspiration: [horsepaste](https://github.com/jbowens/codenames))
 
+Here's the result: [codenames.mattgilbride.com](codenames.mattgilbride.com)
+
 ## prerequisites
 
 - rust: https://www.rust-lang.org/tools/install
 - node: https://nodejs.dev/learn/how-to-install-nodejs
-- awscli: 
+- The AWS CLI: 
   - https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html
   - https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html
 - jq: https://stedolan.github.io/jq/
@@ -71,7 +73,7 @@ You will notice three subprojects within the service directory.  They are as fol
 #### domain
 This is a rust library containing the core business logic representing a game of codenames.
 
-#### local
+#### actix
 A better name for this would be `actix-web`.  This subproject is an actix-web server implementation of the domain.
 
 #### wasm
