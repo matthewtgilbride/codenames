@@ -4,7 +4,7 @@ import { FC } from 'react';
 import { useRouter } from 'next/router';
 import { css } from '@emotion/css';
 import { Palette } from '../../design/color';
-import { GameState, Player } from '../../model';
+import { currentTeam, GameState, getGuesses, Player } from '../../model';
 import { voidFetch } from '../../utils/fetch';
 import { GuessLog } from './GuessLog';
 import { beginAt } from '../../design/responsive';
@@ -18,10 +18,13 @@ export interface PlayProps {
 
 export const GameInfo: FC<PlayProps> = ({
   player,
-  game: { turn, name, board, guesses },
+  game,
+  game: { name, board },
   API_URL,
 }) => {
   const router = useRouter();
+  const turn = currentTeam(game);
+  const guesses = getGuesses(game);
   const onEndTurn = () => {
     const confirmed = confirm(
       `Are you sure you want to end ${turn} team's turn?`,

@@ -10,7 +10,7 @@ import {
 import { useRouter } from 'next/router';
 import { css } from '@emotion/css';
 import { Palette } from '../../design/color';
-import { Player } from '../../model';
+import { isSpyMaster, Player } from '../../model';
 import { jsonHeaders, voidFetch } from '../../utils/fetch';
 
 export interface JoinProps {
@@ -21,7 +21,7 @@ export interface JoinProps {
 export const Join: FC<JoinProps> = ({ game, API_URL }) => {
   const [player, setPlayer] = useState<Player>({
     team: 'Blue',
-    is_spy_master: false,
+    spymaster_secret: null,
     name: '',
   });
   const onChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
@@ -84,7 +84,7 @@ export const Join: FC<JoinProps> = ({ game, API_URL }) => {
           }
         `}
       >
-        {player.is_spy_master ? '⌐■-■' : '(•_•)'}
+        {isSpyMaster(player) ? '⌐■-■' : '(•_•)'}
       </button>
       <p>your name</p>
       <input
@@ -115,16 +115,16 @@ export const Join: FC<JoinProps> = ({ game, API_URL }) => {
 };
 
 function nextPlayerType(player: Player): Player {
-  const { team, is_spy_master } = player;
-  if (is_spy_master) {
+  const { team } = player;
+  if (isSpyMaster(player)) {
     return {
       ...player,
-      is_spy_master: false,
+      spymaster_secret: null,
       team: team === 'Blue' ? 'Red' : 'Blue',
     };
   }
   return {
     ...player,
-    is_spy_master: true,
+    spymaster_secret: '', // TODO: figure out how to provide secret
   };
 }

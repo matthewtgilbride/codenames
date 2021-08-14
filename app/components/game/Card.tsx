@@ -3,7 +3,7 @@ import { css } from '@emotion/css';
 import { darken } from 'polished';
 import { Palette } from '../../design/color';
 import { beginAt, Breakpoints } from '../../design/responsive';
-import { CardColor, CardType, Player, Team } from '../../model';
+import { CardColor, CardType, isSpyMaster, Player, Team } from '../../model';
 
 const { neutral, death, blue, red, contrast } = Palette;
 const { phoneLg, tabletPortrait } = Breakpoints;
@@ -69,6 +69,6 @@ function isDisabled(
 ): boolean {
   if (color) return true;
   if (!player) return true;
-  if (player.is_spy_master) return true;
+  if (isSpyMaster(player)) return true;
   return player.team !== turn;
 }

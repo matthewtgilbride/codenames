@@ -1,57 +1,142 @@
 import { GameState } from '../model';
 
 export const defaultGame: GameState = {
-  name: 'Duck-Olympus',
-  first_team: 'Blue',
+  name: 'Pie-Poison',
+  players: {
+    operative: {
+      team: 'Blue',
+      name: 'Operative',
+      spymaster_secret: null,
+    },
+    'spy master': {
+      team: 'Blue',
+      name: 'Spy Master',
+      spymaster_secret: 'foo',
+    },
+  },
+  turns: [
+    {
+      type: 'Started',
+      data: {
+        spymaster: {
+          team: 'Blue',
+          name: 'Spy Master',
+          spymaster_secret: 'foo',
+        },
+        clue: ['Foo', 1],
+        guesses: [
+          [
+            {
+              team: 'Blue',
+              name: 'Operative',
+              spymaster_secret: null,
+            },
+            0,
+          ],
+        ],
+      },
+    },
+  ],
   board: [
-    { color: null, word: 'Cast' },
-    { color: null, word: 'Carrot' },
+    {
+      color: 'Red',
+      word: 'Glass',
+    },
     {
       color: null,
-      word: 'Grass',
+      word: 'Princess',
     },
-    { color: null, word: 'Buffalo' },
-    { color: null, word: 'Mouth' },
     {
       color: null,
-      word: 'Green',
+      word: 'Laser',
     },
-    { color: null, word: 'Board' },
-    { color: null, word: 'Novel' },
+    {
+      color: null,
+      word: 'Paper',
+    },
+    {
+      color: null,
+      word: 'Hotel',
+    },
+    {
+      color: null,
+      word: 'Egypt',
+    },
+    {
+      color: null,
+      word: 'Hospital',
+    },
+    {
+      color: null,
+      word: 'Stock',
+    },
+    {
+      color: null,
+      word: 'Tap',
+    },
+    {
+      color: null,
+      word: 'Mouth',
+    },
+    {
+      color: null,
+      word: 'Poison',
+    },
+    {
+      color: null,
+      word: 'Revolution',
+    },
+    {
+      color: null,
+      word: 'Face',
+    },
+    {
+      color: null,
+      word: 'Tag',
+    },
     {
       color: null,
       word: 'Root',
     },
-    { color: null, word: 'Bill' },
-    { color: null, word: 'Penguin' },
     {
       color: null,
-      word: 'Stick',
+      word: 'Whale',
     },
-    { color: null, word: 'Wave' },
-    { color: null, word: 'Mole' },
-    { color: null, word: 'Boot' },
     {
       color: null,
-      word: 'Apple',
+      word: 'Row',
     },
-    { color: null, word: 'Washington' },
-    { color: null, word: 'Cycle' },
     {
       color: null,
-      word: 'Berlin',
+      word: 'Bridge',
     },
-    { color: null, word: 'Ninja' },
-    { color: null, word: 'Slug' },
-    { color: null, word: 'Fish' },
     {
       color: null,
-      word: 'Slip',
+      word: 'Plastic',
     },
-    { color: null, word: 'Ruler' },
-    { color: null, word: 'Cliff' },
+    {
+      color: null,
+      word: 'Fan',
+    },
+    {
+      color: null,
+      word: 'Theater',
+    },
+    {
+      color: null,
+      word: 'Kid',
+    },
+    {
+      color: null,
+      word: 'Rome',
+    },
+    {
+      color: null,
+      word: 'Dinosaur',
+    },
+    {
+      color: null,
+      word: 'Chair',
+    },
   ],
-  turn: 'Red',
-  players: {},
-  guesses: [],
 };

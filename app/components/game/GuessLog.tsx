@@ -3,7 +3,7 @@ import { css } from '@emotion/css';
 import { GameState } from '../../model';
 import { Palette } from '../../design/color';
 
-export type GuessLogProps = Pick<GameState, 'board' | 'guesses'>;
+export type GuessLogProps = Pick<GameState, 'board'> & { guesses: number[] };
 
 export const GuessLog: FC<GuessLogProps> = ({ board, guesses }) => (
   <div

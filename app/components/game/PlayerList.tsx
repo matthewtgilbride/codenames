@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import { lighten } from 'polished';
 import { css } from '@emotion/css';
 import { Palette } from '../../design/color';
-import { GameState, Team } from '../../model';
+import { GameState, isSpyMaster, Team } from '../../model';
 import { beginAt } from '../../design/responsive';
 
 const StyledContainer = styled.div<{ color: Team }>`
@@ -65,7 +65,7 @@ export interface PlayerListProps {
   currentPlayer?: string;
   team: Team;
   isSpyMaster: boolean;
-  onJoin: (name: string, team: Team, isSpyMaster: boolean) => void;
+  onJoin: (name: string, team: Team, spyMasterSecret: string) => void;
 }
 
 export const PlayerList: FC<PlayerListProps> = ({
@@ -80,7 +80,7 @@ export const PlayerList: FC<PlayerListProps> = ({
     // eslint-disable-next-line no-alert
     const name = window.prompt('What is your name?');
     if (name === null) return;
-    onJoin(name, team, isSpyMaster);
+    onJoin(name, team, ''); // TODO: figure out how to pass secret
   }, [team, isSpyMaster, onJoin]);
   return (
     <StyledContainer color={team}>
@@ -118,10 +118,10 @@ export const PlayerList: FC<PlayerListProps> = ({
 function getPlayerNames(
   players: GameState['players'],
   team: Team,
-  isSpyMaster: boolean,
+  spyMaster: boolean,
 ): string[] {
   return Object.values(players)
-    .filter((p) => p.team === team && p.is_spy_master === isSpyMaster)
+    .filter((p) => p.team === team && isSpyMaster(p) === spyMaster)
     .map((p) => p.name)
     .sort((a, b) => a.localeCompare(b));
 }

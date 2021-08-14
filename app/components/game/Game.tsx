@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { Breakpoints } from '../../design/responsive';
 import { Palette } from '../../design/color';
 import { Card } from './Card';
-import { GameState, Player, Team } from '../../model';
+import { currentTeam, firstTeam, GameState, Player, Team } from '../../model';
 import { GameInfo } from './GameInfo';
 import { usePoll } from '../../hooks/usePoll';
 import { PlayerList } from './PlayerList';
@@ -61,7 +61,7 @@ export interface GameContainerProps {
 export type GameProps = GameContainerProps & {
   player?: Player;
   onGuess: (word: string) => MouseEventHandler;
-  onJoin: (name: string, team: Team, isSpyMaster: boolean) => void;
+  onJoin: (name: string, team: Team, spyMasterSecret: string) => void;
 };
 
 export const Game: FC<GameProps> = ({
@@ -70,58 +70,62 @@ export const Game: FC<GameProps> = ({
   onJoin,
   API_URL,
   game,
-  game: { first_team, board, name, turn, players },
-}) => (
-  <Container first_team={first_team} turn={turn}>
-    <h2>{name}</h2>
-    <Grid>
-      {board.map((card) => (
-        <Card
-          key={card.word}
-          card={card}
-          player={player}
-          turn={turn}
-          onClick={onGuess(card.word)}
-        />
-      ))}
-    </Grid>
-    <ThreeColumnGrid>
-      <div>
-        <PlayerList
-          isSpyMaster={false}
-          team="Blue"
-          players={players}
-          currentPlayer={player?.name}
-          onJoin={onJoin}
-        />
-        <PlayerList
-          isSpyMaster
-          team="Blue"
-          players={players}
-          currentPlayer={player?.name}
-          onJoin={onJoin}
-        />
-      </div>
-      <GameInfo API_URL={API_URL} player={player} game={game} />
-      <div>
-        <PlayerList
-          isSpyMaster={false}
-          team="Red"
-          players={players}
-          currentPlayer={player?.name}
-          onJoin={onJoin}
-        />
-        <PlayerList
-          isSpyMaster
-          team="Red"
-          players={players}
-          currentPlayer={player?.name}
-          onJoin={onJoin}
-        />
-      </div>
-    </ThreeColumnGrid>
-  </Container>
-);
+  game: { board, name, players },
+}) => {
+  const first_team = firstTeam(game);
+  const turn = currentTeam(game);
+  return (
+    <Container first_team={first_team} turn={turn}>
+      <h2>{name}</h2>
+      <Grid>
+        {board.map((card) => (
+          <Card
+            key={card.word}
+            card={card}
+            player={player}
+            turn={turn}
+            onClick={onGuess(card.word)}
+          />
+        ))}
+      </Grid>
+      <ThreeColumnGrid>
+        <div>
+          <PlayerList
+            isSpyMaster={false}
+            team="Blue"
+            players={players}
+            currentPlayer={player?.name}
+            onJoin={onJoin}
+          />
+          <PlayerList
+            isSpyMaster
+            team="Blue"
+            players={players}
+            currentPlayer={player?.name}
+            onJoin={onJoin}
+          />
+        </div>
+        <GameInfo API_URL={API_URL} player={player} game={game} />
+        <div>
+          <PlayerList
+            isSpyMaster={false}
+            team="Red"
+            players={players}
+            currentPlayer={player?.name}
+            onJoin={onJoin}
+          />
+          <PlayerList
+            isSpyMaster
+            team="Red"
+            players={players}
+            currentPlayer={player?.name}
+            onJoin={onJoin}
+          />
+        </div>
+      </ThreeColumnGrid>
+    </Container>
+  );
+};
 
 export const GameContainer: FC<GameContainerProps> = ({
   API_URL,
@@ -144,11 +148,11 @@ export const GameContainer: FC<GameContainerProps> = ({
   const player = players[currentPlayer?.toLowerCase() ?? ''];
 
   const onJoin = useCallback(
-    (name: string, team: Team, isSpyMaster: boolean) => {
+    (name: string, team: Team, spyMasterSecret: string) => {
       const newPlayer: Player = {
         name,
         team,
-        is_spy_master: isSpyMaster,
+        spymaster_secret: spyMasterSecret,
       };
       voidFetch({
         url: `${API_URL}/game/${gameState.name}/join`,

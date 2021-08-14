@@ -22,8 +22,8 @@ export const NonEmpty = Template.bind({});
 NonEmpty.args = {
   onJoin: action('join'),
   players: {
-    Matt: { name: 'Matt', is_spy_master: false, team: 'Blue' },
-    Jamie: { name: 'Jamie', is_spy_master: false, team: 'Blue' },
+    Matt: { name: 'Matt', spymaster_secret: null, team: 'Blue' },
+    Jamie: { name: 'Jamie', spymaster_secret: null, team: 'Blue' },
   },
   team: 'Blue',
   isSpyMaster: false,
@@ -33,8 +33,8 @@ export const CurrentPlayer = Template.bind({});
 CurrentPlayer.args = {
   onJoin: action('join'),
   players: {
-    Matt: { name: 'Matt', is_spy_master: false, team: 'Blue' },
-    Jamie: { name: 'Jamie', is_spy_master: false, team: 'Blue' },
+    Matt: { name: 'Matt', spymaster_secret: null, team: 'Blue' },
+    Jamie: { name: 'Jamie', spymaster_secret: null, team: 'Blue' },
   },
   currentPlayer: 'Matt',
   team: 'Blue',
