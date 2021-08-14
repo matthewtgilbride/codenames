@@ -1,6 +1,6 @@
 /* eslint-disable no-alert */
 import { ChangeEventHandler, FC, useCallback, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { lighten } from 'polished';
 import { useRouter } from 'next/router';
 import { Breakpoints } from '../design/responsive';

@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import Link from 'next/link';
 import { GetServerSideProps } from 'next';
+import { css } from '@emotion/css';
 import { ContentContainer } from '../../components/ContentContainer';
 
 interface GameListProps {
@@ -14,7 +15,7 @@ const GameList: FC<GameListProps> = ({ games }) => (
       {games.map((g) => (
         <li
           key={g}
-          css={`
+          className={css`
             margin: 1rem;
           `}
         >

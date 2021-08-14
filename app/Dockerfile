@@ -2,7 +2,6 @@ FROM amd64/node:12-alpine
 
 COPY package.json .
 COPY yarn.lock .
-COPY .babelrc .
 COPY tsconfig.json .
 
 COPY model.ts .
