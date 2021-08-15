@@ -1,5 +1,6 @@
 import {addDecorator} from "@storybook/react";
 import {GlobalStyle, Layout} from "../design/layout";
+import {Global} from "@emotion/react";
 
 export const parameters = {
   actions: { argTypesRegex: "^on[A-Z].*" },
@@ -13,7 +14,7 @@ export const parameters = {
 
 addDecorator(story => (
     <>
-      <GlobalStyle />
+      <Global styles={GlobalStyle} />
       <Layout>
         {story()}
       </Layout>
