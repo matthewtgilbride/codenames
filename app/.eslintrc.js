@@ -45,5 +45,9 @@ module.exports = {
     ],
     '@typescript-eslint/no-use-before-define': ['error', { functions: false }],
     '@typescript-eslint/naming-convention': 'off',
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { varsIgnorePattern: '^_', argsIgnorePattern: '^_' },
+    ],
   },
 };

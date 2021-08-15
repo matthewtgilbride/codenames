@@ -15,7 +15,7 @@ Empty.args = {
   onJoin: action('join'),
   players: {},
   team: 'Blue',
-  isSpyMaster: false,
+  spyMaster: false,
 };
 
 export const NonEmpty = Template.bind({});
@@ -26,7 +26,7 @@ NonEmpty.args = {
     Jamie: { name: 'Jamie', spymaster_secret: null, team: 'Blue' },
   },
   team: 'Blue',
-  isSpyMaster: false,
+  spyMaster: false,
 };
 
 export const CurrentPlayer = Template.bind({});
@@ -38,5 +38,5 @@ CurrentPlayer.args = {
   },
   currentPlayer: 'Matt',
   team: 'Blue',
-  isSpyMaster: false,
+  spyMaster: false,
 };

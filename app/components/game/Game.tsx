@@ -1,15 +1,15 @@
 /* eslint-disable no-alert,no-restricted-globals */
-import { FC, MouseEventHandler, useCallback, useState } from 'react';
+import { FC, useCallback, useState } from 'react';
 import styled from '@emotion/styled';
 import { useRouter } from 'next/router';
 import { Breakpoints } from '../../design/responsive';
 import { Palette } from '../../design/color';
-import { Card } from './Card';
 import { currentTeam, firstTeam, GameState, Player, Team } from '../../model';
 import { GameInfo } from './GameInfo';
 import { usePoll } from '../../hooks/usePoll';
-import { PlayerList } from './PlayerList';
+import { PlayerList, PlayerListProps } from './PlayerList';
 import { jsonHeaders, voidFetch } from '../../utils/fetch';
+import { Board, BoardProps } from './Board';
 
 const { tabletPortrait } = Breakpoints;
 
@@ -32,18 +32,6 @@ const Container = styled.div<{ first_team: Team; turn: Team }>`
   }
 `;
 
-const Grid = styled.div`
-  display: grid;
-  padding: 1rem 0;
-  margin: auto;
-  max-width: ${tabletPortrait}px;
-  text-align: center;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-  grid-row-gap: 1rem;
-  grid-column-gap: 1rem;
-  max-width: ${tabletPortrait}px;
-`;
-
 const ThreeColumnGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -58,11 +46,9 @@ export interface GameContainerProps {
   game: GameState;
 }
 
-export type GameProps = GameContainerProps & {
-  player?: Player;
-  onGuess: (word: string) => MouseEventHandler;
-  onJoin: (name: string, team: Team, spyMasterSecret: string) => void;
-};
+export type GameProps = GameContainerProps &
+  Pick<BoardProps, 'player' | 'onGuess'> &
+  Pick<PlayerListProps, 'onJoin'>;
 
 export const Game: FC<GameProps> = ({
   player,
@@ -77,28 +63,18 @@ export const Game: FC<GameProps> = ({
   return (
     <Container first_team={first_team} turn={turn}>
       <h2>{name}</h2>
-      <Grid>
-        {board.map((card) => (
-          <Card
-            key={card.word}
-            card={card}
-            player={player}
-            turn={turn}
-            onClick={onGuess(card.word)}
-          />
-        ))}
-      </Grid>
+      <Board board={board} onGuess={onGuess} turn={turn} />
       <ThreeColumnGrid>
         <div>
           <PlayerList
-            isSpyMaster={false}
+            spyMaster={false}
             team="Blue"
             players={players}
             currentPlayer={player?.name}
             onJoin={onJoin}
           />
           <PlayerList
-            isSpyMaster
+            spyMaster
             team="Blue"
             players={players}
             currentPlayer={player?.name}
@@ -108,14 +84,14 @@ export const Game: FC<GameProps> = ({
         <GameInfo API_URL={API_URL} player={player} game={game} />
         <div>
           <PlayerList
-            isSpyMaster={false}
+            spyMaster={false}
             team="Red"
             players={players}
             currentPlayer={player?.name}
             onJoin={onJoin}
           />
           <PlayerList
-            isSpyMaster
+            spyMaster
             team="Red"
             players={players}
             currentPlayer={player?.name}
@@ -148,7 +124,7 @@ export const GameContainer: FC<GameContainerProps> = ({
   const player = players[currentPlayer?.toLowerCase() ?? ''];
 
   const onJoin = useCallback(
-    (name: string, team: Team, spyMasterSecret: string) => {
+    (name: string, team: Team, spyMasterSecret: string | null) => {
       const newPlayer: Player = {
         name,
         team,

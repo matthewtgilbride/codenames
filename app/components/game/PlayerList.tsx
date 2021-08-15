@@ -64,24 +64,24 @@ export interface PlayerListProps {
   players: GameState['players'];
   currentPlayer?: string;
   team: Team;
-  isSpyMaster: boolean;
-  onJoin: (name: string, team: Team, spyMasterSecret: string) => void;
+  spyMaster: boolean;
+  onJoin: (name: string, team: Team, spyMasterSecret: string | null) => void;
 }
 
 export const PlayerList: FC<PlayerListProps> = ({
   players,
   currentPlayer,
   team,
-  isSpyMaster,
+  spyMaster,
   onJoin,
 }) => {
-  const playerNames = getPlayerNames(players, team, isSpyMaster);
+  const playerNames = getPlayerNames(players, team, spyMaster);
   const onClick = useCallback(() => {
     // eslint-disable-next-line no-alert
     const name = window.prompt('What is your name?');
     if (name === null) return;
-    onJoin(name, team, ''); // TODO: figure out how to pass secret
-  }, [team, isSpyMaster, onJoin]);
+    onJoin(name, team, spyMaster ? '' : null); // TODO: figure out how to pass secret
+  }, [team, spyMaster, onJoin]);
   return (
     <StyledContainer color={team}>
       <div
@@ -90,7 +90,7 @@ export const PlayerList: FC<PlayerListProps> = ({
           font-weight: bold;
         `}
       >
-        {isSpyMaster ? 'Spymaster' : 'Operative'}(s)
+        {spyMaster ? 'Spymaster' : 'Operative'}(s)
       </div>
       <ul>
         {playerNames.length > 0 ? (
@@ -108,7 +108,7 @@ export const PlayerList: FC<PlayerListProps> = ({
       </ul>
       {!currentPlayer && (
         <button type="button" onClick={onClick}>
-          {isSpyMaster ? 'Join as Spymaster' : 'Join as Operative'}
+          {spyMaster ? 'Join as Spymaster' : 'Join as Operative'}
         </button>
       )}
     </StyledContainer>
