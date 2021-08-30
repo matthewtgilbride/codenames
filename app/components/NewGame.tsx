@@ -1,32 +1,14 @@
 /* eslint-disable no-alert */
 import { ChangeEventHandler, FC, useCallback, useState } from 'react';
-import styled from '@emotion/styled';
 import { lighten } from 'polished';
 import { useRouter } from 'next/router';
+import { css } from '@emotion/css';
 import { Breakpoints } from '../design/responsive';
 import { Palette } from '../design/color';
 import { jsonHeaders, voidFetch } from '../utils/fetch';
 
 const { phone } = Breakpoints;
 const { red } = Palette;
-
-const Container = styled.div`
-  & input {
-    max-width: ${phone / 2}px;
-    margin: 0.5rem;
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-  }
-  & button {
-    min-width: ${phone / 4}px;
-    background-color: ${red};
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-    :hover {
-      background-color: ${lighten(0.1, red)};
-    }
-  }
-`;
 
 interface NewGameProps {
   initialName: string;
@@ -54,11 +36,29 @@ export const NewGame: FC<NewGameProps> = ({ initialName, API_URL }) => {
   }, [name, API_URL, router]);
 
   return (
-    <Container>
+    <div className={containerStyle}>
       <input value={name} onChange={onChange} />
       <button type="button" onClick={onSubmit}>
         Start
       </button>
-    </Container>
+    </div>
   );
 };
+
+const containerStyle = css`
+  & input {
+    max-width: ${phone / 2}px;
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+  }
+  & button {
+    min-width: ${phone / 4}px;
+    background-color: ${red};
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    :hover {
+      background-color: ${lighten(0.1, red)};
+    }
+  }
+`;

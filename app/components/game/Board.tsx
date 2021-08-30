@@ -12,7 +12,7 @@ export interface BoardProps {
 }
 
 export const Board: FC<BoardProps> = ({ player, onGuess, turn, board }) => (
-  <div className={styleBoard()}>
+  <div className={container}>
     {board.map((card) => (
       <Card
         key={card.word}
@@ -26,16 +26,14 @@ export const Board: FC<BoardProps> = ({ player, onGuess, turn, board }) => (
 );
 
 const { tabletPortrait } = Breakpoints;
-function styleBoard() {
-  return css`
-    display: grid;
-    padding: 1rem 0;
-    margin: auto;
-    max-width: ${tabletPortrait}px;
-    text-align: center;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-    grid-row-gap: 1rem;
-    grid-column-gap: 1rem;
-    max-width: ${tabletPortrait}px;
-  `;
-}
+const container = css`
+  display: grid;
+  padding: 1rem 0;
+  margin: auto;
+  max-width: ${tabletPortrait}px;
+  text-align: center;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  grid-row-gap: 1rem;
+  grid-column-gap: 1rem;
+  max-width: ${tabletPortrait}px;
+`;

@@ -1,5 +1,6 @@
 import {addDecorator} from "@storybook/react";
-import {GlobalStyle, Layout} from "../design/layout";
+import {Layout} from "../design/layout";
+import {GlobalStyle} from "../pages/_app";
 import {Global} from "@emotion/react";
 
 export const parameters = {

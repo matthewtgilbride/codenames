@@ -58,9 +58,9 @@ impl GameService {
 
     pub fn leave(&self, key: String, player_name: &str) -> ServiceResult<GameState> {
         let game = &self.clone()._get(key)?;
-        println!("got game {}", game.name);
+        println!("got game {}", game.info.name());
         let updated_game = game.clone().leave(player_name)?;
-        println!("left game {}", game.name);
+        println!("left game {}", game.info.name());
         let _ = &self.clone().save(updated_game.clone())?;
         Ok(updated_game.clone().into())
     }

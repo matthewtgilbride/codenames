@@ -1,44 +1,14 @@
 /* eslint-disable no-alert,no-restricted-globals */
 import { FC, useCallback, useState } from 'react';
-import styled from '@emotion/styled';
 import { useRouter } from 'next/router';
-import { Breakpoints } from '../../design/responsive';
+import { css } from '@emotion/css';
 import { Palette } from '../../design/color';
 import { currentTeam, firstTeam, GameState, Player, Team } from '../../model';
-import { GameInfo } from './GameInfo';
+import { Info } from './Info';
 import { usePoll } from '../../hooks/usePoll';
-import { PlayerList, PlayerListProps } from './PlayerList';
+import { PlayerListProps } from './PlayerList';
 import { jsonHeaders, voidFetch } from '../../utils/fetch';
 import { Board, BoardProps } from './Board';
-
-const { tabletPortrait } = Breakpoints;
-
-const Container = styled.div<{ first_team: Team; turn: Team }>`
-  text-align: center;
-
-  & h2 {
-    color: ${(props) =>
-      props.first_team === 'Blue' ? Palette.blue : Palette.red};
-    margin-bottom: 0;
-  }
-
-  & h3 {
-    color: ${(props) => (props.turn === 'Blue' ? Palette.blue : Palette.red)};
-    font-weight: bold;
-  }
-
-  & p {
-    color: ${Palette.neutral};
-  }
-`;
-
-const ThreeColumnGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-
-  margin: 1rem auto;
-  max-width: ${tabletPortrait}px;
-`;
 
 export interface GameContainerProps {
   API_URL: string;
@@ -61,45 +31,17 @@ export const Game: FC<GameProps> = ({
   const first_team = firstTeam(game);
   const turn = currentTeam(game);
   return (
-    <Container first_team={first_team} turn={turn}>
+    <div className={styleContainer(first_team, turn)}>
       <h2>{name}</h2>
-      <Board board={board} onGuess={onGuess} turn={turn} />
-      <ThreeColumnGrid>
-        <div>
-          <PlayerList
-            spyMaster={false}
-            team="Blue"
-            players={players}
-            currentPlayer={player?.name}
-            onJoin={onJoin}
-          />
-          <PlayerList
-            spyMaster
-            team="Blue"
-            players={players}
-            currentPlayer={player?.name}
-            onJoin={onJoin}
-          />
-        </div>
-        <GameInfo API_URL={API_URL} player={player} game={game} />
-        <div>
-          <PlayerList
-            spyMaster={false}
-            team="Red"
-            players={players}
-            currentPlayer={player?.name}
-            onJoin={onJoin}
-          />
-          <PlayerList
-            spyMaster
-            team="Red"
-            players={players}
-            currentPlayer={player?.name}
-            onJoin={onJoin}
-          />
-        </div>
-      </ThreeColumnGrid>
-    </Container>
+      <Board board={board} onGuess={onGuess} turn={turn} player={player} />
+      <Info
+        API_URL={API_URL}
+        player={player}
+        game={game}
+        onJoin={onJoin}
+        players={players}
+      />
+    </div>
   );
 };
 
@@ -151,7 +93,7 @@ export const GameContainer: FC<GameContainerProps> = ({
       voidFetch({
         url: `${API_URL}/game/${gameState.name}/${player.name}/guess/${index}`,
         init: { method: 'PUT' },
-        onSuccess: () => router.reload(),
+        onSuccess: () => {},
         onError: () => alert('error making guess'),
       });
     }
@@ -167,3 +109,21 @@ export const GameContainer: FC<GameContainerProps> = ({
     />
   );
 };
+
+const styleContainer = (first: Team, current: Team): string => css`
+  text-align: center;
+
+  & h2 {
+    color: ${first === 'Blue' ? Palette.blue : Palette.red};
+    margin-bottom: 0;
+  }
+
+  & h3 {
+    color: ${current === 'Blue' ? Palette.blue : Palette.red};
+    font-weight: bold;
+  }
+
+  & p {
+    color: ${Palette.neutral};
+  }
+`;

@@ -1,36 +1,29 @@
-import reset from 'emotion-reset';
 import { FC } from 'react';
 import Link from 'next/link';
-import { css } from '@emotion/react';
-import styled from '@emotion/styled';
+import { css } from '@emotion/css';
 import { Palette } from './color';
 import { beginAt, Breakpoints } from './responsive';
 
 const { phoneMd, phoneLg, tabletPortrait } = Breakpoints;
 
-export const GlobalStyle = css`
-  ${reset};
-  body {
-    font-family: Montserrat, 'Arial CE', Arial, sans-serif;
-    & * {
-      box-sizing: border-box;
-    }
-  }
-  button,
-  input {
-    border-style: solid;
-  }
-  h1 {
-    font-size: 2rem;
-    margin: 2rem 0;
-  }
-  h2 {
-    font-size: 1.5rem;
-    margin: 1.5rem;
-  }
-`;
+export const Layout: FC = ({ children }) => (
+  <div className={container}>
+    <h1 className={title}>
+      (•_•) ( •_•)
+      <Link prefetch={!process.env.STORYBOOK} href="/">
+        Codenames
+      </Link>
+      ⌐■-■ (⌐■_■)
+    </h1>
+    <p className={subtitle}>
+      brought to you by your{' '}
+      <a href="https://www.mattgilbride.com">friendly neighborhood developer</a>
+    </p>
+    {children}
+  </div>
+);
 
-const Container = styled.div`
+const container = css`
   position: absolute;
   top: 0;
   bottom: 0;
@@ -41,7 +34,7 @@ const Container = styled.div`
   background-color: ${Palette.contrast};
 `;
 
-const Title = styled.h1`
+const title = css`
   text-align: center;
   color: ${Palette.neutral};
   font-size: 1rem;
@@ -60,7 +53,7 @@ const Title = styled.h1`
   }
 `;
 
-const Subtitle = styled.p`
+const subtitle = css`
   text-align: center;
   color: ${Palette.neutral};
   font-size: 0.5rem;
@@ -69,20 +62,3 @@ const Subtitle = styled.p`
     color: ${Palette.neutral};
   }
 `;
-
-export const Layout: FC = ({ children }) => (
-  <Container>
-    <Title>
-      (•_•) ( •_•)
-      <Link prefetch={!process.env.STORYBOOK} href="/">
-        Codenames
-      </Link>
-      ⌐■-■ (⌐■_■)
-    </Title>
-    <Subtitle>
-      brought to you by your{' '}
-      <a href="https://www.mattgilbride.com">friendly neighborhood developer</a>
-    </Subtitle>
-    {children}
-  </Container>
-);
