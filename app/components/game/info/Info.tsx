@@ -1,8 +1,8 @@
 /* eslint-disable no-alert,no-restricted-globals */
 import { FC } from 'react';
 import { useRouter } from 'next/router';
-import { currentTeam, GameState, getGuesses, Player } from '../../model';
-import { voidFetch } from '../../utils/fetch';
+import { currentTeam, GameState, getGuesses, Player } from '../../../model';
+import { voidFetch } from '../../../utils/fetch';
 import { GuessLog } from './GuessLog';
 import { PlayerList, PlayerListProps } from './PlayerList';
 import { action, actionButton, container } from './Info.styles';

@@ -1,9 +1,9 @@
 import React, { FC, useCallback } from 'react';
 import { lighten } from 'polished';
 import { css } from '@emotion/css';
-import { Palette } from '../../design/color';
-import { GameState, isSpyMaster, Team } from '../../model';
-import { beginAt } from '../../design/responsive';
+import { Palette } from '../../../design/color';
+import { GameState, isSpyMaster, Team } from '../../../model';
+import { beginAt } from '../../../design/responsive';
 
 export interface PlayerListProps {
   players: GameState['players'];

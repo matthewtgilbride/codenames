@@ -33,6 +33,22 @@ export const GlobalStyle = css`
     font-size: 1.5rem;
     margin: 1.5rem;
   }
+  .ReactModal__Overlay {
+    transition: transform 500ms ease-in-out, opacity 250ms ease-in-out;
+    opacity: 0;
+    transform: scale(0) rotateZ(-180deg);
+  }
+
+  .ReactModal__Overlay--after-open {
+    transform: scale(1) rotateZ(0deg);
+    opacity: 1;
+    border-radius: 0;
+  }
+
+  .ReactModal__Overlay--before-close {
+    opacity: 0;
+    transform: scale(0) rotateZ(-180deg);
+  }
 `;
 
 export default App;

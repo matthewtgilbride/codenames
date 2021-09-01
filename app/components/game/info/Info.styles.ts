@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { lighten } from 'polished';
-import { beginAt, Breakpoints } from '../../design/responsive';
-import { Palette } from '../../design/color';
+import { beginAt, Breakpoints } from '../../../design/responsive';
+import { Palette } from '../../../design/color';
 
 const { tabletPortrait } = Breakpoints;
 

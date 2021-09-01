@@ -4,9 +4,9 @@ import { useRouter } from 'next/router';
 import { css } from '@emotion/css';
 import { Palette } from '../../design/color';
 import { currentTeam, firstTeam, GameState, Player, Team } from '../../model';
-import { Info } from './Info';
+import { Info } from './info/Info';
 import { usePoll } from '../../hooks/usePoll';
-import { PlayerListProps } from './PlayerList';
+import { PlayerListProps } from './info/PlayerList';
 import { jsonHeaders, voidFetch } from '../../utils/fetch';
 import { Board, BoardProps } from './Board';
 
