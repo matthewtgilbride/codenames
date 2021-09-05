@@ -3,6 +3,7 @@ import React, { FC } from 'react';
 import ReactModal from 'react-modal';
 import { transparentize } from 'polished';
 import { Palette } from './color';
+import { Breakpoints } from './responsive';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -28,6 +29,8 @@ const modalStyle = css`
     transform: translateY(100%);
     inset: 60vh 10vw 5vh 10vw !important;
     background-color: ${Palette.neutral} !important;
+    max-width: ${Breakpoints.phone}px !important;
+    margin: auto;
   }
 
   .ReactModal__Content--after-open {

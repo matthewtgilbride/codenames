@@ -1,10 +1,7 @@
 import React from 'react';
 import { Meta, Story } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import {
-  PlayerList,
-  PlayerListProps,
-} from '../components/game/info/PlayerList';
+import { PlayerList, PlayerListProps } from './PlayerList';
 
 export default {
   title: 'PlayerList',

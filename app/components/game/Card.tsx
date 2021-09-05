@@ -4,6 +4,7 @@ import { darken } from 'polished';
 import { Palette } from '../../design/color';
 import { beginAt, Breakpoints } from '../../design/responsive';
 import { CardColor, CardType, isSpyMaster, Player, Team } from '../../model';
+import { buttonStyle } from '../../design/button';
 
 interface CardProps {
   card: CardColor;
@@ -49,14 +50,12 @@ function styleButton(
   player?: Player,
 ): string {
   return css`
-    background-color: ${color ? CardColorMap[color] : Palette.light};
-    box-shadow: 0 0 2px 1px ${Palette.blue};
-    color: ${color === 'Death' ? neutral : contrast};
-    border-radius: 0.25rem;
-    padding: 0.75rem 0.1rem;
+    ${buttonStyle};
     word-break: break-all;
+    background-color: ${color ? CardColorMap[color] : Palette.light};
+    color: ${color === 'Death' ? neutral : contrast};
     font-size: ${size}px;
-    cursor: ${isDisabled(turn, color, player) ? undefined : 'pointer'};
+    cursor: ${isDisabled(turn, color, player) ? 'initial' : 'pointer'};
 
     :hover {
       background-color: ${isDisabled(turn, color, player)

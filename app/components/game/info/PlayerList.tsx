@@ -4,6 +4,7 @@ import { css } from '@emotion/css';
 import { Palette } from '../../../design/color';
 import { GameState, isSpyMaster, Team } from '../../../model';
 import { beginAt } from '../../../design/responsive';
+import { buttonStyle } from '../../../design/button';
 
 export interface PlayerListProps {
   players: GameState['players'];
@@ -87,8 +88,7 @@ function styleContainer(color: Team) {
     }
 
     button {
-      padding: 0.5rem;
-      border-radius: 0.5rem;
+      ${buttonStyle};
       font-size: 0.5rem;
       background-color: ${Palette.neutral};
       cursor: pointer;
