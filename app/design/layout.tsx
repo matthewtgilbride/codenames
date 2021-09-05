@@ -2,6 +2,7 @@ import { FC, useLayoutEffect } from 'react';
 import Link from 'next/link';
 import { css } from '@emotion/css';
 import ReactModal from 'react-modal';
+import { lighten } from 'polished';
 import { Palette } from './color';
 import { beginAt, Breakpoints } from './responsive';
 
@@ -37,15 +38,24 @@ const container = css`
   right: 0;
   overflow-y: auto;
   padding: 0 1rem;
-  background-color: ${Palette.contrast};
+  background: radial-gradient(
+    circle at top left,
+    ${Palette.light} 0%,
+    ${lighten(0.1, Palette.contrast)} 20%,
+    ${Palette.contrast} 40%,
+    ${Palette.contrast} 60%,
+    ${lighten(0.1, Palette.contrast)} 80%,
+    ${Palette.light} 100%
+  );
 `;
 
 const title = css`
   text-align: center;
-  color: ${Palette.neutral};
+  color: ${Palette.light};
   font-size: 1rem;
+  margin: 1.5rem 0 1rem 0;
   a {
-    color: ${Palette.neutral};
+    color: ${Palette.light};
     margin: 0 1rem;
   }
   ${beginAt(phoneMd)} {
@@ -61,10 +71,10 @@ const title = css`
 
 const subtitle = css`
   text-align: center;
-  color: ${Palette.neutral};
+  color: ${Palette.light};
   font-size: 0.5rem;
   margin: 0.5rem;
   a {
-    color: ${Palette.neutral};
+    color: ${Palette.light};
   }
 `;

@@ -8,10 +8,11 @@ import { buttonStyle } from '../../../design/button';
 
 export interface ClueProps {
   isOpen: boolean;
+  onRequestClose: (event: React.MouseEvent | React.KeyboardEvent) => void;
   team: Team;
 }
 
-export const Clue: FC<ClueProps> = ({ isOpen, team }) => {
+export const Clue: FC<ClueProps> = ({ isOpen, onRequestClose, team }) => {
   const [wordState, setWordState] = useState('');
   const onWordChange: ChangeEventHandler<HTMLInputElement> = (event) =>
     setWordState(event.target.value);
@@ -20,21 +21,22 @@ export const Clue: FC<ClueProps> = ({ isOpen, team }) => {
     setAmountState(parseInt(event.target.value, 10));
 
   return (
-    <Modal isOpen={isOpen}>
+    <Modal isOpen={isOpen} onRequestClose={onRequestClose}>
       <div className={container}>
         <div className={row}>
-          <div>
-            <label htmlFor="word">Word</label>
+          <label htmlFor="word">
+            <span>Word</span>
             <input id="word" onChange={onWordChange} value={wordState} />
-          </div>
-          <div>
-            <label>For</label>
+          </label>
+          <label htmlFor="for">
+            <span>For</span>
             <input
+              id="for"
               type="number"
               onChange={onAmountChange}
               value={amountState.toString()}
             />
-          </div>
+          </label>
         </div>
         <div className={row}>
           <button type="submit" className={styleButton(team)}>
@@ -57,34 +59,34 @@ const row = css`
   display: flex;
   flex-wrap: wrap;
   height: 100%;
+  width: 100%;
   align-items: center;
   margin: auto;
-  > div {
+  & label {
     display: flex;
     flex-direction: column;
     justify-content: center;
     margin: 0 0.5rem;
-    :first-child {
-      flex-basis: 50%;
-      flex-grow: 1;
-    }
-    :last-child {
-      max-width: 3rem;
-    }
+    font-size: 0.75rem;
+    padding: 0.25rem 0;
   }
   & input {
     padding: 0.25rem;
     max-width: 100%;
   }
-  & label {
-    font-size: 0.75rem;
-    padding: 0.25rem 0;
+  & label:first-child {
+    flex-basis: 50%;
+    flex-grow: 1;
+  }
+  & label:last-child {
+    max-width: 3rem;
   }
 `;
 
 function styleButton(team: Team) {
   return css`
     ${buttonStyle};
+    margin: auto;
     padding: 0.5rem;
     background-color: ${team === 'Red' ? Palette.red : Palette.blue};
     :hover {

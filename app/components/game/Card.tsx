@@ -51,6 +51,7 @@ function styleButton(
 ): string {
   return css`
     ${buttonStyle};
+    padding: 0.75rem 0.1rem;
     word-break: break-all;
     background-color: ${color ? CardColorMap[color] : Palette.light};
     color: ${color === 'Death' ? neutral : contrast};
