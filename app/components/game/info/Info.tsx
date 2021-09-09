@@ -1,11 +1,13 @@
 /* eslint-disable no-alert,no-restricted-globals */
 import { FC } from 'react';
 import { useRouter } from 'next/router';
-import { currentTeam, GameState, getGuesses, Player } from '../../../model';
+import { css } from '@emotion/css';
+import { currentTeam, GameState, Player } from '../../../model';
 import { voidFetch } from '../../../utils/fetch';
-import { GuessLog } from './GuessLog';
 import { PlayerList, PlayerListProps } from './PlayerList';
-import { action, actionButton, container } from './Info.styles';
+import { container } from './Info.styles';
+import { Palette } from '../../../design/color';
+import { Action } from './Action';
 
 export interface InfoProps {
   API_URL: string;
@@ -19,14 +21,12 @@ export interface InfoProps {
 export const Info: FC<InfoProps> = ({
   player,
   game,
-  game: { name, board },
   API_URL,
   players,
   onJoin,
 }) => {
   const router = useRouter();
   const turn = currentTeam(game);
-  const guesses = getGuesses(game);
   const onEndTurn = () => {
     const confirmed = confirm(
       `Are you sure you want to end ${turn} team's turn?`,
@@ -55,6 +55,23 @@ export const Info: FC<InfoProps> = ({
 
   return (
     <div className={container}>
+      <div
+        className={css`
+          color: ${Palette.blue};
+        `}
+      >
+        0 / 9
+      </div>
+      <div>
+        <h3>{turn} Team&apos;s Turn</h3>
+      </div>
+      <div
+        className={css`
+          color: ${Palette.red};
+        `}
+      >
+        0 / 8
+      </div>
       <div>
         <PlayerList
           spyMaster={false}
@@ -71,20 +88,13 @@ export const Info: FC<InfoProps> = ({
           onJoin={onJoin}
         />
       </div>
-      <div className={action}>
-        <h3>{turn} Team&apos;s Turn</h3>
-        {player && (
-          <button type="button" onClick={onEndTurn} className={actionButton}>
-            End Turn
-          </button>
-        )}
-        <GuessLog board={board} guesses={guesses} />
-        {player && (
-          <button type="button" onClick={onLeave} className={actionButton}>
-            Leave Game
-          </button>
-        )}
-      </div>
+      <Action
+        API_URL={API_URL}
+        player={player}
+        game={game}
+        onEndTurn={onEndTurn}
+        onLeave={onLeave}
+      />
       <div>
         <PlayerList
           spyMaster={false}

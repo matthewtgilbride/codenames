@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { darken } from 'polished';
+import { darken, lighten } from 'polished';
 import { Team } from '../../../model';
 import { Palette } from '../../../design/color';
 import { buttonStyle } from '../../../design/button';
@@ -71,7 +71,7 @@ export const styleButton = (team: Team) => css`
   margin: auto;
   background-color: ${team === 'Red' ? Palette.red : Palette.blue};
   :hover {
-    background-color: ${darken(
+    background-color: ${lighten(
       0.1,
       team === 'Red' ? Palette.red : Palette.blue,
     )};

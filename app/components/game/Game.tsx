@@ -115,7 +115,8 @@ const styleContainer = (first: Team, current: Team): string => css`
 
   & h2 {
     color: ${first === 'Blue' ? Palette.blue : Palette.red};
-    margin-bottom: 0;
+    margin: 0.5rem 0 0 0;
+    font-size: 1rem;
   }
 
   & h3 {

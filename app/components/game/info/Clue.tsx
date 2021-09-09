@@ -2,23 +2,48 @@ import React, { ChangeEventHandler, FC, useState } from 'react';
 import { css } from '@emotion/css';
 import { darken } from 'polished';
 import { Modal } from '../../../design/Modal';
-import { Team } from '../../../model';
+import { GameState, Player, Team } from '../../../model';
 import { Palette } from '../../../design/color';
 import { buttonStyle } from '../../../design/button';
+import { jsonHeaders, voidFetch } from '../../../utils/fetch';
 
 export interface ClueProps {
+  API_URL: string;
+  game: GameState;
+  spyMaster: Player;
   isOpen: boolean;
   onRequestClose: (event: React.MouseEvent | React.KeyboardEvent) => void;
   team: Team;
 }
 
-export const Clue: FC<ClueProps> = ({ isOpen, onRequestClose, team }) => {
+export const Clue: FC<ClueProps> = ({
+  API_URL,
+  game,
+  spyMaster,
+  isOpen,
+  onRequestClose,
+  team,
+}) => {
   const [wordState, setWordState] = useState('');
   const onWordChange: ChangeEventHandler<HTMLInputElement> = (event) =>
     setWordState(event.target.value);
   const [amountState, setAmountState] = useState(1);
   const onAmountChange: ChangeEventHandler<HTMLInputElement> = (event) =>
     setAmountState(parseInt(event.target.value, 10));
+
+  const onSubmit = () =>
+    voidFetch({
+      onError(): void {},
+      onSuccess(): void {
+        onRequestClose((undefined as unknown) as React.MouseEvent<HTMLElement>);
+      },
+      url: `${API_URL}/game/${game.name}/${spyMaster.name}/start-turn`,
+      init: {
+        method: 'PUT',
+        body: JSON.stringify({ word: wordState, amount: amountState }),
+        headers: jsonHeaders,
+      },
+    });
 
   return (
     <Modal isOpen={isOpen} onRequestClose={onRequestClose}>
@@ -39,7 +64,11 @@ export const Clue: FC<ClueProps> = ({ isOpen, onRequestClose, team }) => {
           </label>
         </div>
         <div className={row}>
-          <button type="submit" className={styleButton(team)}>
+          <button
+            type="submit"
+            className={styleButton(team)}
+            onClick={onSubmit}
+          >
             Give Clue
           </button>
         </div>

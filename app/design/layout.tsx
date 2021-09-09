@@ -40,12 +40,13 @@ const container = css`
   padding: 0 1rem;
   background: radial-gradient(
     circle at top left,
-    ${Palette.light} 0%,
-    ${lighten(0.1, Palette.contrast)} 20%,
-    ${Palette.contrast} 40%,
-    ${Palette.contrast} 60%,
-    ${lighten(0.1, Palette.contrast)} 80%,
-    ${Palette.light} 100%
+    ${lighten(0.5, Palette.contrast)} 0%,
+    ${lighten(0.4, Palette.contrast)} 10%,
+    ${lighten(0.2, Palette.contrast)} 20%,
+    ${Palette.contrast} 50%,
+    ${lighten(0.2, Palette.contrast)} 80%,
+    ${lighten(0.4, Palette.contrast)} 90%,
+    ${lighten(0.5, Palette.contrast)} 100%
   );
 `;
 

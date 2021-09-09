@@ -7,7 +7,7 @@ export type GuessLogProps = Pick<GameState, 'board'> & { guesses: number[] };
 
 export const GuessLog: FC<GuessLogProps> = ({ board, guesses }) => (
   <div className={container}>
-    <h4>Guess History</h4>
+    <h4>Game Log</h4>
     <ul>
       {guesses
         .slice()
@@ -22,7 +22,7 @@ export const GuessLog: FC<GuessLogProps> = ({ board, guesses }) => (
 const container = css`
   display: flex;
   flex-direction: column;
-  color: ${Palette.neutral};
+  color: ${Palette.light};
   & h4 {
     font-weight: bold;
     margin: 0.5rem 0;

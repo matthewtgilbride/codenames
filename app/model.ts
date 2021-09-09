@@ -48,6 +48,8 @@ export const currentTeam = (game: GameState): Team => {
   return turn.data.spymaster.team;
 };
 
+export const currentTurn = (game: GameState): Turn => game.turns[0];
+
 export const isSpyMaster = (player: Player): boolean =>
   player.spymaster_secret !== null;
 

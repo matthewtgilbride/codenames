@@ -1,7 +1,7 @@
 import { css, Global } from '@emotion/react';
 import React, { FC, MouseEvent, KeyboardEvent } from 'react';
 import ReactModal from 'react-modal';
-import { transparentize } from 'polished';
+import { lighten, transparentize } from 'polished';
 import { Palette } from './color';
 import { Breakpoints } from './responsive';
 
@@ -36,10 +36,13 @@ const modalStyle = css`
     transform: translateY(100%);
     inset: 75vh 10vw 1rem 10vw !important;
     background: radial-gradient(
-      circle at bottom left,
+      circle at top right,
       ${Palette.neutral} 0%,
-      ${Palette.light} 30%,
-      ${Palette.light} 70%,
+      ${lighten(0.2, Palette.neutral)} 15%,
+      ${lighten(0.5, Palette.neutral)} 30%,
+      ${Palette.light} 50%,
+      ${lighten(0.5, Palette.neutral)} 65%,
+      ${lighten(0.2, Palette.neutral)} 90%,
       ${Palette.neutral} 100%
     ) !important;
     max-width: ${Breakpoints.phone}px !important;
