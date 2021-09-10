@@ -1,4 +1,3 @@
-/* eslint-disable no-alert */
 import { ChangeEventHandler, FC, useCallback, useState } from 'react';
 import { lighten } from 'polished';
 import { useRouter } from 'next/router';
@@ -6,34 +5,36 @@ import { css } from '@emotion/css';
 import { Breakpoints } from '../design/responsive';
 import { Palette } from '../design/color';
 import { jsonHeaders, voidFetch } from '../utils/fetch';
+import { useApiContext } from './ApiContext';
 
 const { phone } = Breakpoints;
 const { red } = Palette;
 
 interface NewGameProps {
   initialName: string;
-  API_URL: string;
 }
 
-export const NewGame: FC<NewGameProps> = ({ initialName, API_URL }) => {
+export const NewGame: FC<NewGameProps> = ({ initialName }) => {
   const [name, setName] = useState(initialName);
   const onChange = useCallback<ChangeEventHandler<HTMLInputElement>>((e) => {
     setName(e.currentTarget.value);
   }, []);
 
+  const { baseUrl, setError } = useApiContext();
+
   const router = useRouter();
   const onSubmit = useCallback(() => {
     voidFetch({
-      url: `${API_URL}/game`,
+      url: `${baseUrl}/game`,
       init: {
         method: 'POST',
         body: JSON.stringify({ game_name: name }),
         headers: jsonHeaders,
       },
       onSuccess: () => router.push(`/game/${name}`),
-      onError: () => alert('error creating game'),
+      onError: () => setError(true),
     });
-  }, [name, API_URL, router]);
+  }, [name, baseUrl, setError, router]);
 
   return (
     <div className={containerStyle}>

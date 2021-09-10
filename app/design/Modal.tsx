@@ -1,9 +1,11 @@
 import { css, Global } from '@emotion/react';
-import React, { FC, MouseEvent, KeyboardEvent } from 'react';
+import React, { FC, KeyboardEvent, MouseEvent } from 'react';
 import ReactModal from 'react-modal';
 import { lighten, transparentize } from 'polished';
 import { Palette } from './color';
 import { Breakpoints } from './responsive';
+
+ReactModal.setAppElement('#app');
 
 export interface ModalProps {
   isOpen: boolean;

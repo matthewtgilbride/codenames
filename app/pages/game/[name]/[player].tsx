@@ -4,9 +4,15 @@ import {
   GameContainer,
   GameContainerProps,
 } from '../../../components/game/Game';
+import { ApiContextProvider } from '../../../components/ApiContext';
 
-const GamePlayer: FC<GameContainerProps> = (props) => (
-  <GameContainer {...props} />
+const GamePlayer: FC<GameContainerProps & { API_URL: string }> = ({
+  API_URL,
+  ...rest
+}) => (
+  <ApiContextProvider baseUrl={API_URL}>
+    <GameContainer {...rest} />
+  </ApiContextProvider>
 );
 
 export const getServerSideProps: GetServerSideProps<GameContainerProps> = async ({

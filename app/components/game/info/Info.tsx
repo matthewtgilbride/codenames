@@ -8,9 +8,9 @@ import { PlayerList, PlayerListProps } from './PlayerList';
 import { container } from './Info.styles';
 import { Palette } from '../../../design/color';
 import { Action } from './Action';
+import { useApiContext } from '../../ApiContext';
 
 export interface InfoProps {
-  API_URL: string;
   word?: string;
   player?: Player;
   game: GameState;
@@ -18,14 +18,9 @@ export interface InfoProps {
   onJoin: PlayerListProps['onJoin'];
 }
 
-export const Info: FC<InfoProps> = ({
-  player,
-  game,
-  API_URL,
-  players,
-  onJoin,
-}) => {
+export const Info: FC<InfoProps> = ({ player, game, players, onJoin }) => {
   const router = useRouter();
+  const { baseUrl, setError } = useApiContext();
   const turn = currentTeam(game);
   const onEndTurn = () => {
     const confirmed = confirm(
@@ -33,10 +28,10 @@ export const Info: FC<InfoProps> = ({
     );
     if (confirmed) {
       voidFetch({
-        url: `${API_URL}/game/${name}/end-turn`,
+        url: `${baseUrl}/game/${name}/end-turn`,
         init: { method: 'PUT' },
         onSuccess: () => router.reload(),
-        onError: () => alert('failed to end turn'),
+        onError: () => setError(true),
       });
     }
   };
@@ -45,10 +40,10 @@ export const Info: FC<InfoProps> = ({
     const confirmed = confirm(`Are you sure you want to leave the game?`);
     if (confirmed) {
       voidFetch({
-        url: `${API_URL}/game/${name}/${player?.name}/leave`,
+        url: `${baseUrl}/game/${name}/${player?.name}/leave`,
         init: { method: 'PUT' },
         onSuccess: () => router.push(`/game/${name}`),
-        onError: () => alert('failed to leave game'),
+        onError: () => setError(true),
       });
     }
   };
@@ -89,7 +84,6 @@ export const Info: FC<InfoProps> = ({
         />
       </div>
       <Action
-        API_URL={API_URL}
         player={player}
         game={game}
         onEndTurn={onEndTurn}

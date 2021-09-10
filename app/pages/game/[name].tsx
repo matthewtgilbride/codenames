@@ -1,9 +1,15 @@
 import { FC } from 'react';
 import { GetServerSideProps } from 'next';
 import { GameContainer, GameContainerProps } from '../../components/game/Game';
+import { ApiContextProvider } from '../../components/ApiContext';
 
-const GameLanding: FC<GameContainerProps> = (props) => (
-  <GameContainer {...props} />
+const GameLanding: FC<GameContainerProps & { API_URL: string }> = ({
+  API_URL,
+  ...rest
+}) => (
+  <ApiContextProvider baseUrl={API_URL}>
+    <GameContainer {...rest} />
+  </ApiContextProvider>
 );
 
 export const getServerSideProps: GetServerSideProps<GameContainerProps> = async ({

@@ -6,9 +6,9 @@ import { GameState, Player, Team } from '../../../model';
 import { Palette } from '../../../design/color';
 import { buttonStyle } from '../../../design/button';
 import { jsonHeaders, voidFetch } from '../../../utils/fetch';
+import { useApiContext } from '../../ApiContext';
 
 export interface ClueProps {
-  API_URL: string;
   game: GameState;
   spyMaster: Player;
   isOpen: boolean;
@@ -17,13 +17,14 @@ export interface ClueProps {
 }
 
 export const Clue: FC<ClueProps> = ({
-  API_URL,
   game,
   spyMaster,
   isOpen,
   onRequestClose,
   team,
 }) => {
+  const { baseUrl, setError } = useApiContext();
+
   const [wordState, setWordState] = useState('');
   const onWordChange: ChangeEventHandler<HTMLInputElement> = (event) =>
     setWordState(event.target.value);
@@ -33,11 +34,13 @@ export const Clue: FC<ClueProps> = ({
 
   const onSubmit = () =>
     voidFetch({
-      onError(): void {},
+      onError(): void {
+        setError(true);
+      },
       onSuccess(): void {
         onRequestClose((undefined as unknown) as React.MouseEvent<HTMLElement>);
       },
-      url: `${API_URL}/game/${game.name}/${spyMaster.name}/start-turn`,
+      url: `${baseUrl}/game/${game.name}/${spyMaster.name}/start-turn`,
       init: {
         method: 'PUT',
         body: JSON.stringify({ word: wordState, amount: amountState }),

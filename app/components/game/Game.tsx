@@ -9,9 +9,9 @@ import { usePoll } from '../../hooks/usePoll';
 import { PlayerListProps } from './info/PlayerList';
 import { jsonHeaders, voidFetch } from '../../utils/fetch';
 import { Board, BoardProps } from './Board';
+import { useApiContext } from '../ApiContext';
 
 export interface GameContainerProps {
-  API_URL: string;
   currentPlayer?: string;
   game: GameState;
 }
@@ -24,7 +24,6 @@ export const Game: FC<GameProps> = ({
   player,
   onGuess,
   onJoin,
-  API_URL,
   game,
   game: { board, name, players },
 }) => {
@@ -34,31 +33,24 @@ export const Game: FC<GameProps> = ({
     <div className={styleContainer(first_team, turn)}>
       <h2>{name}</h2>
       <Board board={board} onGuess={onGuess} turn={turn} player={player} />
-      <Info
-        API_URL={API_URL}
-        player={player}
-        game={game}
-        onJoin={onJoin}
-        players={players}
-      />
+      <Info player={player} game={game} onJoin={onJoin} players={players} />
     </div>
   );
 };
 
 export const GameContainer: FC<GameContainerProps> = ({
-  API_URL,
   currentPlayer,
   game,
 }) => {
   const router = useRouter();
+  const { baseUrl, setError } = useApiContext();
 
   const [gameState, setGameState] = useState(game);
   usePoll<GameState>({
-    url: `${API_URL}/game/${gameState.name}${
+    url: `${baseUrl}/game/${gameState.name}${
       currentPlayer ? `/${currentPlayer}` : ''
     }`,
-    // eslint-disable-next-line no-alert
-    onError: () => alert('error fetching game data'),
+    onError: () => setError(true),
     onSuccess: (newGame: GameState) => setGameState(newGame),
   });
 
@@ -73,17 +65,17 @@ export const GameContainer: FC<GameContainerProps> = ({
         spymaster_secret: spyMasterSecret,
       };
       voidFetch({
-        url: `${API_URL}/game/${gameState.name}/join`,
+        url: `${baseUrl}/game/${gameState.name}/join`,
         init: {
           method: 'PUT',
           body: JSON.stringify(newPlayer),
           headers: jsonHeaders,
         },
         onSuccess: () => router.push(`/game/${gameState.name}/${name}`),
-        onError: () => alert('error joining game'),
+        onError: () => setError(true),
       });
     },
-    [API_URL, gameState, router],
+    [baseUrl, setError, gameState, router],
   );
 
   const onGuess = (word: string) => () => {
@@ -91,22 +83,16 @@ export const GameContainer: FC<GameContainerProps> = ({
     if (confirmed) {
       const index = gameState.board.map((c) => c.word).indexOf(word);
       voidFetch({
-        url: `${API_URL}/game/${gameState.name}/${player.name}/guess/${index}`,
+        url: `${baseUrl}/game/${gameState.name}/${player.name}/guess/${index}`,
         init: { method: 'PUT' },
         onSuccess: () => {},
-        onError: () => alert('error making guess'),
+        onError: () => setError(true),
       });
     }
   };
 
   return (
-    <Game
-      API_URL={API_URL}
-      game={gameState}
-      onGuess={onGuess}
-      onJoin={onJoin}
-      player={player}
-    />
+    <Game game={gameState} onGuess={onGuess} onJoin={onJoin} player={player} />
   );
 };
 

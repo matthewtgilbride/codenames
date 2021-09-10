@@ -1,34 +1,28 @@
-import { FC, useLayoutEffect } from 'react';
+import { FC } from 'react';
 import Link from 'next/link';
 import { css } from '@emotion/css';
-import ReactModal from 'react-modal';
 import { lighten } from 'polished';
 import { Palette } from './color';
 import { beginAt, Breakpoints } from './responsive';
 
 const { phoneMd, phoneLg, tabletPortrait } = Breakpoints;
 
-export const Layout: FC = ({ children }) => {
-  useLayoutEffect(() => ReactModal.setAppElement('#app'), []);
-  return (
-    <div className={container} id="app">
-      <h1 className={title}>
-        (•_•) ( •_•)
-        <Link prefetch={!process.env.STORYBOOK} href="/">
-          Codenames
-        </Link>
-        ⌐■-■ (⌐■_■)
-      </h1>
-      <p className={subtitle}>
-        brought to you by your{' '}
-        <a href="https://www.mattgilbride.com">
-          friendly neighborhood developer
-        </a>
-      </p>
-      {children}
-    </div>
-  );
-};
+export const Layout: FC = ({ children }) => (
+  <div className={container} id="app">
+    <h1 className={title}>
+      (•_•) ( •_•)
+      <Link prefetch={!process.env.STORYBOOK} href="/">
+        Codenames
+      </Link>
+      ⌐■-■ (⌐■_■)
+    </h1>
+    <p className={subtitle}>
+      brought to you by your{' '}
+      <a href="https://www.mattgilbride.com">friendly neighborhood developer</a>
+    </p>
+    {children}
+  </div>
+);
 
 const container = css`
   position: absolute;

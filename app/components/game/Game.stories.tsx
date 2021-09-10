@@ -13,7 +13,6 @@ const Template: Story<GameProps> = (args) => <Game {...args} />;
 
 export const EmptyGame = Template.bind({});
 EmptyGame.args = {
-  API_URL: '',
   game: defaultGame,
   onGuess: () => action('onGuess'),
 };

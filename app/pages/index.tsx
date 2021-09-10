@@ -5,6 +5,7 @@ import { css } from '@emotion/css';
 import { NewGame } from '../components/NewGame';
 import { Palette } from '../design/color';
 import { Breakpoints } from '../design/responsive';
+import { ApiContextProvider } from '../components/ApiContext';
 
 interface HomeProps {
   game_name: string;
@@ -12,15 +13,17 @@ interface HomeProps {
 }
 
 const Home: FC<HomeProps> = ({ API_URL, game_name }) => (
-  <div className={styleContent}>
-    <div>
-      <h2>create a new game</h2>
-      <NewGame API_URL={API_URL} initialName={game_name} />
+  <ApiContextProvider baseUrl={API_URL}>
+    <div className={styleContent}>
+      <div>
+        <h2>create a new game</h2>
+        <NewGame initialName={game_name} />
+      </div>
+      <h2>
+        or <Link href="/game">join an existing one</Link>
+      </h2>
     </div>
-    <h2>
-      or <Link href="/game">join an existing one</Link>
-    </h2>
-  </div>
+  </ApiContextProvider>
 );
 
 const { neutral, blue, contrast } = Palette;

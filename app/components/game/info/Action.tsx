@@ -15,7 +15,6 @@ import { Palette } from '../../../design/color';
 import { Clue } from './Clue';
 
 export interface ActionProps {
-  API_URL: string;
   game: GameState;
   player?: Player;
   onEndTurn: () => void;
@@ -23,7 +22,6 @@ export interface ActionProps {
 }
 
 export const Action: FC<ActionProps> = ({
-  API_URL,
   game,
   game: { board },
   player,
@@ -43,7 +41,6 @@ export const Action: FC<ActionProps> = ({
             Start Turn
           </button>
           <Clue
-            API_URL={API_URL}
             game={game}
             spyMaster={player}
             isOpen={open}
