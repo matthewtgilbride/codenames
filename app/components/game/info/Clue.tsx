@@ -2,28 +2,24 @@ import React, { ChangeEventHandler, FC, useState } from 'react';
 import { css } from '@emotion/css';
 import { darken } from 'polished';
 import { Modal } from '../../../design/Modal';
-import { GameState, Player, Team } from '../../../model';
+import { currentTeam, GameState, Player, Team } from '../../../model';
 import { Palette } from '../../../design/color';
 import { buttonStyle } from '../../../design/button';
 import { voidFetch } from '../../../utils/fetch';
 import { useApiContext } from '../../ApiContext';
+import { actionButton } from './Action.styles';
 
 export interface ClueProps {
   game: GameState;
   spyMaster: Player;
-  isOpen: boolean;
-  onRequestClose: (event: React.MouseEvent | React.KeyboardEvent) => void;
-  team: Team;
 }
 
-export const Clue: FC<ClueProps> = ({
-  game,
-  spyMaster,
-  isOpen,
-  onRequestClose,
-  team,
-}) => {
+export const Clue: FC<ClueProps> = ({ game, spyMaster }) => {
   const apiContext = useApiContext();
+
+  const team = currentTeam(game);
+
+  const [open, setOpen] = useState(false);
 
   const [wordState, setWordState] = useState('');
   const onWordChange: ChangeEventHandler<HTMLInputElement> = (event) =>
@@ -35,8 +31,8 @@ export const Clue: FC<ClueProps> = ({
   const onSubmit = () =>
     voidFetch({
       apiContext,
-      onSuccess: () =>
-        onRequestClose((undefined as unknown) as React.MouseEvent<HTMLElement>),
+      onSuccess: () => setOpen(false),
+      onError: () => setOpen(false),
       path: `/game/${game.name}/${spyMaster.name}/start-turn`,
       init: {
         method: 'PUT',
@@ -45,34 +41,43 @@ export const Clue: FC<ClueProps> = ({
     });
 
   return (
-    <Modal isOpen={isOpen} onRequestClose={onRequestClose}>
-      <div className={container}>
-        <div className={row}>
-          <label htmlFor="word">
-            <span>Word</span>
-            <input id="word" onChange={onWordChange} value={wordState} />
-          </label>
-          <label htmlFor="for">
-            <span>For</span>
-            <input
-              id="for"
-              type="number"
-              onChange={onAmountChange}
-              value={amountState.toString()}
-            />
-          </label>
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className={actionButton}
+      >
+        Start Turn
+      </button>
+      <Modal isOpen={open} onRequestClose={() => setOpen(false)}>
+        <div className={container}>
+          <div className={row}>
+            <label htmlFor="word">
+              <span>Word</span>
+              <input id="word" onChange={onWordChange} value={wordState} />
+            </label>
+            <label htmlFor="for">
+              <span>For</span>
+              <input
+                id="for"
+                type="number"
+                onChange={onAmountChange}
+                value={amountState.toString()}
+              />
+            </label>
+          </div>
+          <div className={row}>
+            <button
+              type="submit"
+              className={styleButton(team)}
+              onClick={onSubmit}
+            >
+              Give Clue
+            </button>
+          </div>
         </div>
-        <div className={row}>
-          <button
-            type="submit"
-            className={styleButton(team)}
-            onClick={onSubmit}
-          >
-            Give Clue
-          </button>
-        </div>
-      </div>
-    </Modal>
+      </Modal>
+    </>
   );
 };
 

@@ -1,35 +1,54 @@
 import React, { FC, useCallback, useState } from 'react';
 import { css } from '@emotion/css';
-import { GameState, isSpyMaster, Team } from '../../../model';
+import { useRouter } from 'next/router';
+import { GameState, isSpyMaster, Player, Team } from '../../../model';
 import { Modal } from '../../../design/Modal';
 import { styleButton, styleContainer, styleInput } from './PlayerList.styles';
+import { voidFetch } from '../../../utils/fetch';
+import { useApiContext } from '../../ApiContext';
 
 export interface PlayerListProps {
-  players: GameState['players'];
-  currentPlayer?: string;
+  game: GameState;
+  playerName?: string;
   team: Team;
   spyMaster: boolean;
-  onJoin: (name: string, team: Team, spyMasterSecret: string | null) => void;
 }
 
 export const PlayerList: FC<PlayerListProps> = ({
-  players,
-  currentPlayer,
+  game,
+  playerName,
   team,
   spyMaster,
-  onJoin,
 }) => {
   const [open, setOpen] = useState(false);
-  const onOpen = useCallback(() => {
-    setOpen(true);
-  }, []);
-  const onRequestClose = () => setOpen(false);
   const [name, setName] = useState('');
   const [secret, setSecret] = useState('');
-  const playerNames = getPlayerNames(players, team, spyMaster);
+  const playerNames = getPlayerNames(game.players, team, spyMaster);
+
+  const apiContext = useApiContext();
+  const router = useRouter();
+
+  const onJoin = useCallback(() => {
+    const newPlayer: Player = {
+      name,
+      team,
+      spymaster_secret: spyMaster ? secret : null,
+    };
+    voidFetch({
+      apiContext,
+      path: `/game/${game.name}/join`,
+      init: {
+        method: 'PUT',
+        body: JSON.stringify(newPlayer),
+      },
+      onSuccess: () => router.push(`/game/${game.name}/${name}`),
+      onError: () => setOpen(false),
+    });
+  }, [spyMaster, team, game.name, router, apiContext, name, secret]);
+
   return (
     <div className={styleContainer(team)}>
-      <Modal isOpen={open} onRequestClose={onRequestClose}>
+      <Modal isOpen={open} onRequestClose={() => setOpen(false)}>
         <label htmlFor="name" className={styleInput}>
           Name
           <input
@@ -51,7 +70,7 @@ export const PlayerList: FC<PlayerListProps> = ({
         <button
           type="submit"
           disabled={!name}
-          onClick={() => onJoin(name, team, spyMaster ? secret : null)}
+          onClick={onJoin}
           className={styleButton(team)}
         >
           Join as {team} Team {spyMaster ? 'Spy Master' : 'Operative'}
@@ -68,10 +87,7 @@ export const PlayerList: FC<PlayerListProps> = ({
       <ul>
         {playerNames.length > 0 ? (
           playerNames.map((p) => (
-            <li
-              key={p}
-              style={p === currentPlayer ? { fontWeight: 'bold' } : {}}
-            >
+            <li key={p} style={p === playerName ? { fontWeight: 'bold' } : {}}>
               {p}
             </li>
           ))
@@ -79,8 +95,8 @@ export const PlayerList: FC<PlayerListProps> = ({
           <li>-</li>
         )}
       </ul>
-      {!currentPlayer && (
-        <button type="button" onClick={onOpen}>
+      {!playerName && (
+        <button type="button" onClick={() => setOpen(true)}>
           {spyMaster ? 'Join as Spymaster' : 'Join as Operative'}
         </button>
       )}

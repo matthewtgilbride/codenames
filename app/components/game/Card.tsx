@@ -8,13 +8,13 @@ import { buttonStyle } from '../../design/button';
 
 interface CardProps {
   card: CardColor;
-  turn: Team;
+  team: Team;
   player?: Player;
   onClick: MouseEventHandler<HTMLButtonElement>;
 }
 
 export const Card: FC<CardProps> = ({
-  turn,
+  team,
   player,
   card: { color, word },
   onClick,
@@ -24,8 +24,8 @@ export const Card: FC<CardProps> = ({
     <button
       type="button"
       onClick={onClick}
-      disabled={isDisabled(turn, color, player)}
-      className={styleButton(turn, color, size, player)}
+      disabled={isDisabled(team, color, player)}
+      className={styleButton(team, color, size, player)}
     >
       {word}
     </button>

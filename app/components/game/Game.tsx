@@ -1,12 +1,9 @@
-import { FC, useCallback, useState } from 'react';
-import { useRouter } from 'next/router';
+import { FC, useState } from 'react';
 import { css } from '@emotion/css';
 import { Palette } from '../../design/color';
-import { currentTeam, firstTeam, GameState, Player, Team } from '../../model';
+import { currentTeam, firstTeam, GameState, Team } from '../../model';
 import { Info } from './info/Info';
 import { usePoll } from '../../hooks/usePoll';
-import { PlayerListProps } from './info/PlayerList';
-import { voidFetch } from '../../utils/fetch';
 import { Board, BoardProps } from './Board';
 import { useApiContext } from '../ApiContext';
 
@@ -15,24 +12,16 @@ export interface GameContainerProps {
   game: GameState;
 }
 
-export type GameProps = GameContainerProps &
-  Pick<BoardProps, 'player' | 'onGuess'> &
-  Pick<PlayerListProps, 'onJoin'>;
+export type GameProps = GameContainerProps & Pick<BoardProps, 'player'>;
 
-export const Game: FC<GameProps> = ({
-  player,
-  onGuess,
-  onJoin,
-  game,
-  game: { board, name, players },
-}) => {
-  const first_team = firstTeam(game);
+export const Game: FC<GameProps> = ({ player, game, game: { name } }) => {
+  const team = firstTeam(game);
   const turn = currentTeam(game);
   return (
-    <div className={styleContainer(first_team, turn)}>
+    <div className={styleContainer(team, turn)}>
       <h2>{name}</h2>
-      <Board board={board} onGuess={onGuess} turn={turn} player={player} />
-      <Info player={player} game={game} onJoin={onJoin} players={players} />
+      <Board game={game} player={player} />
+      <Info game={game} player={player} />
     </div>
   );
 };
@@ -41,9 +30,7 @@ export const GameContainer: FC<GameContainerProps> = ({
   currentPlayer,
   game,
 }) => {
-  const router = useRouter();
   const apiContext = useApiContext();
-
   const [gameState, setGameState] = useState(game);
   usePoll<GameState>({
     apiContext,
@@ -54,42 +41,7 @@ export const GameContainer: FC<GameContainerProps> = ({
   const { players } = gameState;
   const player = players[currentPlayer?.toLowerCase() ?? ''];
 
-  const onJoin = useCallback(
-    (name: string, team: Team, spyMasterSecret: string | null) => {
-      const newPlayer: Player = {
-        name,
-        team,
-        spymaster_secret: spyMasterSecret,
-      };
-      voidFetch({
-        apiContext,
-        path: `/game/${gameState.name}/join`,
-        init: {
-          method: 'PUT',
-          body: JSON.stringify(newPlayer),
-        },
-        onSuccess: () => router.push(`/game/${gameState.name}/${name}`),
-      });
-    },
-    [gameState, router, apiContext],
-  );
-
-  const onGuess = (word: string) => () => {
-    // eslint-disable-next-line no-restricted-globals,no-alert
-    const confirmed = confirm(`Are you sure you want to guess ${word}?`);
-    if (confirmed) {
-      const index = gameState.board.map((c) => c.word).indexOf(word);
-      voidFetch({
-        apiContext,
-        path: `/game/${gameState.name}/${player.name}/guess/${index}`,
-        init: { method: 'PUT' },
-      });
-    }
-  };
-
-  return (
-    <Game game={gameState} onGuess={onGuess} onJoin={onJoin} player={player} />
-  );
+  return <Game game={gameState} player={player} />;
 };
 
 const styleContainer = (first: Team, current: Team): string => css`

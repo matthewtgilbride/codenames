@@ -1,6 +1,5 @@
-import React, { FC, useState } from 'react';
-import { css } from '@emotion/css';
-import { darken } from 'polished';
+import React, { FC } from 'react';
+import { useRouter } from 'next/router';
 import {
   currentTeam,
   currentTurn,
@@ -10,45 +9,54 @@ import {
   Player,
 } from '../../../model';
 import { GuessLog } from './GuessLog';
-import { beginAt } from '../../../design/responsive';
-import { Palette } from '../../../design/color';
 import { Clue } from './Clue';
+import { voidFetch } from '../../../utils/fetch';
+import { useApiContext } from '../../ApiContext';
+import { action, actionButton } from './Action.styles';
 
 export interface ActionProps {
   game: GameState;
   player?: Player;
-  onEndTurn: () => void;
-  onLeave: () => void;
 }
 
-export const Action: FC<ActionProps> = ({
-  game,
-  game: { board },
-  player,
-  onEndTurn,
-  onLeave,
-}) => {
-  const [open, setOpen] = useState(false);
+export const Action: FC<ActionProps> = ({ game, game: { board }, player }) => {
+  const apiContext = useApiContext();
+  const router = useRouter();
+  const turn = currentTeam(game);
+  const onEndTurn = () => {
+    // eslint-disable-next-line no-restricted-globals,no-alert
+    const confirmed = confirm(
+      `Are you sure you want to end ${turn} team's turn?`,
+    );
+    if (confirmed) {
+      voidFetch({
+        apiContext,
+        path: `/game/${game.name}/end-turn`,
+        init: { method: 'PUT' },
+        onSuccess: () => router.reload(),
+      });
+    }
+  };
+
+  const onLeave = () => {
+    // eslint-disable-next-line no-restricted-globals,no-alert
+    const confirmed = confirm(`Are you sure you want to leave the game?`);
+    if (confirmed) {
+      voidFetch({
+        apiContext,
+        path: `/game/${game.name}/${player?.name}/leave`,
+        init: { method: 'PUT' },
+        onSuccess: () => router.push(`/game/${game.name}`),
+      });
+    }
+  };
   return (
     <div className={action}>
-      {player && isSpyMaster(player) && currentTurn(game).type === 'Pending' && (
-        <>
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className={actionButton}
-          >
-            Start Turn
-          </button>
-          <Clue
-            game={game}
-            spyMaster={player}
-            isOpen={open}
-            onRequestClose={() => setOpen(false)}
-            team={currentTeam(game)}
-          />
-        </>
-      )}
+      {player &&
+        isSpyMaster(player) &&
+        currentTurn(game).type === 'Pending' && (
+          <Clue game={game} spyMaster={player} />
+        )}
       {player && currentTurn(game).type === 'Started' && (
         <button type="button" onClick={onEndTurn} className={actionButton}>
           End Turn
@@ -63,35 +71,3 @@ export const Action: FC<ActionProps> = ({
     </div>
   );
 };
-
-const action = css`
-  display: flex;
-  flex-direction: column;
-  font-size: 0.5rem;
-  ${beginAt(375)} {
-    font-size: 0.75rem;
-  }
-  ${beginAt(768)} {
-    font-size: 1rem;
-  }
-  & button {
-    font-size: 0.5rem;
-    ${beginAt(375)} {
-      font-size: 0.75rem;
-    }
-    ${beginAt(768)} {
-      font-size: 1rem;
-    }
-  }
-`;
-
-const actionButton = css`
-  background-color: ${Palette.light};
-  padding: 0.5rem;
-  border-radius: 0.25rem;
-  margin: 0.5rem 0;
-  width: 100%;
-  :hover {
-    background-color: ${darken(0.1, Palette.light)};
-  }
-`;
