@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { css } from '@emotion/css';
 import { Breakpoints } from '../design/responsive';
 import { Palette } from '../design/color';
-import { jsonHeaders, voidFetch } from '../utils/fetch';
+import { voidFetch } from '../utils/fetch';
 import { useApiContext } from './ApiContext';
 
 const { phone } = Breakpoints;
@@ -20,21 +20,20 @@ export const NewGame: FC<NewGameProps> = ({ initialName }) => {
     setName(e.currentTarget.value);
   }, []);
 
-  const { baseUrl, setError } = useApiContext();
+  const apiContext = useApiContext();
 
   const router = useRouter();
   const onSubmit = useCallback(() => {
     voidFetch({
-      url: `${baseUrl}/game`,
+      apiContext,
+      path: '/game',
       init: {
         method: 'POST',
         body: JSON.stringify({ game_name: name }),
-        headers: jsonHeaders,
       },
       onSuccess: () => router.push(`/game/${name}`),
-      onError: () => setError(true),
     });
-  }, [name, baseUrl, setError, router]);
+  }, [name, router, apiContext]);
 
   return (
     <div className={containerStyle}>

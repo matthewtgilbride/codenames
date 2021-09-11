@@ -20,7 +20,7 @@ export interface InfoProps {
 
 export const Info: FC<InfoProps> = ({ player, game, players, onJoin }) => {
   const router = useRouter();
-  const { baseUrl, setError } = useApiContext();
+  const apiContext = useApiContext();
   const turn = currentTeam(game);
   const onEndTurn = () => {
     const confirmed = confirm(
@@ -28,10 +28,10 @@ export const Info: FC<InfoProps> = ({ player, game, players, onJoin }) => {
     );
     if (confirmed) {
       voidFetch({
-        url: `${baseUrl}/game/${name}/end-turn`,
+        apiContext,
+        path: `/game/${game.name}/end-turn`,
         init: { method: 'PUT' },
         onSuccess: () => router.reload(),
-        onError: () => setError(true),
       });
     }
   };
@@ -40,10 +40,10 @@ export const Info: FC<InfoProps> = ({ player, game, players, onJoin }) => {
     const confirmed = confirm(`Are you sure you want to leave the game?`);
     if (confirmed) {
       voidFetch({
-        url: `${baseUrl}/game/${name}/${player?.name}/leave`,
+        apiContext,
+        path: `/game/${game.name}/${player?.name}/leave`,
         init: { method: 'PUT' },
-        onSuccess: () => router.push(`/game/${name}`),
-        onError: () => setError(true),
+        onSuccess: () => router.push(`/game/${game.name}`),
       });
     }
   };

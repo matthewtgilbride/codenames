@@ -5,7 +5,7 @@ import { Modal } from '../../../design/Modal';
 import { GameState, Player, Team } from '../../../model';
 import { Palette } from '../../../design/color';
 import { buttonStyle } from '../../../design/button';
-import { jsonHeaders, voidFetch } from '../../../utils/fetch';
+import { voidFetch } from '../../../utils/fetch';
 import { useApiContext } from '../../ApiContext';
 
 export interface ClueProps {
@@ -23,7 +23,7 @@ export const Clue: FC<ClueProps> = ({
   onRequestClose,
   team,
 }) => {
-  const { baseUrl, setError } = useApiContext();
+  const apiContext = useApiContext();
 
   const [wordState, setWordState] = useState('');
   const onWordChange: ChangeEventHandler<HTMLInputElement> = (event) =>
@@ -34,17 +34,13 @@ export const Clue: FC<ClueProps> = ({
 
   const onSubmit = () =>
     voidFetch({
-      onError(): void {
-        setError(true);
-      },
-      onSuccess(): void {
-        onRequestClose((undefined as unknown) as React.MouseEvent<HTMLElement>);
-      },
-      url: `${baseUrl}/game/${game.name}/${spyMaster.name}/start-turn`,
+      apiContext,
+      onSuccess: () =>
+        onRequestClose((undefined as unknown) as React.MouseEvent<HTMLElement>),
+      path: `/game/${game.name}/${spyMaster.name}/start-turn`,
       init: {
         method: 'PUT',
         body: JSON.stringify({ word: wordState, amount: amountState }),
-        headers: jsonHeaders,
       },
     });
 

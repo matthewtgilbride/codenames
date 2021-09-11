@@ -1,4 +1,3 @@
-/* eslint-disable no-alert,no-restricted-globals */
 import { FC, useCallback, useState } from 'react';
 import { useRouter } from 'next/router';
 import { css } from '@emotion/css';
@@ -7,7 +6,7 @@ import { currentTeam, firstTeam, GameState, Player, Team } from '../../model';
 import { Info } from './info/Info';
 import { usePoll } from '../../hooks/usePoll';
 import { PlayerListProps } from './info/PlayerList';
-import { jsonHeaders, voidFetch } from '../../utils/fetch';
+import { voidFetch } from '../../utils/fetch';
 import { Board, BoardProps } from './Board';
 import { useApiContext } from '../ApiContext';
 
@@ -43,14 +42,12 @@ export const GameContainer: FC<GameContainerProps> = ({
   game,
 }) => {
   const router = useRouter();
-  const { baseUrl, setError } = useApiContext();
+  const apiContext = useApiContext();
 
   const [gameState, setGameState] = useState(game);
   usePoll<GameState>({
-    url: `${baseUrl}/game/${gameState.name}${
-      currentPlayer ? `/${currentPlayer}` : ''
-    }`,
-    onError: () => setError(true),
+    apiContext,
+    path: `/game/${gameState.name}${currentPlayer ? `/${currentPlayer}` : ''}`,
     onSuccess: (newGame: GameState) => setGameState(newGame),
   });
 
@@ -65,28 +62,27 @@ export const GameContainer: FC<GameContainerProps> = ({
         spymaster_secret: spyMasterSecret,
       };
       voidFetch({
-        url: `${baseUrl}/game/${gameState.name}/join`,
+        apiContext,
+        path: `/game/${gameState.name}/join`,
         init: {
           method: 'PUT',
           body: JSON.stringify(newPlayer),
-          headers: jsonHeaders,
         },
         onSuccess: () => router.push(`/game/${gameState.name}/${name}`),
-        onError: () => setError(true),
       });
     },
-    [baseUrl, setError, gameState, router],
+    [gameState, router, apiContext],
   );
 
   const onGuess = (word: string) => () => {
+    // eslint-disable-next-line no-restricted-globals,no-alert
     const confirmed = confirm(`Are you sure you want to guess ${word}?`);
     if (confirmed) {
       const index = gameState.board.map((c) => c.word).indexOf(word);
       voidFetch({
-        url: `${baseUrl}/game/${gameState.name}/${player.name}/guess/${index}`,
+        apiContext,
+        path: `/game/${gameState.name}/${player.name}/guess/${index}`,
         init: { method: 'PUT' },
-        onSuccess: () => {},
-        onError: () => setError(true),
       });
     }
   };
