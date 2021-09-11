@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { darken } from 'polished';
-import { beginAt } from '../../../design/responsive';
-import { Palette } from '../../../design/color';
+import { beginAt } from '../../../../design/responsive';
+import { Palette } from '../../../../design/color';
 
 export const action = css`
   display: flex;

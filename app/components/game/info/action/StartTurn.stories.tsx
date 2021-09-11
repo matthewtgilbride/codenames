@@ -1,13 +1,13 @@
 import React from 'react';
 import { Meta, Story } from '@storybook/react';
-import { Clue, ClueProps } from './Clue';
+import { StartTurn, ClueProps } from './StartTurn';
 
 export default {
   title: 'Clue',
-  component: Clue,
+  component: StartTurn,
 } as Meta;
 
-const Template: Story<ClueProps> = (args) => <Clue {...args} />;
+const Template: Story<ClueProps> = (args) => <StartTurn {...args} />;
 
 export const Default = Template.bind({});
 Default.args = {};

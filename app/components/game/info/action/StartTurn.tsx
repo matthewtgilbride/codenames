@@ -1,68 +1,59 @@
-import React, { ChangeEventHandler, FC, useState } from 'react';
+import React, { FC } from 'react';
 import { css } from '@emotion/css';
 import { darken } from 'polished';
-import { Modal } from '../../../design/Modal';
-import { currentTeam, GameState, Player, Team } from '../../../model';
-import { Palette } from '../../../design/color';
-import { buttonStyle } from '../../../design/button';
-import { voidFetch } from '../../../utils/fetch';
-import { useApiContext } from '../../ApiContext';
+import { Modal, useModalControls } from '../../../../design/Modal';
+import { currentTeam, GameState, Player, Team } from '../../../../model';
+import { Palette } from '../../../../design/color';
+import { buttonStyle } from '../../../../design/button';
+import { voidFetch } from '../../../../utils/fetch';
+import { useApiContext } from '../../../ApiContext';
 import { actionButton } from './Action.styles';
+import { useInputState } from '../../../../hooks/useInputState';
 
 export interface ClueProps {
   game: GameState;
   spyMaster: Player;
 }
 
-export const Clue: FC<ClueProps> = ({ game, spyMaster }) => {
-  const apiContext = useApiContext();
+export const StartTurn: FC<ClueProps> = ({ game, spyMaster }) => {
+  const { isOpen, open, close } = useModalControls();
+  const [word, onWordChange] = useInputState();
+  const [amount, onAmountChange] = useInputState();
 
   const team = currentTeam(game);
 
-  const [open, setOpen] = useState(false);
-
-  const [wordState, setWordState] = useState('');
-  const onWordChange: ChangeEventHandler<HTMLInputElement> = (event) =>
-    setWordState(event.target.value);
-  const [amountState, setAmountState] = useState(1);
-  const onAmountChange: ChangeEventHandler<HTMLInputElement> = (event) =>
-    setAmountState(parseInt(event.target.value, 10));
-
+  const apiContext = useApiContext();
   const onSubmit = () =>
     voidFetch({
       apiContext,
-      onSuccess: () => setOpen(false),
-      onError: () => setOpen(false),
+      onSuccess: close,
+      onError: close,
       path: `/game/${game.name}/${spyMaster.name}/start-turn`,
       init: {
         method: 'PUT',
-        body: JSON.stringify({ word: wordState, amount: amountState }),
+        body: JSON.stringify({ word, amount: parseInt(amount, 10) }),
       },
     });
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className={actionButton}
-      >
+      <button type="button" onClick={open} className={actionButton}>
         Start Turn
       </button>
-      <Modal isOpen={open} onRequestClose={() => setOpen(false)}>
+      <Modal isOpen={isOpen} onRequestClose={close}>
         <div className={container}>
           <div className={row}>
             <label htmlFor="word">
               <span>Word</span>
-              <input id="word" onChange={onWordChange} value={wordState} />
+              <input id="word" value={word} onChange={onWordChange} />
             </label>
             <label htmlFor="for">
               <span>For</span>
               <input
                 id="for"
                 type="number"
+                value={amount}
                 onChange={onAmountChange}
-                value={amountState.toString()}
               />
             </label>
           </div>

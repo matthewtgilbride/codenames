@@ -1,5 +1,5 @@
 import { css, Global } from '@emotion/react';
-import React, { FC, KeyboardEvent, MouseEvent } from 'react';
+import React, { FC, KeyboardEvent, MouseEvent, useState } from 'react';
 import ReactModal from 'react-modal';
 import { lighten, transparentize } from 'polished';
 import { Palette } from './color';
@@ -26,6 +26,17 @@ export const Modal: FC<ModalProps> = ({ isOpen, onRequestClose, children }) => (
     </ReactModal>
   </>
 );
+
+export const useModalControls = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const open = () => setIsOpen(true);
+  const close = () => setIsOpen(false);
+  return {
+    isOpen,
+    open,
+    close,
+  };
+};
 
 const modalStyle = css`
   .ReactModal__Overlay {

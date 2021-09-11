@@ -1,4 +1,4 @@
-import { createContext, FC, useContext, useState } from 'react';
+import { createContext, FC, useContext, useEffect, useState } from 'react';
 import { Modal } from '../design/Modal';
 
 export interface ApiContextType {
@@ -14,11 +14,19 @@ export const ApiContextProvider: FC<{ baseUrl: string }> = ({
   children,
 }) => {
   const [error, setError] = useState<Error | Response | null>(null);
+  const [text, setText] = useState('');
+  useEffect(() => {
+    if (error instanceof Error) {
+      setText(error.message);
+    }
+    if (error instanceof Response) {
+      error.text().then((t) => setText(t));
+    }
+  }, [error]);
   return (
     <>
       <Modal isOpen={!!error} onRequestClose={() => setError(null)}>
-        The API that this site uses has thrown an error. That should not happen.
-        If it does, and you are Matt, check the debugger.
+        {text}
       </Modal>
       <ApiContext.Provider value={{ baseUrl, error, setError }}>
         {children}

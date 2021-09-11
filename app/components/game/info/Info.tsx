@@ -5,7 +5,7 @@ import { currentTeam, GameState, Player } from '../../../model';
 import { PlayerList } from './PlayerList';
 import { container } from './Info.styles';
 import { Palette } from '../../../design/color';
-import { Action } from './Action';
+import { Action } from './action/Action';
 
 export interface InfoProps {
   word?: string;
