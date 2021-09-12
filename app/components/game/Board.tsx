@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import { css } from '@emotion/css';
-import { currentTeam, GameState, Player } from '../../model';
+import { currentTeam, GameState, getGuesses, Player } from '../../model';
 import { Card } from './Card';
 import { Breakpoints } from '../../design/responsive';
 import { voidFetch } from '../../utils/fetch';
@@ -33,16 +33,19 @@ export const Board: FC<BoardProps> = ({ player, game }) => {
       init: { method: 'PUT' },
     });
   };
+
+  const guesses = getGuesses(game);
   return (
     <>
       <div className={container}>
-        {game.board.map((card) => (
+        {game.board.map((card, index) => (
           <Card
             key={card.word}
             card={card}
             player={player}
             team={team}
             onClick={onGuess(card.word)}
+            guessIndex={guesses.indexOf(index)}
           />
         ))}
       </div>

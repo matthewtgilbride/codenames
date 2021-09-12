@@ -11,6 +11,7 @@ interface CardProps {
   team: Team;
   player?: Player;
   onClick: MouseEventHandler<HTMLButtonElement>;
+  guessIndex: number;
 }
 
 export const Card: FC<CardProps> = ({
@@ -18,6 +19,7 @@ export const Card: FC<CardProps> = ({
   player,
   card: { color, word },
   onClick,
+  guessIndex,
 }) => {
   const size = word.length > 5 ? (1 / word.length) * 72 : 12;
   return (
@@ -27,6 +29,7 @@ export const Card: FC<CardProps> = ({
       disabled={isDisabled(team, color, player)}
       className={styleButton(team, color, size, player)}
     >
+      {guessIndex >= 0 && <p>{guessIndex + 1}</p>}
       {word}
     </button>
   );
@@ -53,6 +56,7 @@ function styleButton(
     ${buttonStyle};
     padding: 0.75rem 0.1rem;
     word-break: break-all;
+    position: relative;
     background-color: ${color ? CardColorMap[color] : Palette.light};
     color: ${color === 'Death' ? neutral : contrast};
     font-size: ${size}px;
@@ -71,6 +75,21 @@ function styleButton(
     ${beginAt(tabletPortrait)} {
       font-size: ${size * 2}px;
       padding: 1rem 0.1rem;
+    }
+
+    & p {
+      font-size: 0.3rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 0.8rem;
+      height: 0.8rem;
+      border-radius: 50%;
+      color: ${Palette.light};
+      background-color: ${Palette.gray};
+      position: absolute;
+      top: 2%;
+      left: 2%;
     }
   `;
 }
