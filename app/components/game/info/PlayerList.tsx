@@ -1,5 +1,4 @@
 import React, { FC, useCallback } from 'react';
-import { css } from '@emotion/css';
 import { useRouter } from 'next/router';
 import { GameState, isSpyMaster, Player, Team } from '../../../model';
 import { Modal, useModalControls } from '../../../design/Modal';
@@ -73,20 +72,8 @@ export const PlayerList: FC<PlayerListProps> = ({
           Join as {team} Team {spyMaster ? 'Spy Master' : 'Operative'}
         </button>
       </Modal>
-      <div
-        className={css`
-          font-weight: bold;
-        `}
-      >
-        {spyMaster ? 'Spymaster' : 'Operative'}(s)
-      </div>
-      <ul
-        className={css`
-          align-self: center;
-          justify-content: center;
-          margin: 0.25rem 0;
-        `}
-      >
+      <div>{spyMaster ? 'Spymaster' : 'Operative'}(s)</div>
+      <ul>
         {playerNames.length > 0 ? (
           playerNames.map((p) => (
             <li key={p} style={p === playerName ? { fontWeight: 'bold' } : {}}>

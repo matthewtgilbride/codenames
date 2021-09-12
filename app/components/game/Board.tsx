@@ -64,12 +64,12 @@ export const Board: FC<BoardProps> = ({ player, game }) => {
 const { tabletPortrait } = Breakpoints;
 const container = css`
   display: grid;
-  padding: 1rem 0;
+  padding: 0.5rem 0;
   margin: auto;
   max-width: ${tabletPortrait}px;
   text-align: center;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-  grid-row-gap: 1rem;
-  grid-column-gap: 1rem;
+  grid-row-gap: 0.5rem;
+  grid-column-gap: 0.5rem;
   max-width: ${tabletPortrait}px;
 `;

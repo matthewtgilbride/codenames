@@ -10,23 +10,30 @@ export function styleContainer(color: Team) {
     display: flex;
     border-radius: 0.5rem;
     padding: 0.5rem;
-    margin: 1rem;
     font-size: 0.5rem;
     flex-direction: column;
     color: ${color === 'Blue' ? Palette.blue : Palette.red};
+    border-bottom: 1px solid ${color === 'Blue' ? Palette.blue : Palette.red};
 
     h2 {
       margin: 0;
+    }
+
+    > div {
+      font-weight: bold;
+      margin-bottom: 0.25rem;
     }
 
     ul {
       display: flex;
       flex-wrap: wrap;
       margin-left: -0.25rem;
+      align-self: center;
+      justify-content: center;
     }
 
     li {
-      margin: 0.25rem 0;
+      margin-bottom: 0.25rem;
       padding-left: 0.25rem;
     }
 

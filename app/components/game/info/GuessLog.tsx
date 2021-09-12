@@ -24,10 +24,13 @@ const container = css`
   flex-direction: column;
   color: ${Palette.light};
   & h4 {
-    font-weight: bold;
-    margin: 0.5rem 0;
+    margin: 0;
+    font-size: 1rem;
+  }
+  & ul {
+    padding: 0.5rem;
   }
   & li {
-    margin: 0.25rem 0;
+    margin-bottom: 0.25rem;
   }
 `;

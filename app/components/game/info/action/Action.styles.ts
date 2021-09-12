@@ -6,7 +6,6 @@ import { Palette } from '../../../../design/color';
 export const action = css`
   display: flex;
   flex-direction: column;
-  margin: 1rem;
   font-size: 0.5rem;
   ${beginAt(375)} {
     font-size: 0.75rem;

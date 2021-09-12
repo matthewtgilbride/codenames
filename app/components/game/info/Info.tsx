@@ -1,14 +1,7 @@
 /* eslint-disable no-alert,no-restricted-globals */
 import { FC } from 'react';
 import { css } from '@emotion/css';
-import {
-  currentTurn,
-  GameState,
-  getFirstTeam,
-  getGuesses,
-  Player,
-  Turn,
-} from '../../../model';
+import { GameState, getFirstTeam, getGuesses, Player } from '../../../model';
 import { PlayerList } from './PlayerList';
 import { container } from './Info.styles';
 import { Palette } from '../../../design/color';
@@ -21,7 +14,6 @@ export interface InfoProps {
 }
 
 export const Info: FC<InfoProps> = ({ player, game }) => {
-  const turn = currentTurn(game);
   const firstTeam = getFirstTeam(game);
 
   const blueCount = getGuesses(game).filter(
@@ -32,24 +24,15 @@ export const Info: FC<InfoProps> = ({ player, game }) => {
 
   return (
     <div className={container}>
-      <div
-        className={css`
-          color: ${Palette.blue};
-        `}
-      >
-        {blueCount} / {firstTeam === 'Blue' ? 9 : 8}
-      </div>
       <div>
-        <h3>{heading(turn)}</h3>
-      </div>
-      <div
-        className={css`
-          color: ${Palette.red};
-        `}
-      >
-        {redCount} / {firstTeam === 'Red' ? 9 : 8}
-      </div>
-      <div>
+        <div
+          className={css`
+            color: ${Palette.blue};
+            margin: 0 0.25rem;
+          `}
+        >
+          {blueCount} / {firstTeam === 'Blue' ? 9 : 8}
+        </div>
         <PlayerList
           spyMaster={false}
           team="Blue"
@@ -65,6 +48,13 @@ export const Info: FC<InfoProps> = ({ player, game }) => {
       </div>
       <Action game={game} player={player} />
       <div>
+        <div
+          className={css`
+            color: ${Palette.red};
+          `}
+        >
+          {redCount} / {firstTeam === 'Red' ? 9 : 8}
+        </div>
         <PlayerList
           spyMaster={false}
           team="Red"
@@ -81,10 +71,3 @@ export const Info: FC<InfoProps> = ({ player, game }) => {
     </div>
   );
 };
-
-function heading(turn: Turn): string {
-  if (turn.type === 'Pending') {
-    return `Waiting for ${turn.data} Spymaster`;
-  }
-  return `${turn.data.clue[0]} (${turn.data.clue[1]})`;
-}
