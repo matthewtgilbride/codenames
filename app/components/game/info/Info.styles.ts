@@ -5,7 +5,7 @@ const { tabletPortrait } = Breakpoints;
 
 export const container = css`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 2fr 1fr;
 
   margin: 1rem auto;
   max-width: ${tabletPortrait}px;

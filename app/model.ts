@@ -36,7 +36,7 @@ export interface GameState {
   board: CardColor[];
 }
 
-export const firstTeam = (game: GameState): Team => {
+export const getFirstTeam = (game: GameState): Team => {
   const firstTurn = game.turns.slice().reverse()[0];
   if (firstTurn.type === 'Pending') return firstTurn.data;
   return firstTurn.data.spymaster.team;

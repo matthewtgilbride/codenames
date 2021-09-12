@@ -1,7 +1,14 @@
 /* eslint-disable no-alert,no-restricted-globals */
 import { FC } from 'react';
 import { css } from '@emotion/css';
-import { currentTeam, GameState, Player } from '../../../model';
+import {
+  currentTurn,
+  GameState,
+  getFirstTeam,
+  getGuesses,
+  Player,
+  Turn,
+} from '../../../model';
 import { PlayerList } from './PlayerList';
 import { container } from './Info.styles';
 import { Palette } from '../../../design/color';
@@ -14,7 +21,14 @@ export interface InfoProps {
 }
 
 export const Info: FC<InfoProps> = ({ player, game }) => {
-  const turn = currentTeam(game);
+  const turn = currentTurn(game);
+  const firstTeam = getFirstTeam(game);
+
+  const blueCount = getGuesses(game).filter(
+    (i) => game.board[i].color === 'Blue',
+  ).length;
+  const redCount = getGuesses(game).filter((i) => game.board[i].color === 'Red')
+    .length;
 
   return (
     <div className={container}>
@@ -23,17 +37,17 @@ export const Info: FC<InfoProps> = ({ player, game }) => {
           color: ${Palette.blue};
         `}
       >
-        0 / 9
+        {blueCount} / {firstTeam === 'Blue' ? 9 : 8}
       </div>
       <div>
-        <h3>{turn} Team&apos;s Turn</h3>
+        <h3>{heading(turn)}</h3>
       </div>
       <div
         className={css`
           color: ${Palette.red};
         `}
       >
-        0 / 8
+        {redCount} / {firstTeam === 'Red' ? 9 : 8}
       </div>
       <div>
         <PlayerList
@@ -67,3 +81,10 @@ export const Info: FC<InfoProps> = ({ player, game }) => {
     </div>
   );
 };
+
+function heading(turn: Turn): string {
+  if (turn.type === 'Pending') {
+    return `Waiting for ${turn.data} Spymaster`;
+  }
+  return `${turn.data.clue[0]} (${turn.data.clue[1]})`;
+}

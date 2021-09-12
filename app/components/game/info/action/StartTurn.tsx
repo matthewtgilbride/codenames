@@ -23,17 +23,17 @@ export const StartTurn: FC<ClueProps> = ({ game, spyMaster }) => {
   const team = currentTeam(game);
 
   const apiContext = useApiContext();
-  const onSubmit = () =>
+  const onSubmit = () => {
+    close();
     voidFetch({
       apiContext,
-      onSuccess: close,
-      onError: close,
       path: `/game/${game.name}/${spyMaster.name}/start-turn`,
       init: {
         method: 'PUT',
         body: JSON.stringify({ word, amount: parseInt(amount, 10) }),
       },
     });
+  };
 
   return (
     <>

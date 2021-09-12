@@ -6,7 +6,7 @@ import { Breakpoints } from '../../design/responsive';
 import { voidFetch } from '../../utils/fetch';
 import { useApiContext } from '../ApiContext';
 import { Modal, useModalControls } from '../../design/Modal';
-import { actionButton } from './info/action/Action.styles';
+import { actionButton, modalContainer } from './info/action/Action.styles';
 
 export interface BoardProps {
   player?: Player;
@@ -25,13 +25,12 @@ export const Board: FC<BoardProps> = ({ player, game }) => {
   };
 
   const confirmGuess = () => {
+    close();
     const index = game.board.map((c) => c.word).indexOf(word as string);
     voidFetch({
       apiContext,
       path: `/game/${game.name}/${player?.name}/guess/${index}`,
       init: { method: 'PUT' },
-      onSuccess: close,
-      onError: close,
     });
   };
   return (
@@ -48,13 +47,15 @@ export const Board: FC<BoardProps> = ({ player, game }) => {
         ))}
       </div>
       <Modal isOpen={isOpen} onRequestClose={close}>
-        Are you sure you want to guess {word}?
-        <button className={actionButton} type="button" onClick={confirmGuess}>
-          Yes
-        </button>
-        <button className={actionButton} type="button" onClick={close}>
-          No
-        </button>
+        <div className={modalContainer}>
+          <span>Guess {word}?</span>
+          <button className={actionButton} type="button" onClick={confirmGuess}>
+            Yes
+          </button>
+          <button className={actionButton} type="button" onClick={close}>
+            No
+          </button>
+        </div>
       </Modal>
     </>
   );

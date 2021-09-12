@@ -3,6 +3,8 @@ import { Modal } from '../design/Modal';
 
 export interface ApiContextType {
   baseUrl: string;
+  loading: boolean;
+  setLoading: (isLoading: boolean) => void;
   error: Error | Response | null;
   setError: (error: Error | Response | null) => void;
 }
@@ -14,6 +16,7 @@ export const ApiContextProvider: FC<{ baseUrl: string }> = ({
   children,
 }) => {
   const [error, setError] = useState<Error | Response | null>(null);
+  const [loading, setLoading] = useState(false);
   const [text, setText] = useState('');
   useEffect(() => {
     if (error instanceof Error) {
@@ -25,10 +28,12 @@ export const ApiContextProvider: FC<{ baseUrl: string }> = ({
   }, [error]);
   return (
     <>
-      <Modal isOpen={!!error} onRequestClose={() => setError(null)}>
-        {text}
+      <Modal isOpen={loading || !!error} onRequestClose={() => setError(null)}>
+        {loading ? 'Just a sec...' : text}
       </Modal>
-      <ApiContext.Provider value={{ baseUrl, error, setError }}>
+      <ApiContext.Provider
+        value={{ baseUrl, loading, setLoading, error, setError }}
+      >
         {children}
       </ApiContext.Provider>
     </>

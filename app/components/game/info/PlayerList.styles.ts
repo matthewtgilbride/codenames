@@ -13,8 +13,7 @@ export function styleContainer(color: Team) {
     margin: 1rem;
     font-size: 0.5rem;
     flex-direction: column;
-    color: ${Palette.contrast};
-    background-color: ${color === 'Blue' ? Palette.blue : Palette.red};
+    color: ${color === 'Blue' ? Palette.blue : Palette.red};
 
     h2 {
       margin: 0;
@@ -23,12 +22,12 @@ export function styleContainer(color: Team) {
     ul {
       display: flex;
       flex-wrap: wrap;
-      padding-left: 0.75rem;
+      margin-left: -0.25rem;
     }
 
     li {
       margin: 0.25rem 0;
-      padding-right: 0.5rem;
+      padding-left: 0.25rem;
     }
 
     button {

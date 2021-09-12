@@ -1,11 +1,12 @@
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback } from 'react';
 import { css } from '@emotion/css';
 import { useRouter } from 'next/router';
 import { GameState, isSpyMaster, Player, Team } from '../../../model';
-import { Modal } from '../../../design/Modal';
+import { Modal, useModalControls } from '../../../design/Modal';
 import { styleButton, styleContainer, styleInput } from './PlayerList.styles';
 import { voidFetch } from '../../../utils/fetch';
 import { useApiContext } from '../../ApiContext';
+import { useInputState } from '../../../hooks/useInputState';
 
 export interface PlayerListProps {
   game: GameState;
@@ -20,9 +21,9 @@ export const PlayerList: FC<PlayerListProps> = ({
   team,
   spyMaster,
 }) => {
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [secret, setSecret] = useState('');
+  const { isOpen, open, close } = useModalControls();
+  const [name, onNameChange] = useInputState();
+  const [secret, onSecretChange] = useInputState();
   const playerNames = getPlayerNames(game.players, team, spyMaster);
 
   const apiContext = useApiContext();
@@ -34,6 +35,7 @@ export const PlayerList: FC<PlayerListProps> = ({
       team,
       spymaster_secret: spyMaster ? secret : null,
     };
+    close();
     voidFetch({
       apiContext,
       path: `/game/${game.name}/join`,
@@ -42,29 +44,24 @@ export const PlayerList: FC<PlayerListProps> = ({
         body: JSON.stringify(newPlayer),
       },
       onSuccess: () => router.push(`/game/${game.name}/${name}`),
-      onError: () => setOpen(false),
     });
-  }, [spyMaster, team, game.name, router, apiContext, name, secret]);
+  }, [spyMaster, team, game.name, router, apiContext, name, secret, close]);
 
   return (
     <div className={styleContainer(team)}>
-      <Modal isOpen={open} onRequestClose={() => setOpen(false)}>
+      <Modal isOpen={isOpen} onRequestClose={close}>
         <label htmlFor="name" className={styleInput}>
           Name
-          <input
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+          <input id="name" value={name} onChange={onNameChange} />
         </label>
         {spyMaster && (
-          <label htmlFor="secret" className={styleInput}>
-            Secret
-            <input
-              id="secret"
-              value={secret}
-              onChange={(e) => setSecret(e.target.value)}
-            />
+          <label
+            htmlFor="secret"
+            className={styleInput}
+            title="Enter something here to keep others from revealing the game key"
+          >
+            Personal Game Key Secret
+            <input id="secret" value={secret} onChange={onSecretChange} />
           </label>
         )}
         <button
@@ -78,13 +75,18 @@ export const PlayerList: FC<PlayerListProps> = ({
       </Modal>
       <div
         className={css`
-          align-self: flex-start;
           font-weight: bold;
         `}
       >
         {spyMaster ? 'Spymaster' : 'Operative'}(s)
       </div>
-      <ul>
+      <ul
+        className={css`
+          align-self: center;
+          justify-content: center;
+          margin: 0.25rem 0;
+        `}
+      >
         {playerNames.length > 0 ? (
           playerNames.map((p) => (
             <li key={p} style={p === playerName ? { fontWeight: 'bold' } : {}}>
@@ -96,8 +98,8 @@ export const PlayerList: FC<PlayerListProps> = ({
         )}
       </ul>
       {!playerName && (
-        <button type="button" onClick={() => setOpen(true)}>
-          {spyMaster ? 'Join as Spymaster' : 'Join as Operative'}
+        <button type="button" onClick={open}>
+          Join
         </button>
       )}
     </div>

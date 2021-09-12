@@ -47,7 +47,8 @@ const modalStyle = css`
     transition: transform 250ms ease-in-out, opacity 250ms ease-in-out;
     opacity: 0;
     transform: translateY(100%);
-    inset: 75vh 10vw 1rem 10vw !important;
+    inset: 70vh 10vw 1rem 10vw !important;
+    padding: 0.5rem !important;
     background: radial-gradient(
       circle at top right,
       ${Palette.neutral} 0%,

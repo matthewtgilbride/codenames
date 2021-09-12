@@ -27,11 +27,11 @@ export const usePoll = <T>(config: PollConfig<T>) => {
           config.onSuccess(json as T);
         } else {
           setError(true);
-          onErrorWithContext(apiContext, config.onError)(result);
+          onErrorWithContext(result, apiContext, config.onError);
         }
       } catch (e) {
         setError(true);
-        onErrorWithContext(apiContext, config.onError)(e);
+        onErrorWithContext(e, apiContext, config.onError);
       }
     };
     const i = setInterval(() => {

@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { css } from '@emotion/css';
 import { Palette } from '../../design/color';
-import { currentTeam, firstTeam, GameState, Team } from '../../model';
+import { currentTeam, getFirstTeam, GameState, Team } from '../../model';
 import { Info } from './info/Info';
 import { usePoll } from '../../hooks/usePoll';
 import { Board, BoardProps } from './Board';
@@ -15,7 +15,7 @@ export interface GameContainerProps {
 export type GameProps = GameContainerProps & Pick<BoardProps, 'player'>;
 
 export const Game: FC<GameProps> = ({ player, game, game: { name } }) => {
-  const team = firstTeam(game);
+  const team = getFirstTeam(game);
   const turn = currentTeam(game);
   return (
     <div className={styleContainer(team, turn)}>

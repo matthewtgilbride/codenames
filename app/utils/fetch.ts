@@ -18,16 +18,27 @@ export const initOrDefault = (init?: RequestInit): RequestInit => ({
 });
 
 export const onErrorWithContext = (
+  response: Response | Error,
   apiContext: ApiContextType,
   onError?: VoidFetchConfig['onError'],
-): ((r: Response | Error) => void) => (e) => {
-  apiContext.setError(e);
-  if (onError) onError(e);
+): void => {
+  apiContext.setError(response);
+  apiContext.setLoading(false);
+  if (onError) onError(response);
 };
 
-const onSuccessOrDefault = (onSuccess?: VoidFetchConfig['onSuccess']) =>
-  // eslint-disable-next-line no-console
-  onSuccess ?? ((r) => console.log(r));
+const onSuccessWithContext = (
+  response: Response,
+  apiContext: ApiContextType,
+  onSuccess?: VoidFetchConfig['onSuccess'],
+) => {
+  apiContext.setError(null);
+  apiContext.setLoading(false);
+  if (onSuccess) {
+    onSuccess(response);
+    // eslint-disable-next-line no-console
+  } else console.log(response);
+};
 
 export const url = (apiContext: ApiContextType, path?: string) =>
   `${apiContext.baseUrl}${path}`;
@@ -39,13 +50,15 @@ export const voidFetch = ({
   onSuccess,
   onError,
 }: VoidFetchConfig): void => {
+  apiContext.setLoading(true);
   fetch(url(apiContext, path), initOrDefault(init))
     .then((response) => {
       if (response.ok) {
-        onSuccessOrDefault(onSuccess)(response);
+        onSuccessWithContext(response, apiContext, onSuccess);
+        apiContext.setLoading(false);
       } else {
-        onErrorWithContext(apiContext, onError)(response);
+        onErrorWithContext(response, apiContext, onError);
       }
     })
-    .catch((e) => onErrorWithContext(apiContext, onError)(e));
+    .catch((e) => onErrorWithContext(e, apiContext, onError));
 };
