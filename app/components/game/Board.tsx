@@ -6,7 +6,7 @@ import { Breakpoints } from '../../design/responsive';
 import { voidFetch } from '../../utils/fetch';
 import { useApiContext } from '../ApiContext';
 import { Modal, useModalControls } from '../../design/Modal';
-import { actionButton, modalContainer } from './info/action/Action.styles';
+import { actionButton, actionModal } from './info/action/Action.styles';
 
 export interface BoardProps {
   player?: Player;
@@ -50,7 +50,7 @@ export const Board: FC<BoardProps> = ({ player, game }) => {
         ))}
       </div>
       <Modal isOpen={isOpen} onRequestClose={close}>
-        <div className={modalContainer}>
+        <div className={actionModal}>
           <span>Guess {word}?</span>
           <button className={actionButton} type="button" onClick={confirmGuess}>
             Yes

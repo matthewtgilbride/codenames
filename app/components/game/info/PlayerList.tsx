@@ -104,8 +104,8 @@ export const PlayerList: FC<PlayerListProps> = ({
       )}
       {player &&
         player.team === team &&
-        spyMaster &&
         isSpyMaster(player) &&
+        spyMaster &&
         currentTeam(game) === player.team &&
         currentTurn(game).type === 'Pending' && (
           <StartTurn game={game} spyMaster={player} />
@@ -113,8 +113,6 @@ export const PlayerList: FC<PlayerListProps> = ({
       {player &&
         player.team === team &&
         spyMaster === isSpyMaster(player) &&
-        ((spyMaster && isSpyMaster(player)) ||
-          (!spyMaster && !isSpyMaster(player))) &&
         currentTurn(game).type === 'Started' && <EndTurn game={game} />}
       {player && player.team === team && spyMaster === isSpyMaster(player) && (
         <LeaveGame playerName={player.name} gameName={game.name} />

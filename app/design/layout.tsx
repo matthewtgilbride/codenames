@@ -48,7 +48,7 @@ const title = css`
   text-align: center;
   color: ${Palette.light};
   font-size: 1rem;
-  margin: 1.5rem 0 0 0;
+  margin: 1rem 0 0 0;
   a {
     color: ${Palette.light};
     margin: 0 1rem;

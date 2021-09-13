@@ -1,7 +1,8 @@
 import { FC, useState } from 'react';
 import { css } from '@emotion/css';
+import Link from 'next/link';
 import { Palette } from '../../design/color';
-import { currentTeam, getFirstTeam, GameState, Team } from '../../model';
+import { currentTeam, GameState, getFirstTeam, Team } from '../../model';
 import { Info } from './info/Info';
 import { usePoll } from '../../hooks/usePoll';
 import { Board, BoardProps } from './Board';
@@ -19,7 +20,9 @@ export const Game: FC<GameProps> = ({ player, game, game: { name } }) => {
   const turn = currentTeam(game);
   return (
     <div className={styleContainer(team, turn)}>
-      <h2>{name}</h2>
+      <h2>
+        <Link href={`/game/${name}`}>{name}</Link>
+      </h2>
       <Board game={game} player={player} />
       <Info game={game} player={player} />
     </div>
@@ -48,9 +51,12 @@ const styleContainer = (first: Team, current: Team): string => css`
   text-align: center;
 
   & h2 {
-    color: ${first === 'Blue' ? Palette.blue : Palette.red};
     margin: 0;
     font-size: 1rem;
+    > a {
+      text-decoration: underline;
+      color: ${first === 'Blue' ? Palette.blue : Palette.red};
+    }
   }
 
   & h3 {

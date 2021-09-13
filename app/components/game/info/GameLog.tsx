@@ -1,56 +1,59 @@
 import React, { FC } from 'react';
 import { css } from '@emotion/css';
-import { CardColor, CardType, GameState, StartedTurn } from '../../../model';
+import {
+  CardColor,
+  CardType,
+  GameState,
+  StartedTurn,
+  Turn,
+} from '../../../model';
 import { Palette } from '../../../design/color';
 import { CardColorMap } from '../Card';
+import { beginAt } from '../../../design/responsive';
 
 export type GameLogProps = Pick<GameState, 'board' | 'turns'>;
 
 export const GameLog: FC<GameLogProps> = ({ board, turns }) => (
   <div className={container}>
     <h4>Game Log</h4>
-    {turns.map((t, index) => {
-      if (t.type === 'Started') {
-        const {
-          data: { guesses, spymaster, clue },
-        } = t as StartedTurn;
-        return (
-          <div
-            // eslint-disable-next-line react/no-array-index-key
-            key={index}
-            className={css`
-              border-radius: 0.5rem;
-              border-bottom: 1px solid ${Palette.light};
-              border-top: 1px solid ${Palette.light};
-            `}
-          >
-            <ul>
-              {guesses.map((guess) => (
-                <Guess key={guess[1]} guess={guess} board={board} />
-              ))}
-            </ul>
-            <Clue spymaster={spymaster} clue={clue} />
-          </div>
-        );
-      }
-      const color = t.data === 'Blue' ? Palette.blue : Palette.red;
-      return (
-        <div
-          className={css`
-            border-radius: 0.5rem;
-            border-bottom: 1px solid ${Palette.light};
-            border-top: 1px solid ${Palette.light};
-            padding: 1rem 0;
-          `}
-        >
-          <span>Waiting for </span>
-          <span style={{ color }}>{t.data}</span>
-          <span> team Spymaster</span>
-        </div>
-      );
-    })}
+    {turns.map((turn, index) => (
+      // eslint-disable-next-line react/no-array-index-key
+      <div key={index}>
+        <TurnContent turn={turn} board={board} />
+      </div>
+    ))}
   </div>
 );
+
+const TurnContent: FC<{ turn: Turn; board: CardColor[] }> = ({
+  turn,
+  board,
+}) => {
+  if (turn.type === 'Started') {
+    const {
+      data: { guesses, spymaster, clue },
+    } = turn;
+    return (
+      <>
+        <ul>
+          {guesses.map((guess) => (
+            <Guess key={guess[1]} guess={guess} board={board} />
+          ))}
+        </ul>
+        <Clue spymaster={spymaster} clue={clue} />
+      </>
+    );
+  }
+
+  const color = turn.data === 'Blue' ? Palette.blue : Palette.red;
+  return (
+    <>
+      <span>Waiting for </span>
+      <span style={{ color }}>{turn.data}</span>
+      <span> team Spymaster</span>
+    </>
+  );
+};
 
 const Guess: FC<{
   board: CardColor[];
@@ -72,30 +75,39 @@ const Clue: FC<Pick<StartedTurn['data'], 'spymaster' | 'clue'>> = ({
 }) => {
   const color = spymaster.team === 'Blue' ? Palette.blue : Palette.red;
   return (
-    <div
-      className={css`
-        font-weight: bold;
-        padding-bottom: 0.75rem;
-        margin: 0 auto;
-      `}
-    >
+    <div>
       <span style={{ color }}>{`${spymaster.name}`}</span>
       <span>{` said "${clue[0]}" for ${clue[1]}`}</span>
     </div>
   );
 };
+
 const container = css`
   display: flex;
   flex-direction: column;
+  font-size: 0.5rem;
+  ${beginAt(375)} {
+    font-size: 0.75rem;
+  }
+  ${beginAt(768)} {
+    font-size: 1rem;
+  }
   color: ${Palette.light};
   & h4 {
     margin: 0;
     font-size: 1rem;
   }
-  & ul {
-    padding: 0.5rem;
-  }
-  & li {
-    margin-bottom: 0.25rem;
+
+  > div {
+    border-radius: 0.5rem;
+    border-bottom: 1px solid ${Palette.light};
+    border-top: 1px solid ${Palette.light};
+    padding: 0.5rem 0;
+    & li {
+      margin-bottom: 0.25rem;
+      :last-child {
+        margin-bottom: 0.5rem;
+      }
+    }
   }
 `;

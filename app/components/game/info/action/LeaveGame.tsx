@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { useRouter } from 'next/router';
 import { voidFetch } from '../../../../utils/fetch';
-import { actionButton, modalContainer } from './Action.styles';
+import { actionButton, actionModal } from './Action.styles';
 import { useApiContext } from '../../../ApiContext';
 import { Modal, useModalControls } from '../../../../design/Modal';
 
@@ -28,7 +28,7 @@ export const LeaveGame: FC<{ gameName: string; playerName: string }> = ({
         Leave Game
       </button>
       <Modal isOpen={isOpen} onRequestClose={close}>
-        <div className={modalContainer}>
+        <div className={actionModal}>
           <span>Leave the game?</span>
           <button className={actionButton} type="button" onClick={leave}>
             Yes

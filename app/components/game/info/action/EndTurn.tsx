@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { voidFetch } from '../../../../utils/fetch';
-import { actionButton, modalContainer } from './Action.styles';
+import { actionButton, actionModal } from './Action.styles';
 import { useApiContext } from '../../../ApiContext';
 import { currentTeam, GameState } from '../../../../model';
 import { Modal, useModalControls } from '../../../../design/Modal';
@@ -25,7 +25,7 @@ export const EndTurn: FC<{ game: GameState }> = ({ game }) => {
         End Turn
       </button>
       <Modal isOpen={isOpen} onRequestClose={close}>
-        <div className={modalContainer}>
+        <div className={actionModal}>
           <span>{`End ${team} Team's turn?`}</span>
           <button className={actionButton} type="button" onClick={endTurn}>
             Yes
