@@ -50,6 +50,11 @@ export const currentTeam = (game: GameState): Team => {
 
 export const currentTurn = (game: GameState): Turn => game.turns[0];
 
+export const turnTeam = (turn: Turn): Team => {
+  if (turn.type === 'Pending') return turn.data;
+  return turn.data.spymaster.team;
+};
+
 export const isSpyMaster = (player: Player): boolean =>
   player.spymaster_secret !== null;
 

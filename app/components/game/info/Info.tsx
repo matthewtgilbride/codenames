@@ -33,20 +33,10 @@ export const Info: FC<InfoProps> = ({ player, game }) => {
         >
           {blueCount} / {firstTeam === 'Blue' ? 9 : 8}
         </div>
-        <PlayerList
-          spyMaster={false}
-          team="Blue"
-          game={game}
-          playerName={player?.name}
-        />
-        <PlayerList
-          spyMaster
-          team="Blue"
-          game={game}
-          playerName={player?.name}
-        />
+        <PlayerList spyMaster={false} team="Blue" game={game} player={player} />
+        <PlayerList spyMaster team="Blue" game={game} player={player} />
       </div>
-      <Action game={game} player={player} />
+      <Action game={game} />
       <div>
         <div
           className={css`
@@ -55,18 +45,8 @@ export const Info: FC<InfoProps> = ({ player, game }) => {
         >
           {redCount} / {firstTeam === 'Red' ? 9 : 8}
         </div>
-        <PlayerList
-          spyMaster={false}
-          team="Red"
-          game={game}
-          playerName={player?.name}
-        />
-        <PlayerList
-          spyMaster
-          team="Red"
-          game={game}
-          playerName={player?.name}
-        />
+        <PlayerList spyMaster={false} team="Red" game={game} player={player} />
+        <PlayerList spyMaster team="Red" game={game} player={player} />
       </div>
     </div>
   );

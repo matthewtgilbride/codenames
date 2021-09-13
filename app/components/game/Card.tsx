@@ -3,19 +3,26 @@ import { css } from '@emotion/css';
 import { darken } from 'polished';
 import { Palette } from '../../design/color';
 import { beginAt, Breakpoints } from '../../design/responsive';
-import { CardColor, CardType, isSpyMaster, Player, Team } from '../../model';
+import {
+  CardColor,
+  CardType,
+  isSpyMaster,
+  Player,
+  Turn,
+  turnTeam,
+} from '../../model';
 import { buttonStyle } from '../../design/button';
 
 interface CardProps {
   card: CardColor;
-  team: Team;
+  turn: Turn;
   player?: Player;
   onClick: MouseEventHandler<HTMLButtonElement>;
   guessIndex: number;
 }
 
 export const Card: FC<CardProps> = ({
-  team,
+  turn,
   player,
   card: { color, word },
   onClick,
@@ -26,8 +33,8 @@ export const Card: FC<CardProps> = ({
     <button
       type="button"
       onClick={onClick}
-      disabled={isDisabled(team, color, player)}
-      className={styleButton(team, color, size, player)}
+      disabled={isDisabled(turn, color, player)}
+      className={styleButton(turn, color, size, player)}
     >
       {guessIndex >= 0 && <p>{guessIndex + 1}</p>}
       {word}
@@ -36,18 +43,19 @@ export const Card: FC<CardProps> = ({
 };
 
 function isDisabled(
-  turn: Team,
+  turn: Turn,
   color: CardType | null,
   player?: Player,
 ): boolean {
+  if (turn.type === 'Pending') return true;
   if (color) return true;
   if (!player) return true;
   if (isSpyMaster(player)) return true;
-  return player.team !== turn;
+  return player.team !== turnTeam(turn);
 }
 
 function styleButton(
-  turn: Team,
+  turn: Turn,
   color: CardType | null,
   size: number,
   player?: Player,
@@ -97,7 +105,7 @@ function styleButton(
 const { neutral, death, blue, red, contrast } = Palette;
 const { phoneLg, tabletPortrait } = Breakpoints;
 
-const CardColorMap: { [key in CardType]: string } = {
+export const CardColorMap: { [key in CardType]: string } = {
   Neutral: neutral,
   Death: death,
   Blue: blue,

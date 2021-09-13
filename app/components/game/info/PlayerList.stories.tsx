@@ -23,7 +23,6 @@ NonEmpty.args = {
 
 export const CurrentPlayer = Template.bind({});
 CurrentPlayer.args = {
-  playerName: 'Matt',
   team: 'Blue',
   spyMaster: false,
 };

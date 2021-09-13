@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import { css } from '@emotion/css';
-import { currentTeam, GameState, getGuesses, Player } from '../../model';
+import { currentTurn, GameState, getGuesses, Player } from '../../model';
 import { Card } from './Card';
 import { Breakpoints } from '../../design/responsive';
 import { voidFetch } from '../../utils/fetch';
@@ -14,7 +14,7 @@ export interface BoardProps {
 }
 
 export const Board: FC<BoardProps> = ({ player, game }) => {
-  const team = currentTeam(game);
+  const turn = currentTurn(game);
   const apiContext = useApiContext();
   const { isOpen, open, close } = useModalControls();
   const [word, setWord] = useState<string | undefined>();
@@ -43,7 +43,7 @@ export const Board: FC<BoardProps> = ({ player, game }) => {
             key={card.word}
             card={card}
             player={player}
-            team={team}
+            turn={turn}
             onClick={onGuess(card.word)}
             guessIndex={guesses.indexOf(index)}
           />

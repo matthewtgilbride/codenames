@@ -14,6 +14,7 @@ export function styleContainer(color: Team) {
     flex-direction: column;
     color: ${color === 'Blue' ? Palette.blue : Palette.red};
     border-bottom: 1px solid ${color === 'Blue' ? Palette.blue : Palette.red};
+    border-top: 1px solid ${color === 'Blue' ? Palette.blue : Palette.red};
 
     h2 {
       margin: 0;

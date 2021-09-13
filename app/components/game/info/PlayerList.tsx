@@ -1,22 +1,32 @@
 import React, { FC, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import { GameState, isSpyMaster, Player, Team } from '../../../model';
+import {
+  currentTeam,
+  currentTurn,
+  GameState,
+  isSpyMaster,
+  Player,
+  Team,
+} from '../../../model';
 import { Modal, useModalControls } from '../../../design/Modal';
 import { styleButton, styleContainer, styleInput } from './PlayerList.styles';
 import { voidFetch } from '../../../utils/fetch';
 import { useApiContext } from '../../ApiContext';
 import { useInputState } from '../../../hooks/useInputState';
+import { StartTurn } from './action/StartTurn';
+import { LeaveGame } from './action/LeaveGame';
+import { EndTurn } from './action/EndTurn';
 
 export interface PlayerListProps {
   game: GameState;
-  playerName?: string;
+  player?: Player;
   team: Team;
   spyMaster: boolean;
 }
 
 export const PlayerList: FC<PlayerListProps> = ({
   game,
-  playerName,
+  player,
   team,
   spyMaster,
 }) => {
@@ -76,7 +86,10 @@ export const PlayerList: FC<PlayerListProps> = ({
       <ul>
         {playerNames.length > 0 ? (
           playerNames.map((p) => (
-            <li key={p} style={p === playerName ? { fontWeight: 'bold' } : {}}>
+            <li
+              key={p}
+              style={p === player?.name ? { fontWeight: 'bold' } : {}}
+            >
               {p}
             </li>
           ))
@@ -84,10 +97,27 @@ export const PlayerList: FC<PlayerListProps> = ({
           <li>-</li>
         )}
       </ul>
-      {!playerName && (
+      {!player && (
         <button type="button" onClick={open}>
           Join
         </button>
+      )}
+      {player &&
+        player.team === team &&
+        spyMaster &&
+        isSpyMaster(player) &&
+        currentTeam(game) === player.team &&
+        currentTurn(game).type === 'Pending' && (
+          <StartTurn game={game} spyMaster={player} />
+        )}
+      {player &&
+        player.team === team &&
+        spyMaster === isSpyMaster(player) &&
+        ((spyMaster && isSpyMaster(player)) ||
+          (!spyMaster && !isSpyMaster(player))) &&
+        currentTurn(game).type === 'Started' && <EndTurn game={game} />}
+      {player && player.team === team && spyMaster === isSpyMaster(player) && (
+        <LeaveGame playerName={player.name} gameName={game.name} />
       )}
     </div>
   );
