@@ -63,7 +63,7 @@ export class DevelopmentInstanceConstruct extends Construct {
       blockDevices: [
         {
           deviceName: '/dev/sda1',
-          volume: BlockDeviceVolume.ebs(8),
+          volume: BlockDeviceVolume.ebs(16),
         },
       ],
     });

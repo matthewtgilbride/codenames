@@ -18,3 +18,7 @@ check: format compile build ## lint, compile, build
 start: export API_URL=http://${LOCAL_IP}:8080
 start: ## start dev server
 	yarn dev
+
+start-build: export API_URL=http://${LOCAL_IP}:8080
+start-build: ## start dev server
+	yarn next start

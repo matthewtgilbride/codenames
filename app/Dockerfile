@@ -11,6 +11,8 @@ COPY pages ./pages
 COPY public ./public
 COPY utils ./utils
 COPY hooks ./hooks
+# TODO shouldn't have to copy this for build
+COPY stories ./stories
 
 RUN yarn
 RUN yarn build
