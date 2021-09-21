@@ -9,7 +9,10 @@ import { Board, BoardProps } from './Board';
 import { useApiContext } from '../ApiContext';
 
 export interface GameContainerProps {
-  currentPlayer?: string;
+  currentPlayer?: {
+    name: string;
+    secret?: string;
+  };
   game: GameState;
 }
 
@@ -37,14 +40,24 @@ export const GameContainer: FC<GameContainerProps> = ({
   const [gameState, setGameState] = useState(game);
   usePoll<GameState>({
     apiContext,
-    path: `/game/${gameState.name}${currentPlayer ? `/${currentPlayer}` : ''}`,
+    path: `/game/${gameState.name}${playerSuffix(currentPlayer)}`,
     onSuccess: (newGame: GameState) => setGameState(newGame),
   });
 
   const { players } = gameState;
-  const player = players[currentPlayer?.toLowerCase() ?? ''];
+  const player = players[currentPlayer?.name.toLowerCase() ?? ''];
 
   return <Game game={gameState} player={player} />;
+};
+
+const playerSuffix = (
+  currentPlayer: GameContainerProps['currentPlayer'],
+): string => {
+  if (!currentPlayer) return '';
+  if (currentPlayer.secret !== undefined) {
+    return `/${currentPlayer.name}?secret=${currentPlayer.secret}`;
+  }
+  return `/${currentPlayer.name}`;
 };
 
 const styleContainer = (first: Team, current: Team): string => css`

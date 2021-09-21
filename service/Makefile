@@ -37,7 +37,7 @@ LOCAL_IP = $(shell ipconfig getifaddr en0)
 
 run-local: redis-up kill-local
 run-local: export REDIS_HOST=0.0.0.0
-run-local: export ALLOWED_ORIGINS=http://$(LOCAL_IP):3000
+run-local: export ALLOWED_ORIGINS=http://localhost:3000
 run-local: ## run the http server locally
 	cargo build
 	cargo run
@@ -61,8 +61,6 @@ wasmcloud-deps: ## start the auxiliary services needed to run wash locally
 	docker-compose -f ../docker-compose.yml up -d registry nats redis
 
 rust_log = info
-wasmcloud_host_id = $(shell wash ctl get hosts -o json | jq -r '.hosts[0].id')
-codenames_actor_id = $(shell wash claims inspect ./codenames.wasm -o json | jq -r .module)
 
 wasmcloud-actor-build: build-wasm ## compile and build wasmcloud actor mosule
 
@@ -78,10 +76,10 @@ wasmcloud-actor-push: codenames.wasm ## push the built wasmcloud module to a loc
 
 .PHONY: wasmcloud-actor-update
 wasmcloud-actor-update: wasmcloud-actor-push ## update the running actor in the wasmcloud host
-	wash ctl update actor $(wasmcloud_host_id) $(codenames_actor_id) localhost:5000/codenames:v1
+	wash ctl update actor $(shell wash ctl get hosts -o json | jq -r '.hosts[0].id') $(codenames_actor_id) localhost:5000/codenames:v1
 
 .PHONY: wasmcloud-up
-wasmcloud-up: export ACTOR_ID=$(codenames_actor_id)
+wasmcloud-up: export ACTOR_ID=$(shell wash claims inspect ./codenames.wasm -o json | jq -r .module)
 wasmcloud-up: export RUST_LOG=$(rust_log)
 wasmcloud-up: wasmcloud-deps codenames.wasm ## start the wasmcloud actor locally
 	wasmcloud --allowed-insecure localhost:5000 -m wasm/manifest.yaml
@@ -93,7 +91,7 @@ wasmcloud-down: kill-local ## tear down wasmcloud and it's dependencies
 	-kill $(wasmcloud_process)
 
 .PHONY: wash-up ## start the wasmcloud actor in a wash REPL
-wash-up: export ACTOR_ID=$(codenames_actor_id)
+wash-up: export ACTOR_ID=$(shell wash claims inspect ./codenames.wasm -o json | jq -r .module)
 wash-up: export RUST_LOG=$(rust_log)
 wash-up: codenames.wasm
 	wash up -m wasm/manifest.yaml

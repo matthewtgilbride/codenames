@@ -27,10 +27,10 @@ const GameList: FC<GameListProps> = ({ games }) => (
   </div>
 );
 
-const { blue, neutral, contrast } = Palette;
+const { blue, light, contrast } = Palette;
 
 const container = css`
-  background-color: ${neutral};
+  background-color: ${light};
   display: flex;
   flex-direction: column;
   margin: auto;

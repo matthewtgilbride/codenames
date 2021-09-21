@@ -50,14 +50,14 @@ impl GameService {
     }
 
     pub fn join(&self, key: String, player: Player) -> ServiceResult<Game> {
-        let game = &self.clone()._get(key)?;
+        let game = &self.clone()._get(&key)?;
         let updated_game = game.clone().join(player.clone())?;
         let _ = &self.clone().save(updated_game.clone())?;
         Ok((player.clone(), updated_game).into())
     }
 
     pub fn leave(&self, key: String, player_name: &str) -> ServiceResult<GameState> {
-        let game = &self.clone()._get(key)?;
+        let game = &self.clone()._get(&key)?;
         println!("got game {}", game.info.name());
         let updated_game = game.clone().leave(player_name)?;
         println!("left game {}", game.info.name());
@@ -66,7 +66,7 @@ impl GameService {
     }
 
     pub fn guess(&self, key: String, guess: (&str, usize)) -> ServiceResult<GameState> {
-        let game = &self.clone()._get(key)?;
+        let game = &self.clone()._get(&key)?;
         let updated_game = game.clone().guess(guess)?;
         let _ = &self.clone().save(updated_game.clone())?;
         Ok(updated_game.clone().into())
@@ -78,29 +78,34 @@ impl GameService {
         spymaster_name: String,
         clue: (String, usize),
     ) -> ServiceResult<GameState> {
-        let game = &self.clone()._get(key)?;
+        let game = &self.clone()._get(&key)?;
         let updated_game = game.clone().start_turn(spymaster_name, clue)?;
         let _ = &self.clone().save(updated_game.clone())?;
         Ok(updated_game.clone().into())
     }
 
     pub fn end_turn(&self, key: String) -> ServiceResult<GameState> {
-        let game = &self.clone()._get(key)?;
+        let game = &self.clone()._get(&key)?;
         let updated_game = game.clone().end_turn();
         let _ = &self.clone().save(updated_game.clone())?;
         Ok(updated_game.clone().into())
     }
 
-    fn _get(&mut self, key: String) -> ServiceResult<GameData> {
-        self.dao.get(Lowercase::new(key.as_str())).map_err(|e| {
+    fn _get(&mut self, key: &str) -> ServiceResult<GameData> {
+        self.dao.get(Lowercase::new(key)).map_err(|e| {
             info!("{}", e);
             e.into()
         })
     }
 
-    pub fn get(&mut self, key: String, req: Option<String>) -> ServiceResult<Game> {
+    pub fn get(
+        &mut self,
+        key: &str,
+        player_name: &Option<String>,
+        spymaster_secret: &Option<String>,
+    ) -> ServiceResult<Game> {
         let data = self._get(key)?;
-        match req {
+        match player_name {
             None => Ok(Game::State(data.into())),
             Some(player_name) => {
                 let player = data
@@ -110,7 +115,15 @@ impl GameService {
                     .find(|&p| p.name.to_lowercase() == player_name.to_lowercase())
                     .cloned()
                     .ok_or(ServiceError::NotFound(format!("player: {}", player_name)))?;
-                Ok((player.clone(), data).into())
+                match (&player.spymaster_secret, &spymaster_secret) {
+                    (None, _) => Ok((player.clone(), data).into()),
+                    (Some(player_secret), Some(provided_secret))
+                        if player_secret == provided_secret =>
+                    {
+                        Ok((player.clone(), data).into())
+                    }
+                    _ => Ok(Game::State(data.into())),
+                }
             }
         }
     }

@@ -52,7 +52,10 @@ export const PlayerList: FC<PlayerListProps> = ({
         method: 'PUT',
         body: JSON.stringify(newPlayer),
       },
-      onSuccess: () => router.push(`/game/${game.name}/${name}`),
+      onSuccess: () =>
+        router.push(
+          `/game/${game.name}/${name}${spyMaster ? `?secret=${secret}` : ''}`,
+        ),
     });
   }, [spyMaster, team, game.name, router, apiContext, name, secret, close]);
 
@@ -67,9 +70,9 @@ export const PlayerList: FC<PlayerListProps> = ({
           <label
             htmlFor="secret"
             className={styleInput}
-            title="Enter something here to keep others from revealing the game key"
+            title="Enter something here to keep others from url hacking to the answers"
           >
-            Personal Game Key Secret
+            Spymaster Secret ⌐■-■
             <input id="secret" value={secret} onChange={onSecretChange} />
           </label>
         )}

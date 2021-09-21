@@ -38,7 +38,7 @@ fn game_routes() -> Scope {
 
 #[get("")]
 async fn get_game(path: web::Path<String>, data: web::Data<AppData>) -> impl Responder {
-    respond(&data.service.clone().get(path.clone(), None))
+    respond(&data.service.clone().get(&path.clone(), &None, &None))
 }
 
 #[put("/join")]

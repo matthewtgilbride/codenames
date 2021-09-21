@@ -26,10 +26,10 @@ const Home: FC<HomeProps> = ({ API_URL, game_name }) => (
   </ApiContextProvider>
 );
 
-const { neutral, blue, contrast } = Palette;
+const { light, blue, contrast } = Palette;
 
 export const styleContent = css`
-  background-color: ${neutral};
+  background-color: ${light};
   display: flex;
   flex-direction: column;
   margin: auto;
