@@ -1,36 +1,30 @@
-import reset from 'emotion-reset';
 import { FC } from 'react';
 import Link from 'next/link';
-import { css } from '@emotion/react';
-import styled from '@emotion/styled';
+import { css } from '@emotion/css';
+import { lighten } from 'polished';
 import { Palette } from './color';
 import { beginAt, Breakpoints } from './responsive';
 
 const { phoneMd, phoneLg, tabletPortrait } = Breakpoints;
 
-export const GlobalStyle = css`
-  ${reset};
-  body {
-    font-family: Montserrat, 'Arial CE', Arial, sans-serif;
-    & * {
-      box-sizing: border-box;
-    }
-  }
-  button,
-  input {
-    border-style: solid;
-  }
-  h1 {
-    font-size: 2rem;
-    margin: 2rem 0;
-  }
-  h2 {
-    font-size: 1.5rem;
-    margin: 1.5rem;
-  }
-`;
+export const Layout: FC = ({ children }) => (
+  <div className={container} id="app">
+    <h1 className={title}>
+      (•_•) ( •_•)
+      <Link prefetch={!process.env.STORYBOOK} href="/">
+        Codenames
+      </Link>
+      ⌐■-■ (⌐■_■)
+    </h1>
+    <p className={subtitle}>
+      brought to you by your{' '}
+      <a href="https://www.mattgilbride.com">friendly neighborhood developer</a>
+    </p>
+    {children}
+  </div>
+);
 
-const Container = styled.div`
+const container = css`
   position: absolute;
   top: 0;
   bottom: 0;
@@ -38,15 +32,25 @@ const Container = styled.div`
   right: 0;
   overflow-y: auto;
   padding: 0 1rem;
-  background-color: ${Palette.contrast};
+  background: radial-gradient(
+    circle at top left,
+    ${lighten(0.5, Palette.contrast)} 0%,
+    ${lighten(0.4, Palette.contrast)} 10%,
+    ${lighten(0.2, Palette.contrast)} 20%,
+    ${Palette.contrast} 50%,
+    ${lighten(0.2, Palette.contrast)} 80%,
+    ${lighten(0.4, Palette.contrast)} 90%,
+    ${lighten(0.5, Palette.contrast)} 100%
+  );
 `;
 
-const Title = styled.h1`
+const title = css`
   text-align: center;
-  color: ${Palette.neutral};
+  color: ${Palette.light};
   font-size: 1rem;
+  margin: 1rem 0 0 0;
   a {
-    color: ${Palette.neutral};
+    color: ${Palette.light};
     margin: 0 1rem;
   }
   ${beginAt(phoneMd)} {
@@ -60,29 +64,12 @@ const Title = styled.h1`
   }
 `;
 
-const Subtitle = styled.p`
+const subtitle = css`
   text-align: center;
-  color: ${Palette.neutral};
+  color: ${Palette.light};
   font-size: 0.5rem;
   margin: 0.5rem;
   a {
-    color: ${Palette.neutral};
+    color: ${Palette.light};
   }
 `;
-
-export const Layout: FC = ({ children }) => (
-  <Container>
-    <Title>
-      (•_•) ( •_•)
-      <Link prefetch={!process.env.STORYBOOK} href="/">
-        Codenames
-      </Link>
-      ⌐■-■ (⌐■_■)
-    </Title>
-    <Subtitle>
-      brought to you by your{' '}
-      <a href="https://www.mattgilbride.com">friendly neighborhood developer</a>
-    </Subtitle>
-    {children}
-  </Container>
-);

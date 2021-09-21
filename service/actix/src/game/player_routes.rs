@@ -1,4 +1,5 @@
 use actix_web::{get, put, web, Responder, Scope};
+use serde::{Deserialize, Serialize};
 
 use crate::{util::respond, AppData, ClueBody};
 
@@ -10,13 +11,24 @@ pub fn player_routes(path: &str) -> Scope {
         .service(leave_game)
 }
 
+#[derive(Serialize, Deserialize)]
+struct SecretQuery {
+    secret: Option<String>,
+}
+
 #[get("")]
 async fn get_player_game(
     path: web::Path<(String, String)>,
+    query: web::Query<SecretQuery>,
     data: web::Data<AppData>,
 ) -> impl Responder {
     let (key, player_name) = path.clone();
-    respond(&data.service.clone().get(key, Some(player_name)))
+    respond(
+        &data
+            .service
+            .clone()
+            .get(&key, &Some(player_name), &query.secret),
+    )
 }
 
 #[put("start-turn")]

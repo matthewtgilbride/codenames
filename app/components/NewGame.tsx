@@ -1,16 +1,51 @@
-/* eslint-disable no-alert */
 import { ChangeEventHandler, FC, useCallback, useState } from 'react';
-import styled from '@emotion/styled';
 import { lighten } from 'polished';
 import { useRouter } from 'next/router';
+import { css } from '@emotion/css';
 import { Breakpoints } from '../design/responsive';
 import { Palette } from '../design/color';
-import { jsonHeaders, voidFetch } from '../utils/fetch';
+import { voidFetch } from '../utils/fetch';
+import { useApiContext } from './ApiContext';
 
 const { phone } = Breakpoints;
 const { red } = Palette;
 
-const Container = styled.div`
+interface NewGameProps {
+  initialName: string;
+}
+
+export const NewGame: FC<NewGameProps> = ({ initialName }) => {
+  const [name, setName] = useState(initialName);
+  const onChange = useCallback<ChangeEventHandler<HTMLInputElement>>((e) => {
+    setName(e.currentTarget.value);
+  }, []);
+
+  const apiContext = useApiContext();
+
+  const router = useRouter();
+  const onSubmit = useCallback(() => {
+    voidFetch({
+      apiContext,
+      path: '/game',
+      init: {
+        method: 'POST',
+        body: JSON.stringify({ game_name: name }),
+      },
+      onSuccess: () => router.push(`/game/${name}`),
+    });
+  }, [name, router, apiContext]);
+
+  return (
+    <div className={containerStyle}>
+      <input value={name} onChange={onChange} />
+      <button type="button" onClick={onSubmit}>
+        Start
+      </button>
+    </div>
+  );
+};
+
+const containerStyle = css`
   & input {
     max-width: ${phone / 2}px;
     margin: 0.5rem;
@@ -27,38 +62,3 @@ const Container = styled.div`
     }
   }
 `;
-
-interface NewGameProps {
-  initialName: string;
-  API_URL: string;
-}
-
-export const NewGame: FC<NewGameProps> = ({ initialName, API_URL }) => {
-  const [name, setName] = useState(initialName);
-  const onChange = useCallback<ChangeEventHandler<HTMLInputElement>>((e) => {
-    setName(e.currentTarget.value);
-  }, []);
-
-  const router = useRouter();
-  const onSubmit = useCallback(() => {
-    voidFetch({
-      url: `${API_URL}/game`,
-      init: {
-        method: 'POST',
-        body: JSON.stringify({ game_name: name }),
-        headers: jsonHeaders,
-      },
-      onSuccess: () => router.push(`/game/${name}`),
-      onError: () => alert('error creating game'),
-    });
-  }, [name, API_URL, router]);
-
-  return (
-    <Container>
-      <input value={name} onChange={onChange} />
-      <button type="button" onClick={onSubmit}>
-        Start
-      </button>
-    </Container>
-  );
-};

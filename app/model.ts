@@ -2,7 +2,7 @@ export type Team = 'Blue' | 'Red';
 
 export interface Player {
   team: Team;
-  is_spy_master: boolean;
+  spymaster_secret: string | null;
   name: string;
 }
 
@@ -13,11 +13,55 @@ export interface CardColor {
   word: string;
 }
 
-export interface GameState {
-  board: CardColor[];
-  name: string;
-  first_team: Team;
-  turn: Team;
-  players: { [key: string]: Player };
-  guesses: number[];
+export interface PendingTurn {
+  type: 'Pending';
+  data: Team;
 }
+
+export interface StartedTurn {
+  type: 'Started';
+  data: {
+    spymaster: Player;
+    clue: [string, number];
+    guesses: [Player, number][];
+  };
+}
+
+export type Turn = PendingTurn | StartedTurn;
+
+export interface GameState {
+  name: string;
+  players: { [key: string]: Player };
+  turns: Turn[];
+  board: CardColor[];
+}
+
+export const getFirstTeam = (game: GameState): Team => {
+  const firstTurn = game.turns.slice().reverse()[0];
+  if (firstTurn.type === 'Pending') return firstTurn.data;
+  return firstTurn.data.spymaster.team;
+};
+
+export const currentTeam = (game: GameState): Team => {
+  const [turn] = game.turns;
+  if (turn.type === 'Pending') return turn.data;
+  return turn.data.spymaster.team;
+};
+
+export const currentTurn = (game: GameState): Turn => game.turns[0];
+
+export const turnTeam = (turn: Turn): Team => {
+  if (turn.type === 'Pending') return turn.data;
+  return turn.data.spymaster.team;
+};
+
+export const isSpyMaster = (player: Player): boolean =>
+  player.spymaster_secret !== null;
+
+export const getGuesses = (game: GameState): number[] =>
+  game.turns
+    .map((t) => {
+      if (t.type === 'Pending') return [];
+      return t.data.guesses.map(([_, index]) => index);
+    })
+    .flat();

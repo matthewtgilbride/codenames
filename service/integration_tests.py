@@ -139,8 +139,24 @@ def test_get_game_as_operative(host, test_state):
     assert r.json().get("board")[1].get("color") is None
 
 
-def test_get_game_as_spy_master(host, test_state):
+def test_get_game_as_spy_master_no_secret(host, test_state):
     r = requests.get(f"{host}/game/{test_state.game_name}/mr spy master")
+
+    assert r.status_code == 200
+    assert r.json().get("board")[0].get("color") is not None
+    assert r.json().get("board")[1].get("color") is None
+
+
+def test_get_game_as_spy_master_incorrect_secret(host, test_state):
+    r = requests.get(f"{host}/game/{test_state.game_name}/mr spy master?secret=bar")
+
+    assert r.status_code == 200
+    assert r.json().get("board")[0].get("color") is not None
+    assert r.json().get("board")[1].get("color") is None
+
+
+def test_get_game_as_spy_master_correct_secret(host, test_state):
+    r = requests.get(f"{host}/game/{test_state.game_name}/mr spy master?secret=foo")
 
     assert r.status_code == 200
     assert r.json().get("board")[0].get("color") is not None
