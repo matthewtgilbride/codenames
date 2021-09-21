@@ -18,9 +18,8 @@ Here's the result: [codenames.mattgilbride.com](codenames.mattgilbride.com)
 
 See the [Makefile](Makefile) to run the various local development tasks.  `help` is the default goal and will print descriptions of the various commands:
 
+`make` (or `make help`)
 ```shell
-make
-
 Usage:
   make 
 
@@ -77,7 +76,8 @@ This is a rust library containing the core business logic representing a game of
 A better name for this would be `actix-web`.  This subproject is an actix-web server implementation of the domain.
 
 #### wasm
-The ultimate goal is to run this project as a [wasmCloud actor](https://wasmcloud.dev/).  This subproject is a wasmCloud implementation of the domain.
+At one point in time, the goal is to run this project as a [wasmCloud actor](https://wasmcloud.dev/).  This subproject is a wasmCloud implementation of the domain.  
+As of the latest update to this README, the `wasm` subproject has been set aside for now...but I hope to come back to it someday.
 
 ### app
 The [app](./app) directory contains the web based user interface, written in React with NextJS.
