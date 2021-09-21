@@ -1,12 +1,13 @@
 use std::convert::TryInto;
 
-use rand::seq::SliceRandom;
-use rand::thread_rng;
-
-use codenames_domain::game::board::{Board, BoardGenerator};
-use codenames_domain::game::card::{Card, CardColor, CardState};
-use codenames_domain::game::model::Team;
-use codenames_domain::ServiceResult;
+use codenames_domain::{
+    game::{
+        board_service::BoardGenerator,
+        model::{Board, Card, CardColor, CardState, Team},
+    },
+    ServiceResult,
+};
+use rand::{seq::SliceRandom, thread_rng};
 
 #[derive(Clone)]
 pub struct BoardGeneratorRand;
@@ -69,13 +70,16 @@ impl BoardGenerator for BoardGeneratorRand {
 
 #[cfg(test)]
 mod tests {
-    use codenames_domain::dictionary::DictionaryService;
-    use codenames_domain::game::board::{card_color_count, BoardService};
-    use codenames_domain::game::card::CardColor;
-    use codenames_domain::game::model::Team;
 
-    use crate::dictionary::WordGeneratorRand;
-    use crate::game::board::BoardGeneratorRand;
+    use codenames_domain::{
+        dictionary::DictionaryService,
+        game::{
+            board_service::{card_color_count, BoardService},
+            model::{CardColor, Team},
+        },
+    };
+
+    use crate::{dictionary::WordGeneratorRand, game::board::BoardGeneratorRand};
 
     #[test]
     fn new_board() {

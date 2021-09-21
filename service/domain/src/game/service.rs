@@ -1,14 +1,14 @@
 use log::{debug, info, warn};
 
-use crate::dictionary::{DictionaryService, WordGenerator};
-use crate::game::board::BoardGenerator;
-use crate::game::board::BoardService;
-use crate::game::dao::GameDao;
-use crate::game::model::{
-    Game, GameList, GameVariant, GuessRequest, NewGameRequest, PlayerRequest,
+use crate::{
+    dictionary::{DictionaryService, WordGenerator},
+    game::{
+        board_service::{BoardGenerator, BoardService},
+        dao::GameDao,
+        model::{Game, GameData, GameState, Player},
+    },
+    DaoError, Lowercase, ServiceError, ServiceResult, StdResult,
 };
-use crate::game::model::{GameState, Player};
-use crate::{DaoError, ServiceError, ServiceResult, StdResult};
 
 #[derive(Clone)]
 pub struct GameService {
@@ -33,50 +33,48 @@ impl GameService {
         })
     }
 
-    pub fn random_name(&self) -> ServiceResult<NewGameRequest> {
+    pub fn random_name(&self) -> ServiceResult<String> {
         debug!("call: game.Service.random_name");
         let (first_name, last_name) = self.dictionary_service.new_word_pair()?;
-        Ok(NewGameRequest {
-            game_name: format!("{}-{}", first_name, last_name),
-        })
+        Ok(format!("{}-{}", first_name, last_name))
     }
 
-    pub fn new_game(&self, request: NewGameRequest) -> ServiceResult<GameState> {
+    pub fn new_game(&self, game_name: String) -> ServiceResult<GameState> {
         let words = self.dictionary_service.new_word_set()?;
         let (board, first_team) = self.board_service.new_board(words)?;
 
-        let game = Game::new(request.game_name, board, first_team);
+        let game = GameData::new(game_name, board, first_team);
         let _ = &self.clone().save(game.clone())?;
 
         Ok(game.clone().into())
     }
 
-    pub fn join(&self, key: String, player: Player) -> ServiceResult<GameVariant> {
+    pub fn join(&self, key: String, player: Player) -> ServiceResult<Game> {
         let game = &self.clone()._get(key)?;
         let updated_game = game.clone().join(player.clone())?;
         let _ = &self.clone().save(updated_game.clone())?;
         Ok((player.clone(), updated_game).into())
     }
 
-    pub fn leave(&self, key: String, req: PlayerRequest) -> ServiceResult<GameState> {
+    pub fn leave(&self, key: String, player_name: &str) -> ServiceResult<GameState> {
         let game = &self.clone()._get(key)?;
         println!("got game {}", game.name);
-        let updated_game = game.clone().leave(req.player_name.as_str())?;
+        let updated_game = game.clone().leave(player_name)?;
         println!("left game {}", game.name);
         let _ = &self.clone().save(updated_game.clone())?;
         Ok(updated_game.clone().into())
     }
 
-    pub fn guess(&self, key: String, guess: GuessRequest) -> ServiceResult<GameState> {
+    pub fn guess(&self, key: String, guess: (&str, usize)) -> ServiceResult<GameState> {
         let game = &self.clone()._get(key)?;
         let updated_game = game.clone().guess(guess)?;
         let _ = &self.clone().save(updated_game.clone())?;
         Ok(updated_game.clone().into())
     }
 
-    pub fn undo_guess(&self, key: String) -> ServiceResult<GameState> {
+    pub fn start_turn(&self, key: String, spymaster_name: String, clue: (String, usize)) -> ServiceResult<GameState> {
         let game = &self.clone()._get(key)?;
-        let updated_game = game.clone().undo_guess();
+        let updated_game = game.clone().start_turn(spymaster_name, clue)?;
         let _ = &self.clone().save(updated_game.clone())?;
         Ok(updated_game.clone().into())
     }
@@ -88,39 +86,46 @@ impl GameService {
         Ok(updated_game.clone().into())
     }
 
-    fn _get(&mut self, key: String) -> ServiceResult<Game> {
-        self.dao.get(key.to_lowercase()).map_err(|e| {
+    fn _get(&mut self, key: String) -> ServiceResult<GameData> {
+        self.dao.get(Lowercase::new(key.as_str())).map_err(|e| {
             info!("{}", e);
             e.into()
         })
     }
 
-    pub fn get(&mut self, key: String, req: Option<PlayerRequest>) -> ServiceResult<GameVariant> {
+    pub fn get(&mut self, key: String, req: Option<String>) -> ServiceResult<Game> {
         let data = self._get(key)?;
         match req {
-            None => Ok(GameVariant::State(data.into())),
-            Some(PlayerRequest { player_name }) => {
+            None => Ok(Game::State(data.into())),
+            Some(player_name) => {
                 let player = data
-                    .players
-                    .get(player_name.to_lowercase().as_str())
+                    .info
+                    .players()
+                    .iter()
+                    .find(|&p| p.name.to_lowercase() == player_name.to_lowercase())
+                    .cloned()
                     .ok_or(ServiceError::NotFound(format!("player: {}", player_name)))?;
                 Ok((player.clone(), data).into())
             }
         }
     }
 
-    pub fn find(&mut self) -> ServiceResult<GameList> {
-        let games = self.dao.keys().map_err(|e| {
-            warn!("{}", e);
-            let de: DaoError = e.into();
-            de
-        })?;
+    pub fn find(&mut self) -> ServiceResult<Vec<String>> {
+        let games = self
+            .dao
+            .keys()
+            .map(|ls| ls.iter().map(|l| l.value().to_string()).collect())
+            .map_err(|e| {
+                warn!("{}", e);
+                let de: DaoError = e.into();
+                de
+            })?;
 
-        Ok(GameList { games })
+        Ok(games)
     }
 
-    fn save(&mut self, game: Game) -> ServiceResult<()> {
-        let key = game.name.to_lowercase();
+    fn save(&mut self, game: GameData) -> ServiceResult<()> {
+        let key = Lowercase::new(game.info.name());
         self.dao.set(key, game).map_err(|e| {
             warn!("{}", e);
             e.into()

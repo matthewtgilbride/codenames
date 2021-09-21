@@ -1,9 +1,8 @@
-use redis::Connection;
-use redis::{Commands, Value};
-
-use codenames_domain::game::dao::GameDao;
-use codenames_domain::game::model::Game;
-use codenames_domain::{DaoError, DaoResult, StdResult};
+use codenames_domain::{
+    game::{dao::GameDao, model::GameData},
+    DaoError, DaoResult, Lowercase, StdResult,
+};
+use redis::{Commands, Connection, Value};
 
 pub struct RedisDao {
     con: Connection,
@@ -25,10 +24,10 @@ impl RedisDao {
 }
 
 impl GameDao for RedisDao {
-    fn get(&mut self, key: String) -> DaoResult<Game> {
+    fn get(&mut self, key: Lowercase) -> DaoResult<GameData> {
         let value: Value = self
             .con
-            .get(key.clone())
+            .get(key.value().clone())
             .map_err(|e| DaoError::Unknown(e.to_string()))?;
 
         let result: String = match value {
@@ -41,7 +40,7 @@ impl GameDao for RedisDao {
                         )
                     })
             }
-            Value::Nil => Err(DaoError::NotFound(key.clone())),
+            Value::Nil => Err(DaoError::NotFound(key.value().to_string())),
             _ => Err(DaoError::Unknown(
                 "unexpected redis::Value type from get operation".to_string(),
             )),
@@ -50,17 +49,18 @@ impl GameDao for RedisDao {
         serde_json::from_str(result.as_str()).map_err(|e| DaoError::Unknown(e.to_string()))
     }
 
-    fn keys(&mut self) -> DaoResult<Vec<String>> {
-        let result: Vec<String> = self
+    fn keys(&mut self) -> DaoResult<Vec<Lowercase>> {
+        let result: Vec<Lowercase> = self
             .con
             .keys("*")
+            .map(|ks: Vec<String>| ks.iter().map(|k| Lowercase::new(k)).collect())
             .map_err(|e| DaoError::Unknown(e.to_string()))?;
         Ok(result)
     }
 
-    fn set(&mut self, key: String, game: Game) -> DaoResult<()> {
+    fn set(&mut self, key: Lowercase, game: GameData) -> DaoResult<()> {
         self.con
-            .set_ex(key, json!(game).to_string(), 86400)
+            .set_ex(key.value(), json!(game).to_string(), 86400)
             .map_err(|e| DaoError::Unknown(e.to_string()))
     }
 }

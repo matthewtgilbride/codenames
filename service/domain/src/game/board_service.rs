@@ -1,12 +1,9 @@
 use dyn_clone::DynClone;
 
-use crate::game::card::{Card, CardColor, CardState};
-use crate::game::model::Team;
-use crate::ServiceResult;
-
-pub const BOARD_SIZE: usize = 25;
-pub type Board = [Card; BOARD_SIZE];
-pub type BoardState = [CardState; BOARD_SIZE];
+use crate::{
+    game::model::{Board, Card, CardColor, Team},
+    ServiceResult,
+};
 
 #[derive(Clone)]
 pub struct BoardService {
@@ -51,8 +48,7 @@ pub fn card_color_count(partial_board: &Vec<Card>, color: &CardColor) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use crate::game::card::CardColor;
-    use crate::game::model::Team;
+    use crate::game::model::{CardColor, Team};
 
     #[test]
     fn max_card_color() {
