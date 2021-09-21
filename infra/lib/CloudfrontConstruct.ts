@@ -5,6 +5,7 @@ import {
   CachePolicy,
   Distribution,
   OriginProtocolPolicy,
+  OriginRequestPolicy,
   ViewerProtocolPolicy,
 } from '@aws-cdk/aws-cloudfront';
 import { HttpOrigin } from '@aws-cdk/aws-cloudfront-origins';
@@ -49,6 +50,7 @@ export class CloudfrontConstruct extends Construct {
         }),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         cachePolicy: CachePolicy.CACHING_DISABLED,
+        originRequestPolicy: OriginRequestPolicy.ALL_VIEWER,
       },
       domainNames: [appDnsRecord],
     });
@@ -71,6 +73,7 @@ export class CloudfrontConstruct extends Construct {
           minTtl: Duration.seconds(0),
           defaultTtl: Duration.seconds(0),
         }),
+        originRequestPolicy: OriginRequestPolicy.ALL_VIEWER,
       },
       domainNames: [serviceDnsRecord],
     });
