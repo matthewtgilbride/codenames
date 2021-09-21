@@ -20,10 +20,19 @@ async fn get_player_game(
 }
 
 #[put("start-turn")]
-async fn start_turn(path: web::Path<(String, String)>, body: web::Json<ClueBody>, data: web::Data<AppData>,) -> impl Responder {
+async fn start_turn(
+    path: web::Path<(String, String)>,
+    body: web::Json<ClueBody>,
+    data: web::Data<AppData>,
+) -> impl Responder {
     let (key, player_name) = path.clone();
     let ClueBody { word, amount } = body.into_inner();
-    respond(&data.service.clone().start_turn(key, player_name, (word, amount)))
+    respond(
+        &data
+            .service
+            .clone()
+            .start_turn(key, player_name, (word, amount)),
+    )
 }
 
 #[put("/guess/{index}")]
