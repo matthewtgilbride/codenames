@@ -18,7 +18,7 @@ interface CardProps {
   turn: Turn;
   player?: Player;
   onClick: MouseEventHandler<HTMLButtonElement>;
-  guessIndex: number;
+  guessNumber?: number;
 }
 
 export const Card: FC<CardProps> = ({
@@ -26,7 +26,7 @@ export const Card: FC<CardProps> = ({
   player,
   card: { color, word },
   onClick,
-  guessIndex,
+  guessNumber,
 }) => {
   const size = word.length > 5 ? (1 / word.length) * 72 : 12;
   return (
@@ -36,7 +36,7 @@ export const Card: FC<CardProps> = ({
       disabled={isDisabled(turn, color, player)}
       className={styleButton(turn, color, size, player)}
     >
-      {guessIndex >= 0 && <p>{guessIndex + 1}</p>}
+      {guessNumber && <p>{guessNumber}</p>}
       {word}
     </button>
   );

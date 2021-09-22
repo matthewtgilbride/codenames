@@ -42,16 +42,21 @@ export const Board: FC<BoardProps> = ({ player }) => {
   return (
     <>
       <div className={container}>
-        {game.board.map((card, index) => (
-          <Card
-            key={card.word}
-            card={card}
-            player={player}
-            turn={turn}
-            onClick={onGuess(card.word)}
-            guessIndex={guesses.indexOf(index)}
-          />
-        ))}
+        {game.board.map((card, index) => {
+          const guessIndex = guesses.indexOf(index);
+          const guessNumber =
+            guessIndex < 0 ? undefined : guesses.length - guessIndex;
+          return (
+            <Card
+              key={card.word}
+              card={card}
+              player={player}
+              turn={turn}
+              onClick={onGuess(card.word)}
+              guessNumber={guessNumber}
+            />
+          );
+        })}
       </div>
       <Modal isOpen={isOpen} onRequestClose={close}>
         <div className={actionModal}>
