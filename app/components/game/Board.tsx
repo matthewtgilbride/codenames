@@ -1,21 +1,22 @@
 import React, { FC, useState } from 'react';
 import { css } from '@emotion/css';
-import { currentTurn, GameState, getGuesses, Player } from '../../model';
+import { currentTurn, getGuesses, Player } from '../../model';
 import { Card } from './Card';
 import { Breakpoints } from '../../design/responsive';
 import { voidFetch } from '../../utils/fetch';
 import { useApiContext } from '../ApiContext';
 import { Modal, useModalControls } from '../../design/Modal';
 import { actionButton, actionModal } from './info/action/Action.styles';
+import { useGameContext } from './GameContext';
 
 export interface BoardProps {
   player?: Player;
-  game: GameState;
 }
 
-export const Board: FC<BoardProps> = ({ player, game }) => {
-  const turn = currentTurn(game);
+export const Board: FC<BoardProps> = ({ player }) => {
+  const { game, setGame } = useGameContext();
   const apiContext = useApiContext();
+  const turn = currentTurn(game);
   const { isOpen, open, close } = useModalControls();
   const [word, setWord] = useState<string | undefined>();
 
@@ -31,6 +32,9 @@ export const Board: FC<BoardProps> = ({ player, game }) => {
       apiContext,
       path: `/game/${game.name}/${player?.name}/guess/${index}`,
       init: { method: 'PUT' },
+      onSuccess: (r) => {
+        r.json().then((g) => setGame(g));
+      },
     });
   };
 

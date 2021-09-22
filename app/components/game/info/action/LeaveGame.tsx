@@ -4,11 +4,12 @@ import { voidFetch } from '../../../../utils/fetch';
 import { actionButton, actionModal } from './Action.styles';
 import { useApiContext } from '../../../ApiContext';
 import { Modal, useModalControls } from '../../../../design/Modal';
+import { useGameContext } from '../../GameContext';
 
-export const LeaveGame: FC<{ gameName: string; playerName: string }> = ({
-  gameName,
-  playerName,
-}) => {
+export const LeaveGame: FC<{ playerName: string }> = ({ playerName }) => {
+  const {
+    game: { name },
+  } = useGameContext();
   const apiContext = useApiContext();
   const router = useRouter();
   const { isOpen, open, close } = useModalControls();
@@ -16,9 +17,9 @@ export const LeaveGame: FC<{ gameName: string; playerName: string }> = ({
     close();
     voidFetch({
       apiContext,
-      path: `/game/${gameName}/${playerName}/leave`,
+      path: `/game/${name}/${playerName}/leave`,
       init: { method: 'PUT' },
-      onSuccess: () => router.push(`/game/${gameName}`),
+      onSuccess: () => router.push(`/game/${name}`),
     });
   };
 

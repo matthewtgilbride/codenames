@@ -16,20 +16,20 @@ import { useInputState } from '../../../hooks/useInputState';
 import { StartTurn } from './action/StartTurn';
 import { LeaveGame } from './action/LeaveGame';
 import { EndTurn } from './action/EndTurn';
+import { useGameContext } from '../GameContext';
 
 export interface PlayerListProps {
-  game: GameState;
   player?: Player;
   team: Team;
   spyMaster: boolean;
 }
 
 export const PlayerList: FC<PlayerListProps> = ({
-  game,
   player,
   team,
   spyMaster,
 }) => {
+  const { game } = useGameContext();
   const { isOpen, open, close } = useModalControls();
   const [name, onNameChange] = useInputState();
   const [secret, onSecretChange] = useInputState();
@@ -111,14 +111,14 @@ export const PlayerList: FC<PlayerListProps> = ({
         spyMaster &&
         currentTeam(game) === player.team &&
         currentTurn(game).type === 'Pending' && (
-          <StartTurn game={game} spyMaster={player} />
+          <StartTurn spyMaster={player} />
         )}
       {player &&
         player.team === team &&
         spyMaster === isSpyMaster(player) &&
-        currentTurn(game).type === 'Started' && <EndTurn game={game} />}
+        currentTurn(game).type === 'Started' && <EndTurn />}
       {player && player.team === team && spyMaster === isSpyMaster(player) && (
-        <LeaveGame playerName={player.name} gameName={game.name} />
+        <LeaveGame playerName={player.name} />
       )}
     </div>
   );

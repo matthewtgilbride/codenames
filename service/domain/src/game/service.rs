@@ -77,11 +77,11 @@ impl GameService {
         key: String,
         spymaster_name: String,
         clue: (String, usize),
-    ) -> ServiceResult<GameState> {
+    ) -> ServiceResult<GameData> {
         let game = &self.clone()._get(&key)?;
         let updated_game = game.clone().start_turn(spymaster_name, clue)?;
         let _ = &self.clone().save(updated_game.clone())?;
-        Ok(updated_game.clone().into())
+        Ok(updated_game.clone())
     }
 
     pub fn end_turn(&self, key: String) -> ServiceResult<GameState> {

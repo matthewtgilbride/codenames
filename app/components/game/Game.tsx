@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import { css } from '@emotion/css';
 import Link from 'next/link';
 import { Palette } from '../../design/color';
@@ -7,18 +7,22 @@ import { Info } from './info/Info';
 import { usePoll } from '../../hooks/usePoll';
 import { Board, BoardProps } from './Board';
 import { useApiContext } from '../ApiContext';
+import { useGameContext } from './GameContext';
 
 export interface GameContainerProps {
   currentPlayer?: {
     name: string;
     secret?: string;
   };
-  game: GameState;
 }
 
 export type GameProps = GameContainerProps & Pick<BoardProps, 'player'>;
 
-export const Game: FC<GameProps> = ({ player, game, game: { name } }) => {
+export const Game: FC<GameProps> = ({ player }) => {
+  const {
+    game,
+    game: { name },
+  } = useGameContext();
   const team = getFirstTeam(game);
   const turn = currentTeam(game);
   return (
@@ -26,28 +30,25 @@ export const Game: FC<GameProps> = ({ player, game, game: { name } }) => {
       <h2>
         <Link href={`/game/${name}`}>{name}</Link>
       </h2>
-      <Board game={game} player={player} />
-      <Info game={game} player={player} />
+      <Board player={player} />
+      <Info player={player} />
     </div>
   );
 };
 
-export const GameContainer: FC<GameContainerProps> = ({
-  currentPlayer,
-  game,
-}) => {
+export const GameContainer: FC<GameContainerProps> = ({ currentPlayer }) => {
   const apiContext = useApiContext();
-  const [gameState, setGameState] = useState(game);
+  const { game, setGame } = useGameContext();
   usePoll<GameState>({
     apiContext,
-    path: `/game/${gameState.name}${playerSuffix(currentPlayer)}`,
-    onSuccess: (newGame: GameState) => setGameState(newGame),
+    path: `/game/${game.name}${playerSuffix(currentPlayer)}`,
+    onSuccess: (newGame: GameState) => setGame(newGame),
   });
 
-  const { players } = gameState;
+  const { players } = game;
   const player = players[currentPlayer?.name.toLowerCase() ?? ''];
 
-  return <Game game={gameState} player={player} />;
+  return <Game player={player} />;
 };
 
 const playerSuffix = (

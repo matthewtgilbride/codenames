@@ -6,13 +6,16 @@ import {
   GameContainerProps,
 } from '../../../components/game/Game';
 import { ApiContextProvider } from '../../../components/ApiContext';
+import { GameState } from '../../../model';
+import { GameContextProvider } from '../../../components/game/GameContext';
 
-const GamePlayer: FC<GameContainerProps & { API_URL: string }> = ({
-  API_URL,
-  ...rest
-}) => (
+const GamePlayer: FC<
+  GameContainerProps & { API_URL: string; game: GameState }
+> = ({ API_URL, game, currentPlayer }) => (
   <ApiContextProvider baseUrl={API_URL}>
-    <GameContainer {...rest} />
+    <GameContextProvider game={game}>
+      <GameContainer currentPlayer={currentPlayer} />
+    </GameContextProvider>
   </ApiContextProvider>
 );
 

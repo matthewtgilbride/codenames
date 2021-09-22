@@ -2,20 +2,21 @@ import React, { FC } from 'react';
 import { css } from '@emotion/css';
 import { darken } from 'polished';
 import { Modal, useModalControls } from '../../../../design/Modal';
-import { currentTeam, GameState, Player, Team } from '../../../../model';
+import { currentTeam, Player, Team } from '../../../../model';
 import { Palette } from '../../../../design/color';
 import { buttonStyle } from '../../../../design/button';
 import { voidFetch } from '../../../../utils/fetch';
 import { useApiContext } from '../../../ApiContext';
 import { actionButton } from './Action.styles';
 import { useInputState } from '../../../../hooks/useInputState';
+import { useGameContext } from '../../GameContext';
 
 export interface ClueProps {
-  game: GameState;
   spyMaster: Player;
 }
 
-export const StartTurn: FC<ClueProps> = ({ game, spyMaster }) => {
+export const StartTurn: FC<ClueProps> = ({ spyMaster }) => {
+  const { game, setGame } = useGameContext();
   const { isOpen, open, close } = useModalControls();
   const [word, onWordChange] = useInputState();
   const [amount, onAmountChange] = useInputState();
@@ -31,6 +32,9 @@ export const StartTurn: FC<ClueProps> = ({ game, spyMaster }) => {
       init: {
         method: 'PUT',
         body: JSON.stringify({ word, amount: parseInt(amount, 10) }),
+      },
+      onSuccess: (r) => {
+        r.json().then((g) => setGame(g));
       },
     });
   };

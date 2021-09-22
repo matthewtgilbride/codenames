@@ -65,7 +65,8 @@ deploy-infra: ## deploy AWS infrastructure
 destroy-infra: ## tear down AWS infrastructure
 	${MAKE} -C infra destroy-app
 
-build-service-image: ## build docker image for the service - CAREFUL - this needs to be done from an x86 powered machine (not Apple M1 silicon)
+build-service-image: ## build docker image for the service to run on AWS (x86_64)
+	${MAKE} -C service build-release-x86_64
 	docker-compose build service
 
 build-app-image: ## build docker image for the web ui

@@ -12,27 +12,30 @@ import { PlayerList } from './PlayerList';
 import { container } from './Info.styles';
 import { Palette } from '../../../design/color';
 import { GameLog } from './GameLog';
+import { useGameContext } from '../GameContext';
 
 export interface InfoProps {
   player?: Player;
-  game: GameState;
 }
 
-export const Info: FC<InfoProps> = ({ player, game }) => (
-  <div className={container}>
-    <div>
-      <PlayerListHeader game={game} team="Blue" />
-      <PlayerList spyMaster={false} team="Blue" game={game} player={player} />
-      <PlayerList spyMaster team="Blue" game={game} player={player} />
+export const Info: FC<InfoProps> = ({ player }) => {
+  const { game } = useGameContext();
+  return (
+    <div className={container}>
+      <div>
+        <PlayerListHeader game={game} team="Blue" />
+        <PlayerList spyMaster={false} team="Blue" player={player} />
+        <PlayerList spyMaster team="Blue" player={player} />
+      </div>
+      <GameLog board={game.board} turns={game.turns} />
+      <div>
+        <PlayerListHeader game={game} team="Red" />
+        <PlayerList spyMaster={false} team="Red" player={player} />
+        <PlayerList spyMaster team="Red" player={player} />
+      </div>
     </div>
-    <GameLog board={game.board} turns={game.turns} />
-    <div>
-      <PlayerListHeader game={game} team="Red" />
-      <PlayerList spyMaster={false} team="Red" game={game} player={player} />
-      <PlayerList spyMaster team="Red" game={game} player={player} />
-    </div>
-  </div>
-);
+  );
+};
 
 const PlayerListHeader: FC<{ game: GameState; team: Team }> = ({
   game,

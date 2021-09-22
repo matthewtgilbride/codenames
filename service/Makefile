@@ -8,8 +8,24 @@ SHELL := /bin/bash
 clean: ## cargo clean
 	cargo clean
 
-build: ## compile and build non-wasm subprojects
+build: ## compile and build the service
 	cargo build
+
+# https://github.com/messense/homebrew-macos-cross-toolchains
+build-release-x86_64: export CC_x86_64_unknown_linux_musl=x86_64-unknown-linux-musl-gcc
+build-release-x86_64: export CXX_x86_64_unknown_linux_musl=x86_64-unknown-linux-musl-g++
+build-release-x86_64: export AR_x86_64_unknown_linux_musl=x86_64-unknown-linux-musl-ar
+build-release-x86_64: export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=x86_64-unknown-linux-musl-gcc
+build-release-x86_64: ## build a release for 64 bit AMD architectures
+	cargo build --release --target x86_64-unknown-linux-musl
+
+# https://github.com/messense/homebrew-macos-cross-toolchains
+build-release-aarch64: export CC_aarch64_unknown_linux_musl=aarch64-unknown-linux-musl-gcc
+build-release-aarch64: export CXX_aarch64_unknown_linux_musl=aarch64-unknown-linux-musl-g++
+build-release-aarch64: export AR_aarch64_unknown_linux_musl=aarch64-unknown-linux-musl-ar
+build-release-aarch64: export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-unknown-linux-musl-gcc
+build-release-aarch64: ## build a release for 64 bit ARM architectures (e.g. Mac M1)
+	cargo build --release --target aarch64-unknown-linux-musl
 
 build-wasm: ## compile and build wasm subproject
 	cargo build -p codenames-wasm --release --target wasm32-unknown-unknown

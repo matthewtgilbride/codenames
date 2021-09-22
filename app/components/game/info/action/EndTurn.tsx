@@ -2,10 +2,12 @@ import React, { FC } from 'react';
 import { voidFetch } from '../../../../utils/fetch';
 import { actionButton, actionModal } from './Action.styles';
 import { useApiContext } from '../../../ApiContext';
-import { currentTeam, GameState } from '../../../../model';
+import { currentTeam } from '../../../../model';
 import { Modal, useModalControls } from '../../../../design/Modal';
+import { useGameContext } from '../../GameContext';
 
-export const EndTurn: FC<{ game: GameState }> = ({ game }) => {
+export const EndTurn: FC = () => {
+  const { game, setGame } = useGameContext();
   const apiContext = useApiContext();
   const { isOpen, open, close } = useModalControls();
   const endTurn = () => {
@@ -14,6 +16,9 @@ export const EndTurn: FC<{ game: GameState }> = ({ game }) => {
       apiContext,
       path: `/game/${game.name}/end-turn`,
       init: { method: 'PUT' },
+      onSuccess: (r) => {
+        r.json().then((g) => setGame(g));
+      },
     });
   };
 
