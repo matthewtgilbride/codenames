@@ -108,14 +108,13 @@ impl GameService {
         match player_name {
             None => Ok(Game::State(data.into())),
             Some(player_name) => {
-                let player = data
+                let &player = data
                     .info
                     .players()
                     .iter()
                     .find(|&p| p.name.to_lowercase() == player_name.to_lowercase())
-                    .cloned()
                     .ok_or(ServiceError::NotFound(format!("player: {}", player_name)))?;
-                match (&player.spymaster_secret, &spymaster_secret) {
+                match (&player.spymaster_secret, spymaster_secret) {
                     (None, _) => Ok((player.clone(), data).into()),
                     (Some(player_secret), Some(provided_secret))
                         if player_secret == provided_secret =>

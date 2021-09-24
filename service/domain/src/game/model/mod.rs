@@ -80,7 +80,7 @@ impl GameData {
 
         info.guesses()
             .iter()
-            .find(|&(_, index)| *index == board_index)
+            .find(|&(_, index)| index == &board_index)
             .map(|_| Err(GameError::unique_guess(board_index)))
             .unwrap_or(Ok(()))?;
 
@@ -117,7 +117,7 @@ impl Into<GameState> for GameData {
                     .info
                     .guesses()
                     .iter()
-                    .find(|(_, board_index)| *board_index == index)
+                    .find(|(_, board_index)| board_index == &index)
                     .map(|_| card.color);
                 CardState {
                     color: maybe_card_color,

@@ -42,7 +42,7 @@ pub fn max_card_color(card_color: &CardColor, first_team: &Team) -> usize {
 pub fn card_color_count(partial_board: &Vec<Card>, color: &CardColor) -> usize {
     partial_board
         .iter()
-        .filter(|card| card.color == *color)
+        .filter(|card| &card.color == color)
         .count()
 }
 

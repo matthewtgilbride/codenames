@@ -68,7 +68,7 @@ impl GameInfo {
         match (maybe_player, head) {
             (_, Turn::Started(_)) => Err(GameError::TurnStarted),
             (None, _) => Err(GameError::PlayerNotFound(spymaster_name)),
-            (Some(player), turn) if player.team != *turn.team() => {
+            (Some(player), turn) if &player.team != turn.team() => {
                 Err(GameError::WrongTeam(spymaster_name))
             }
             (Some(player), _) if player.spymaster_secret.is_none() => {
