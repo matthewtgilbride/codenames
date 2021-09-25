@@ -61,23 +61,27 @@ impl GameInfo {
         spymaster_name: String,
         clue: (String, usize),
     ) -> Result<Self, GameError> {
-        let head = self.current_turn();
-        let tail = self.turns[1..].to_vec();
         let maybe_player = self.players.get(&Lowercase::new(spymaster_name.as_str()));
+        let current_turn = self.current_turn();
+        let previous_turns = self.turns[1..].to_vec();
 
-        match (maybe_player, head) {
+        match (maybe_player, current_turn) {
             (_, Turn::Started(_)) => Err(GameError::TurnStarted),
+
             (None, _) => Err(GameError::PlayerNotFound(spymaster_name)),
+
             (Some(player), turn) if &player.team != turn.team() => {
                 Err(GameError::WrongTeam(spymaster_name))
             }
+
             (Some(player), _) if player.spymaster_secret.is_none() => {
                 Err(GameError::NotASpymaster(spymaster_name))
             }
+
             (Some(player), _) => Ok(Self {
                 turns: [
                     vec![Turn::Started(TurnData::new(player.clone(), clue))],
-                    tail,
+                    previous_turns,
                 ]
                 .concat(),
                 ..self.clone()
