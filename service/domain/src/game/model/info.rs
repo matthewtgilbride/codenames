@@ -70,11 +70,15 @@ impl GameInfo {
 
             (None, _) => Err(GameError::PlayerNotFound(spymaster_name)),
 
-            (Some(player), _) if player.spymaster_secret.is_none() => {
-                Err(GameError::NotASpymaster(spymaster_name))
-            }
+            (
+                Some(Player {
+                    spymaster_secret: None,
+                    ..
+                }),
+                _,
+            ) => Err(GameError::NotASpymaster(spymaster_name)),
 
-            (Some(player), Turn::Pending(team)) if &player.team != team => {
+            (Some(Player { team, .. }), Turn::Pending(current_team)) if team != current_team => {
                 Err(GameError::WrongTeam(spymaster_name))
             }
 
