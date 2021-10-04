@@ -59,7 +59,7 @@ export class InstanceConstruct extends Construct {
       blockDevices: [
         {
           deviceName: '/dev/sda1',
-          volume: BlockDeviceVolume.ebs(8),
+          volume: BlockDeviceVolume.ebs(16),
         },
       ],
       role: new Role(this, 'ecr-role', {
