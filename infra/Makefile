@@ -9,6 +9,11 @@ bootstrap: export DEPLOY_TYPE=app
 bootstrap:
 	yarn cdk bootstrap
 
+diff:
+	export DEPLOY_TYPE=app && yarn cdk diff
+	export DEPLOY_TYPE=registry && yarn cdk diff
+	export DEPLOY_TYPE=dev && yarn cdk diff
+
 ##@ App Deployment
 
 synth-app: export DEPLOY_TYPE=app

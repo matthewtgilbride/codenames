@@ -7,6 +7,7 @@ import { RepositoryConstruct } from '../lib/RepositoryConstruct';
 import { DevelopmentInstanceConstruct } from '../lib/DevelopmentInstanceConstruct';
 import { InstanceConstruct } from '../lib/InstanceConstruct';
 import { CloudfrontConstruct } from '../lib/CloudfrontConstruct';
+import { DynamoConstruct } from '../lib/DynamoConstruct';
 
 type DeployType = 'app' | 'dev' | 'registry' | 'cluster';
 
@@ -36,6 +37,7 @@ class CodenamesStack extends Stack {
           },
         );
         new CloudfrontConstruct(this, `${id}-Cloudfront`, instanceDnsName);
+        new DynamoConstruct(this, `${id}-Dynamo`);
         break;
       case 'dev':
         if (!process.env.PUBLIC_IP) {
