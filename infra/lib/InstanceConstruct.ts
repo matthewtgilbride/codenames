@@ -1,4 +1,6 @@
-import { Construct } from '@aws-cdk/core';
+import { readFileSync } from 'fs';
+import * as path from 'path';
+import { Construct } from 'constructs';
 import {
   BlockDeviceVolume,
   Instance,
@@ -11,10 +13,8 @@ import {
   SecurityGroup,
   UserData,
   Vpc,
-} from '@aws-cdk/aws-ec2';
-import { readFileSync } from 'fs';
-import * as path from 'path';
-import { ManagedPolicy, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
+} from 'aws-cdk-lib/aws-ec2';
+import { ManagedPolicy, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 
 export class InstanceConstruct extends Construct {
   public instanceDnsName: string;

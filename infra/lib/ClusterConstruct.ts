@@ -1,5 +1,11 @@
-import { Construct } from '@aws-cdk/core';
-import { ApplicationLoadBalancedEc2Service } from '@aws-cdk/aws-ecs-patterns';
+import { Construct } from 'constructs';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+import {
+  InstanceClass,
+  InstanceSize,
+  InstanceType,
+  Vpc,
+} from 'aws-cdk-lib/aws-ec2';
 import {
   Cluster,
   ContainerDependencyCondition,
@@ -7,17 +13,11 @@ import {
   Ec2TaskDefinition,
   LogDriver,
   NetworkMode,
-} from '@aws-cdk/aws-ecs';
-import { Repository } from '@aws-cdk/aws-ecr';
-import {
-  InstanceClass,
-  InstanceSize,
-  InstanceType,
-  Vpc,
-} from '@aws-cdk/aws-ec2';
-import { StringParameter } from '@aws-cdk/aws-ssm';
-import { HostedZone } from '@aws-cdk/aws-route53';
-import { Certificate } from '@aws-cdk/aws-certificatemanager';
+} from 'aws-cdk-lib/aws-ecs';
+import { Repository } from 'aws-cdk-lib/aws-ecr';
+import { ApplicationLoadBalancedEc2Service } from 'aws-cdk-lib/aws-ecs-patterns';
+import { HostedZone } from 'aws-cdk-lib/aws-route53';
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 
 export class ClusterConstruct extends Construct {
   constructor(scope: Construct, id: string) {

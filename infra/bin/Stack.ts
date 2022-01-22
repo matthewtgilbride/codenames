@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
-import { App, Construct, Stack } from '@aws-cdk/core';
+import { App, Stack } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 import { ClusterConstruct } from '../lib/ClusterConstruct';
 import { RepositoryConstruct } from '../lib/RepositoryConstruct';
 import { DevelopmentInstanceConstruct } from '../lib/DevelopmentInstanceConstruct';

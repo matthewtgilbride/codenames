@@ -1,4 +1,12 @@
-import { Construct, Duration } from '@aws-cdk/core';
+import { Duration } from 'aws-cdk-lib';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+import {
+  HostedZone,
+  RecordSet,
+  RecordTarget,
+  RecordType,
+} from 'aws-cdk-lib/aws-route53';
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
   AllowedMethods,
   CacheHeaderBehavior,
@@ -7,17 +15,9 @@ import {
   OriginProtocolPolicy,
   OriginRequestPolicy,
   ViewerProtocolPolicy,
-} from '@aws-cdk/aws-cloudfront';
-import { HttpOrigin } from '@aws-cdk/aws-cloudfront-origins';
-import { StringParameter } from '@aws-cdk/aws-ssm';
-import { Certificate } from '@aws-cdk/aws-certificatemanager';
-import {
-  HostedZone,
-  RecordSet,
-  RecordTarget,
-  RecordType,
-} from '@aws-cdk/aws-route53';
-import { constants } from 'http2';
+} from 'aws-cdk-lib/aws-cloudfront';
+import { HttpOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import { Construct } from 'constructs';
 
 export class CloudfrontConstruct extends Construct {
   constructor(scope: Construct, id: string, instanceDnsName: string) {

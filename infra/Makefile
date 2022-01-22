@@ -5,6 +5,10 @@ AWS_ACCOUNT_NUMBER = $(shell aws sts get-caller-identity | jq -r .Account)
 AWS_DEFAULT_REGION = us-east-1
 PUBLIC_IP=$(shell dig +short myip.opendns.com @resolver1.opendns.com)
 
+bootstrap: export DEPLOY_TYPE=app
+bootstrap:
+	yarn cdk bootstrap
+
 ##@ App Deployment
 
 synth-app: export DEPLOY_TYPE=app

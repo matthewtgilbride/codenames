@@ -1,5 +1,6 @@
-import { Construct, RemovalPolicy } from '@aws-cdk/core';
-import { Repository } from '@aws-cdk/aws-ecr';
+import { Construct } from 'constructs';
+import { Repository } from 'aws-cdk-lib/aws-ecr';
+import { RemovalPolicy } from 'aws-cdk-lib';
 
 export class RepositoryConstruct extends Construct {
   constructor(scope: Construct, id: string) {

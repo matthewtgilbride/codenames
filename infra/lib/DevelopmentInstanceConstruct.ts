@@ -1,4 +1,4 @@
-import { Construct } from '@aws-cdk/core';
+import { Construct } from 'constructs';
 import {
   BlockDeviceVolume,
   Instance,
@@ -11,10 +11,10 @@ import {
   SecurityGroup,
   UserData,
   Vpc,
-} from '@aws-cdk/aws-ec2';
+} from 'aws-cdk-lib/aws-ec2';
 import { readFileSync } from 'fs';
 import * as path from 'path';
-import { ManagedPolicy, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
+import { ManagedPolicy, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 
 export class DevelopmentInstanceConstruct extends Construct {
   constructor(
