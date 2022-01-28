@@ -12,6 +12,9 @@ use codenames_domain::{
 use redis::{Commands, Connection, Value};
 use tokio::runtime::Runtime;
 
+const TABLE_NAME: &str = "codenames";
+const KEY_COLUMN: &str = "id";
+
 pub struct DynamoDao {
     client: Client,
     runtime: Runtime,
@@ -40,8 +43,8 @@ impl GameDao for DynamoDao {
         let request = &self
             .client
             .get_item()
-            .table_name("codenames")
-            .key("id", AttributeValue::S(key.value().to_string()));
+            .table_name(TABLE_NAME)
+            .key(KEY_COLUMN, AttributeValue::S(key.value().to_string()));
 
         let result =
             self.runtime
@@ -66,24 +69,37 @@ impl GameDao for DynamoDao {
     }
 
     fn keys(&mut self) -> DaoResult<Vec<Lowercase>> {
-        todo!()
-        // let request = &self.client
-        //     .scan()
-        //     .table_name("codenames")
-        //     .attributes_to_get(vec!["id"]);
-        //
-        // let result = request.send().await?;
-        // let items = result.items.unwrap_or(Vec::new());
-        // let keys: Vec<String> = items.iter().map(|i| i.get("id")).collect();
-        // return Ok(keys.iter().map(|k| Lowercase::new(k)).collect())
+        let request = &self
+            .client
+            .scan()
+            .table_name(TABLE_NAME)
+            .attributes_to_get(KEY_COLUMN);
+
+        let result = self
+            .runtime
+            .block_on(request.clone().send())
+            .map_err(|e| DaoError::Unknown(e.to_string()))?;
+
+        let items = result
+            .items
+            .ok_or_else(|| DaoError::Unknown("no items".into()))?;
+
+        let keys: Vec<String> = items
+            .iter()
+            .map(|i| i.get(KEY_COLUMN).expect("no key col"))
+            .map(|a| a.as_s().expect("key not str"))
+            .cloned()
+            .collect();
+
+        Ok(keys.iter().map(|k| Lowercase::new(k)).collect())
     }
 
     fn set(&mut self, key: Lowercase, game: GameData) -> DaoResult<()> {
         let request = &self
             .client
             .put_item()
-            .table_name("codenames")
-            .item("id", AttributeValue::S(key.value().to_string()))
+            .table_name(TABLE_NAME)
+            .item(KEY_COLUMN, AttributeValue::S(key.value().to_string()))
             .item("timestamp", AttributeValue::S(Utc::now().to_string()))
             .item("game", AttributeValue::S(json!(game).to_string()));
 
