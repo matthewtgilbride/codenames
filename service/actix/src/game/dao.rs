@@ -10,20 +10,22 @@ use codenames_domain::{
     DaoResult, Lowercase, StdResult,
 };
 use redis::{Commands, Connection, Value};
+use tokio::runtime::Runtime;
 
 pub struct DynamoDao {
     client: Client,
+    runtime: Runtime,
 }
 
 impl DynamoDao {
     pub fn new() -> StdResult<DynamoDao> {
-        let shared_config = tokio::runtime::Builder::new_current_thread()
+        let runtime = tokio::runtime::Builder::new_current_thread()
             .enable_all()
             .build()
-            .unwrap()
-            .block_on(aws_config::load_from_env());
+            .unwrap();
+        let shared_config = runtime.block_on(aws_config::load_from_env());
         let client = Client::new(&shared_config);
-        Ok(DynamoDao { client })
+        Ok(DynamoDao { client, runtime })
     }
 }
 
@@ -41,18 +43,16 @@ impl GameDao for DynamoDao {
             .table_name("codenames")
             .key("id", AttributeValue::S(key.value().to_string()));
 
-        let result = tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build()
-            .unwrap()
-            .block_on(request.clone().send())
-            .map_err(|outer| match outer {
-                ServiceError { err, .. } => match &err.kind {
-                    ResourceNotFoundException(r) => DaoError::NotFound(r.to_string()),
-                    _ => DaoError::Unknown("wat".into()),
-                },
-                e => DaoError::Unknown(e.to_string()),
-            })?;
+        let result =
+            self.runtime
+                .block_on(request.clone().send())
+                .map_err(|outer| match outer {
+                    ServiceError { err, .. } => match &err.kind {
+                        ResourceNotFoundException(r) => DaoError::NotFound(r.to_string()),
+                        _ => DaoError::Unknown("wat".into()),
+                    },
+                    e => DaoError::Unknown(e.to_string()),
+                })?;
 
         let item = result.item.ok_or(NotFound(key.value().to_string()))?;
         let attribute = item.get("game").ok_or(DaoError::Unknown(
@@ -87,12 +87,7 @@ impl GameDao for DynamoDao {
             .item("timestamp", AttributeValue::S(Utc::now().to_string()))
             .item("game", AttributeValue::S(json!(game).to_string()));
 
-        match tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build()
-            .unwrap()
-            .block_on(request.clone().send())
-        {
+        match self.runtime.block_on(request.clone().send()) {
             Ok(_) => Ok(()),
             Err(e) => Err(DaoError::Unknown(e.to_string())),
         }
