@@ -12,11 +12,6 @@ services:
       - "4222:4222"
       - "8222:8222"
 
-  redis:
-    image: redis:6.0.9
-    ports:
-      - "6379:6379"
-
   service:
     image: ${AWS_ECR_URL}/codenames_service
     build:
@@ -25,12 +20,12 @@ services:
         ARCH: x86_64
     ports:
       - ${SERVICE_PORT:-8080}:${SERVICE_PORT:-8080}
-    depends_on:
-      - redis
     environment:
       - PORT=${SERVICE_PORT:-8080}
-      - REDIS_HOST=redis
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=us-east-1
 
   service-test:
     build:
