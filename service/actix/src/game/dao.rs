@@ -2,7 +2,7 @@ use aws_sdk_dynamodb::{
     error::GetItemErrorKind::ResourceNotFoundException, model::AttributeValue, Client,
     SdkError::ServiceError,
 };
-use chrono::Utc;
+use chrono::{Duration, Utc};
 use codenames_domain::{
     game::{dao::GameDao, model::GameData},
     DaoError,
@@ -12,8 +12,10 @@ use codenames_domain::{
 use redis::{Commands, Connection, Value};
 use tokio::runtime::Runtime;
 
-const TABLE_NAME: &str = "codenames";
-const KEY_COLUMN: &str = "id";
+const DYNAMO_TABLE_NAME: &str = "codenames";
+const DYNAMO_KEY_ATTRIBUTE: &str = "key";
+const DYNAMO_TTL_ATTRIBUTE: &str = "ttl";
+const DYNAMO_GAME_ATTRIBUTE: &str = "game";
 
 pub struct DynamoDao {
     client: Client,
@@ -30,6 +32,10 @@ impl DynamoDao {
         let client = Client::new(&shared_config);
         Ok(DynamoDao { client, runtime })
     }
+
+    fn get_ttl() -> i64 {
+        Utc::now().timestamp() + Duration::days(1).num_seconds()
+    }
 }
 
 impl Clone for DynamoDao {
@@ -43,8 +49,8 @@ impl GameDao for DynamoDao {
         let request = &self
             .client
             .get_item()
-            .table_name(TABLE_NAME)
-            .key(KEY_COLUMN, AttributeValue::S(key.value().to_string()));
+            .table_name(DYNAMO_TABLE_NAME)
+            .key(DYNAMO_KEY_ATTRIBUTE, AttributeValue::S(key.value().to_string()));
 
         let result =
             self.runtime
@@ -52,13 +58,13 @@ impl GameDao for DynamoDao {
                 .map_err(|outer| match outer {
                     ServiceError { err, .. } => match &err.kind {
                         ResourceNotFoundException(r) => DaoError::NotFound(r.to_string()),
-                        _ => DaoError::Unknown("wat".into()),
+                        _ => DaoError::Unknown("unknown dynamo service error".into()),
                     },
-                    e => DaoError::Unknown(e.to_string()),
+                    e => DaoError::Unknown("unknown dynamo sdk error".into()),
                 })?;
 
         let item = result.item.ok_or(NotFound(key.value().to_string()))?;
-        let attribute = item.get("game").ok_or(DaoError::Unknown(
+        let attribute = item.get(DYNAMO_GAME_ATTRIBUTE).ok_or(DaoError::Unknown(
             "could not find game attribute on dynamo result".into(),
         ))?;
         let game_string = attribute
@@ -72,8 +78,8 @@ impl GameDao for DynamoDao {
         let request = &self
             .client
             .scan()
-            .table_name(TABLE_NAME)
-            .attributes_to_get(KEY_COLUMN);
+            .table_name(DYNAMO_TABLE_NAME)
+            .attributes_to_get(DYNAMO_KEY_ATTRIBUTE);
 
         let result = self
             .runtime
@@ -86,8 +92,8 @@ impl GameDao for DynamoDao {
 
         let keys: Vec<String> = items
             .iter()
-            .map(|i| i.get(KEY_COLUMN).expect("no key col"))
-            .map(|a| a.as_s().expect("key not str"))
+            .map(|i| i.get(DYNAMO_KEY_ATTRIBUTE).expect(format!("No {} field in response", DYNAMO_KEY_ATTRIBUTE).as_str()))
+            .map(|a| a.as_s().expect(format!("{} field was not a string", DYNAMO_KEY_ATTRIBUTE).as_str()))
             .cloned()
             .collect();
 
@@ -98,10 +104,10 @@ impl GameDao for DynamoDao {
         let request = &self
             .client
             .put_item()
-            .table_name(TABLE_NAME)
-            .item(KEY_COLUMN, AttributeValue::S(key.value().to_string()))
-            .item("timestamp", AttributeValue::S(Utc::now().to_string()))
-            .item("game", AttributeValue::S(json!(game).to_string()));
+            .table_name(DYNAMO_TABLE_NAME)
+            .item(DYNAMO_KEY_ATTRIBUTE, AttributeValue::S(key.value().to_string()))
+            .item(DYNAMO_TTL_ATTRIBUTE, AttributeValue::N(DynamoDao::get_ttl().to_string()))
+            .item(DYNAMO_GAME_ATTRIBUTE, AttributeValue::S(json!(game).to_string()));
 
         match self.runtime.block_on(request.clone().send()) {
             Ok(_) => Ok(()),

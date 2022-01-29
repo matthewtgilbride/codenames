@@ -7,8 +7,8 @@ export class DynamoConstruct extends Construct {
 
     new Table(scope, `${id}-table`, {
       tableName: 'codenames',
-      partitionKey: { name: 'id', type: AttributeType.STRING },
-      timeToLiveAttribute: 'timestamp',
+      partitionKey: { name: 'key', type: AttributeType.STRING },
+      timeToLiveAttribute: 'ttl',
     });
   }
 }
