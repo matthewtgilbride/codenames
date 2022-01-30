@@ -89,6 +89,8 @@ start-aws: export SERVICE_PORT=8080
 start-aws: export APP_PORT=3000
 start-aws: export ALLOWED_ORIGINS=https://codenames.mattgilbride.com
 start-aws: export API_URL=https://codenamesapi.mattgilbride.com
+start-aws: export AWS_ACCESS_KEY_ID=$(shell aws configure get aws_access_key_id)
+start-aws: export AWS_SECRET_ACCESS_KEY=$(shell aws configure get aws_secret_access_key)
 start-aws: ## start fully functioning stack on EC2
-	docker-compose pull redis service app
+	docker-compose pull service app
 	docker-compose up -d app

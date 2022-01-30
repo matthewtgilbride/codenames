@@ -44,7 +44,7 @@ apt-get install net-tools -y
 
 # clone codenames
 cd /home/ubuntu
-git clone https://github.com/matthewtgilbride/codenames.git
+git clone --branch dynamo https://github.com/matthewtgilbride/codenames.git
 
 cd /home/ubuntu/codenames
 

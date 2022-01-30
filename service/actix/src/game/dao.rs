@@ -60,7 +60,7 @@ impl GameDao for DynamoDao {
                         ResourceNotFoundException(r) => DaoError::NotFound(r.to_string()),
                         _ => DaoError::Unknown("unknown dynamo service error".into()),
                     },
-                    e => DaoError::Unknown("unknown dynamo sdk error".into()),
+                    e => DaoError::Unknown(e.to_string()),
                 })?;
 
         let item = result.item.ok_or(NotFound(key.value().to_string()))?;
