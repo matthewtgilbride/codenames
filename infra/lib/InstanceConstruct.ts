@@ -67,6 +67,7 @@ export class InstanceConstruct extends Construct {
           ManagedPolicy.fromAwsManagedPolicyName(
             'AmazonEC2ContainerRegistryReadOnly',
           ),
+          ManagedPolicy.fromAwsManagedPolicyName('AmazonDynamoDBFullAccess'),
         ],
         assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
       }),
