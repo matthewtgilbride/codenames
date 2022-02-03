@@ -1,6 +1,8 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react';
+import { css } from '@emotion/css';
 import { Modal } from '../design/Modal';
 import { API_URL } from '../constants';
+import { overlayColor } from '../design/color';
 
 export interface ApiContextType {
   baseUrl: string;
@@ -29,8 +31,9 @@ export const ApiContextProvider: FC<{ baseUrl?: string }> = ({
   }, [error]);
   return (
     <>
-      <Modal isOpen={loading || !!error} onRequestClose={() => setError(null)}>
-        {loading ? 'Just a sec...' : text}
+      {loading && <LoadingDimmer />}
+      <Modal isOpen={!!error} onRequestClose={() => setError(null)}>
+        {text}
       </Modal>
       <ApiContext.Provider
         value={{ baseUrl, loading, setLoading, error, setError }}
@@ -40,6 +43,20 @@ export const ApiContextProvider: FC<{ baseUrl?: string }> = ({
     </>
   );
 };
+
+const LoadingDimmer: FC = () => (
+  <div
+    className={css`
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background-color: ${overlayColor};
+      z-index: 1000;
+    `}
+  />
+);
 
 export const useApiContext = () => {
   const apiContext = useContext(ApiContext);
