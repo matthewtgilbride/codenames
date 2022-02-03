@@ -1,45 +1,45 @@
-import { FC } from 'react';
-import { GetServerSideProps } from 'next';
+import { FC, useState } from 'react';
 import { encode } from 'querystring';
+import { useRouter } from 'next/router';
 import {
   GameContainer,
   GameContainerProps,
 } from '../../../components/game/Game';
-import { ApiContextProvider } from '../../../components/ApiContext';
 import { GameState } from '../../../model';
 import { GameContextProvider } from '../../../components/game/GameContext';
+import { useApiContext } from '../../../components/ApiContext';
+import { useFetchOnce } from '../../../hooks/useFetch';
 
-const GamePlayer: FC<
-  GameContainerProps & { API_URL: string; game: GameState }
-> = ({ API_URL, game, currentPlayer }) => (
-  <ApiContextProvider baseUrl={API_URL}>
-    <GameContextProvider game={game}>
-      <GameContainer currentPlayer={currentPlayer} />
-    </GameContextProvider>
-  </ApiContextProvider>
+const GamePlayer: FC<GameContainerProps & { game: GameState }> = ({
+  game,
+  currentPlayer,
+}) => (
+  <GameContextProvider game={game}>
+    <GameContainer currentPlayer={currentPlayer} />
+  </GameContextProvider>
 );
 
-export const getServerSideProps: GetServerSideProps<GameContainerProps> = async ({
-  params,
-  query,
-}) => {
-  const game = params?.name as string;
-  const player = params?.player as string;
-  const API_URL = process.env.API_URL as string;
-  const url = `${API_URL}/game/${game}/${player}?${encode(query)}`;
-  const result = await fetch(url);
-  const json = await result.json();
+export const GamePlayerContainer = () => {
+  const apiContext = useApiContext();
+  const {
+    query: { name, player, ...rest },
+  } = useRouter();
+  const [game, setGame] = useState<GameState | null>(null);
+  useFetchOnce(
+    {
+      apiContext,
+      path: `/game/${name}/${player}?${encode(rest)}`,
+      onSuccess: (r) => r.json().then((json) => setGame(json)),
+    },
+    !!name,
+  );
 
-  return {
-    props: {
-      game: json,
-      currentPlayer: {
-        name: player,
-        secret: query.secret === undefined ? null : query.secret,
-      },
-      API_URL,
-    } as GameContainerProps,
+  const currentPlayer = {
+    name: player as string,
+    secret: rest.secret as string,
   };
+
+  return game ? <GamePlayer game={game} currentPlayer={currentPlayer} /> : null;
 };
 
-export default GamePlayer;
+export default GamePlayerContainer;

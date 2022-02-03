@@ -1,9 +1,10 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import Link from 'next/link';
-import { GetServerSideProps } from 'next';
 import { css } from '@emotion/css';
 import { Palette } from '../../design/color';
 import { Breakpoints } from '../../design/responsive';
+import { useApiContext } from '../../components/ApiContext';
+import { useFetchOnce } from '../../hooks/useFetch';
 
 interface GameListProps {
   games: string[];
@@ -45,11 +46,18 @@ const container = css`
   }
 `;
 
-export const getServerSideProps: GetServerSideProps<GameListProps> = async () => {
-  const result = await fetch(`${process.env.API_URL}/game`);
-  const json = await result.json();
-
-  return { props: json as GameListProps };
+const GameListContainer = () => {
+  const apiContext = useApiContext();
+  const [games, setGames] = useState<GameListProps['games'] | null>(null);
+  useFetchOnce(
+    {
+      apiContext,
+      path: '/game',
+      onSuccess: (r) => r.json().then((p) => setGames(p.games)),
+    },
+    true,
+  );
+  return games ? <GameList games={games} /> : null;
 };
 
-export default GameList;
+export default GameListContainer;

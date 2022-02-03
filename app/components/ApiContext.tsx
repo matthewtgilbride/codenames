@@ -1,5 +1,6 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react';
 import { Modal } from '../design/Modal';
+import { API_URL } from '../constants';
 
 export interface ApiContextType {
   baseUrl: string;
@@ -11,8 +12,8 @@ export interface ApiContextType {
 
 export const ApiContext = createContext<ApiContextType | undefined>(undefined);
 
-export const ApiContextProvider: FC<{ baseUrl: string }> = ({
-  baseUrl,
+export const ApiContextProvider: FC<{ baseUrl?: string }> = ({
+  baseUrl = API_URL,
   children,
 }) => {
   const [error, setError] = useState<Error | Response | null>(null);

@@ -1,4 +1,10 @@
-import { ChangeEventHandler, FC, useCallback, useState } from 'react';
+import {
+  ChangeEventHandler,
+  FC,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { lighten } from 'polished';
 import { useRouter } from 'next/router';
 import { css } from '@emotion/css';
@@ -62,3 +68,18 @@ const containerStyle = css`
     }
   }
 `;
+
+export const NewGameContainer = () => {
+  const apiContext = useApiContext();
+  const [gameName, setGameName] = useState<null | string>(null);
+  useEffect(() => {
+    voidFetch({
+      apiContext,
+      path: '',
+      onSuccess: (r) =>
+        r.json().then((payload) => setGameName(payload.game_name as string)),
+    });
+  }, []);
+
+  return gameName === null ? null : <NewGame initialName={gameName} />;
+};

@@ -41,7 +41,7 @@ export const GameContainer: FC<GameContainerProps> = ({ currentPlayer }) => {
   const { game, setGame } = useGameContext();
   usePoll<GameState>({
     apiContext,
-    path: `/game/${game.name}${playerSuffix(currentPlayer)}`,
+    path: `/game/${game?.name}${playerSuffix(currentPlayer)}`,
     onSuccess: (newGame: GameState) => setGame(newGame),
   });
 
