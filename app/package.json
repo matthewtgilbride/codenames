@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "export": "next export",
     "start": "next start -p $PORT",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "tsc": "tsc",
@@ -46,6 +47,7 @@
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
     "prettier": "^2.2.1",
+    "serve": "^13.0.2",
     "typescript": "^4.1.5"
   }
 }

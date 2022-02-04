@@ -62,6 +62,9 @@ deploy-infra: ## deploy AWS infrastructure
 	${MAKE} -C infra deploy-registry
 	${MAKE} -C infra deploy-app
 
+deploy-ui:
+	${MAKE} -C app upload
+
 destroy-infra: ## tear down AWS infrastructure
 	${MAKE} -C infra destroy-app
 
@@ -92,5 +95,5 @@ start-aws: export API_URL=https://codenamesapi.mattgilbride.com
 # start-aws: export AWS_ACCESS_KEY_ID=$(shell aws configure get aws_access_key_id)
 # start-aws: export AWS_SECRET_ACCESS_KEY=$(shell aws configure get aws_secret_access_key)
 start-aws: ## start fully functioning stack on EC2
-	docker-compose pull service app
-	docker-compose up -d app
+	docker-compose pull service
+	docker-compose up -d service

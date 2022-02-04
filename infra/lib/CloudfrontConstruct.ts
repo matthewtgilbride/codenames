@@ -1,4 +1,4 @@
-import { Duration } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import {
   HostedZone,
@@ -18,6 +18,7 @@ import {
 } from 'aws-cdk-lib/aws-cloudfront';
 import { HttpOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { Construct } from 'constructs';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 
 export class CloudfrontConstruct extends Construct {
   constructor(scope: Construct, id: string, instanceDnsName: string) {
@@ -41,16 +42,25 @@ export class CloudfrontConstruct extends Construct {
     const appDnsRecord = `codenames.${domainName}`;
     const serviceDnsRecord = `codenamesapi.${domainName}`;
 
+    // Content bucket
+    const siteBucket = new Bucket(this, `${id}-AppBucket`, {
+      bucketName: appDnsRecord,
+      websiteIndexDocument: 'index.html',
+      publicReadAccess: true,
+
+      // The default removal policy is RETAIN, which means that cdk destroy will not attempt to delete
+      // the new bucket, and it will remain in your account until manually deleted. By setting the policy to
+      // DESTROY, cdk destroy will attempt to delete the bucket, but will error if the bucket is not empty.
+      removalPolicy: RemovalPolicy.DESTROY, // NOT recommended for production code
+    });
+
     const appDist = new Distribution(this, 'AppDist', {
       certificate,
       defaultBehavior: {
-        origin: new HttpOrigin(instanceDnsName, {
+        origin: new HttpOrigin(siteBucket.bucketWebsiteDomainName, {
           protocolPolicy: OriginProtocolPolicy.HTTP_ONLY,
-          httpPort: 3000,
         }),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        cachePolicy: CachePolicy.CACHING_DISABLED,
-        originRequestPolicy: OriginRequestPolicy.ALL_VIEWER,
       },
       domainNames: [appDnsRecord],
     });

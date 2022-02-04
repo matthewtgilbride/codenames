@@ -11,9 +11,7 @@ export const Layout: FC = ({ children }) => (
   <div className={container} id="app">
     <h1 className={title}>
       (•_•) ( •_•)
-      <Link prefetch={!process.env.STORYBOOK} href="/">
-        Codenames
-      </Link>
+      <Link href="/">Codenames</Link>
       ⌐■-■ (⌐■_■)
     </h1>
     <p className={subtitle}>
