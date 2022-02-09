@@ -52,14 +52,14 @@ export class InstanceConstruct extends Construct {
       vpc,
       userData,
       machineImage,
-      instanceType: InstanceType.of(InstanceClass.T2, InstanceSize.MICRO),
+      instanceType: InstanceType.of(InstanceClass.T2, InstanceSize.NANO),
       availabilityZone: 'us-east-1b',
       keyName: 'aws_ssh',
       securityGroup,
       blockDevices: [
         {
           deviceName: '/dev/sda1',
-          volume: BlockDeviceVolume.ebs(16),
+          volume: BlockDeviceVolume.ebs(8),
         },
       ],
       role: new Role(this, 'ecr-role', {
