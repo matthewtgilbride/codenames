@@ -5,7 +5,7 @@ apt-get install ca-certificates y
 cd /home/ubuntu
 git clone --branch dynamo https://github.com/matthewtgilbride/codenames.git
 
-cd /home/ubuntu/codenames
+cd /home/ubuntu/codenames/service
 
 export ALLOWED_ORIGINS=https://codenames.mattgilbride.com
 
