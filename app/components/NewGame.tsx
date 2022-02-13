@@ -38,6 +38,7 @@ export const NewGame: FC = () => {
         body: JSON.stringify({ game_name: name }),
       },
       onSuccess: () => navigate(`/game/${name}`),
+      remainLoadingOnSuccess: true,
     });
   }, [name, navigate, apiContext]);
 

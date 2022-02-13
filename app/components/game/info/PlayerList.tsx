@@ -56,6 +56,7 @@ export const PlayerList: FC<PlayerListProps> = ({
         navigate(
           `/game/${game.name}/${name}${spyMaster ? `?secret=${secret}` : ''}`,
         ),
+      remainLoadingOnSuccess: true,
     });
   }, [spyMaster, team, game.name, navigate, apiContext, name, secret, close]);
 

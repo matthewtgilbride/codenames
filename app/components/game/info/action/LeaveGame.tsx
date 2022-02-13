@@ -20,6 +20,7 @@ export const LeaveGame: FC<{ playerName: string }> = ({ playerName }) => {
       path: `/game/${name}/${playerName}/leave`,
       init: { method: 'PUT' },
       onSuccess: () => navigate(`/game/${name}`),
+      remainLoadingOnSuccess: true,
     });
   };
 

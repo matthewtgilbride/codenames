@@ -5,6 +5,7 @@ export interface VoidFetchConfig {
   path: string;
   init?: RequestInit;
   onSuccess?: (r: Response) => void;
+  remainLoadingOnSuccess?: boolean;
   onError?: (r: Response | Error) => void;
 }
 
@@ -48,6 +49,7 @@ export const voidFetch = ({
   path,
   init,
   onSuccess,
+  remainLoadingOnSuccess,
   onError,
 }: VoidFetchConfig): void => {
   apiContext.setLoading(true);
@@ -55,7 +57,7 @@ export const voidFetch = ({
     .then((response) => {
       if (response.ok) {
         onSuccessWithContext(response, apiContext, onSuccess);
-        apiContext.setLoading(false);
+        if (!remainLoadingOnSuccess) apiContext.setLoading(false);
       } else {
         onErrorWithContext(response, apiContext, onError);
       }
