@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { css } from '@emotion/css';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { Palette } from '../../design/color';
 import { currentTeam, GameState, getFirstTeam, Team } from '../../model';
 import { Info } from './info/Info';
@@ -28,7 +28,7 @@ export const Game: FC<GameProps> = ({ player }) => {
   return (
     <div className={styleContainer(team, turn)}>
       <h2>
-        <Link href={`/game/${name}`}>{name}</Link>
+        <Link to={`/game/${name}`}>{name}</Link>
       </h2>
       <Board player={player} />
       <Info player={player} />

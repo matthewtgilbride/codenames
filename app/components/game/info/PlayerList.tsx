@@ -1,5 +1,5 @@
 import React, { FC, useCallback } from 'react';
-import { useRouter } from 'next/router';
+import { useNavigate } from 'react-router';
 import {
   currentTeam,
   currentTurn,
@@ -36,7 +36,7 @@ export const PlayerList: FC<PlayerListProps> = ({
   const playerNames = getPlayerNames(game.players, team, spyMaster);
 
   const apiContext = useApiContext();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const onJoin = useCallback(() => {
     const newPlayer: Player = {
@@ -53,11 +53,11 @@ export const PlayerList: FC<PlayerListProps> = ({
         body: JSON.stringify(newPlayer),
       },
       onSuccess: () =>
-        router.push(
+        navigate(
           `/game/${game.name}/${name}${spyMaster ? `?secret=${secret}` : ''}`,
         ),
     });
-  }, [spyMaster, team, game.name, router, apiContext, name, secret, close]);
+  }, [spyMaster, team, game.name, navigate, apiContext, name, secret, close]);
 
   return (
     <div className={styleContainer(team)}>

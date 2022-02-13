@@ -1,8 +1,8 @@
 import { FC, useState } from 'react';
-import { useRouter } from 'next/router';
-import { GameContainer, GameContainerProps } from '../../components/game/Game';
-import { useApiContext } from '../../components/ApiContext';
-import { GameContextProvider } from '../../components/game/GameContext';
+import { useParams } from 'react-router';
+import { GameContainer, GameContainerProps } from './Game';
+import { useApiContext } from '../ApiContext';
+import { GameContextProvider } from './GameContext';
 import { GameState } from '../../model';
 import { useFetchOnce } from '../../hooks/useFetch';
 
@@ -17,9 +17,7 @@ const GameLanding: FC<GameContainerProps & { game: GameState }> = ({
 
 const GameLandingContainer = () => {
   const apiContext = useApiContext();
-  const {
-    query: { name },
-  } = useRouter();
+  const { name } = useParams();
   const [game, setGame] = useState<GameState | null>(null);
   useFetchOnce(
     {

@@ -9,6 +9,7 @@ import * as React from 'react';
 import createEmotionServer from '@emotion/server/create-instance';
 import { cache } from '@emotion/css';
 
+/* eslint-disable react/no-danger */
 export default class AppDocument extends Document {
   static async getInitialProps(ctx: DocumentContext) {
     const page = await ctx.renderPage();

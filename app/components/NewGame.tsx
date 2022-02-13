@@ -1,17 +1,12 @@
-import {
-  ChangeEventHandler,
-  FC,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { ChangeEventHandler, FC, useCallback, useState } from 'react';
 import { lighten } from 'polished';
-import { useRouter } from 'next/router';
 import { css } from '@emotion/css';
+import { useNavigate } from 'react-router-dom';
 import { Breakpoints } from '../design/responsive';
 import { Palette } from '../design/color';
 import { voidFetch } from '../utils/fetch';
 import { useApiContext } from './ApiContext';
+import { useFetchOnce } from '../hooks/useFetch';
 
 const { phone } = Breakpoints;
 const { red } = Palette;
@@ -28,7 +23,7 @@ export const NewGame: FC<NewGameProps> = ({ initialName }) => {
 
   const apiContext = useApiContext();
 
-  const router = useRouter();
+  const navigate = useNavigate();
   const onSubmit = useCallback(() => {
     voidFetch({
       apiContext,
@@ -37,9 +32,9 @@ export const NewGame: FC<NewGameProps> = ({ initialName }) => {
         method: 'POST',
         body: JSON.stringify({ game_name: name }),
       },
-      onSuccess: () => router.push(`/game/${name}`),
+      onSuccess: () => navigate(`/game/${name}`),
     });
-  }, [name, router, apiContext]);
+  }, [name, navigate, apiContext]);
 
   return (
     <div className={containerStyle}>
@@ -72,14 +67,15 @@ const containerStyle = css`
 export const NewGameContainer = () => {
   const apiContext = useApiContext();
   const [gameName, setGameName] = useState<null | string>(null);
-  useEffect(() => {
-    voidFetch({
+  useFetchOnce(
+    {
       apiContext,
       path: '',
       onSuccess: (r) =>
         r.json().then((payload) => setGameName(payload.game_name as string)),
-    });
-  }, []);
+    },
+    true,
+  );
 
   return gameName === null ? null : <NewGame initialName={gameName} />;
 };

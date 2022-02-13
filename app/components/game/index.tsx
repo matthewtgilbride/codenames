@@ -1,9 +1,9 @@
 import { FC, useState } from 'react';
-import Link from 'next/link';
 import { css } from '@emotion/css';
+import { Link } from 'react-router-dom';
 import { Palette } from '../../design/color';
 import { Breakpoints } from '../../design/responsive';
-import { useApiContext } from '../../components/ApiContext';
+import { useApiContext } from '../ApiContext';
 import { useFetchOnce } from '../../hooks/useFetch';
 
 interface GameListProps {
@@ -21,7 +21,7 @@ const GameList: FC<GameListProps> = ({ games }) => (
             margin: 1rem;
           `}
         >
-          <Link href={`/game/${g}`}>{g}</Link>
+          <Link to={`/game/${g}`}>{g}</Link>
         </li>
       ))}
     </ul>

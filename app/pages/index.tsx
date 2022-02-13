@@ -1,38 +1,16 @@
-import { FC } from 'react';
-import Link from 'next/link';
-import { css } from '@emotion/css';
-import { NewGameContainer } from '../components/NewGame';
-import { Palette } from '../design/color';
-import { Breakpoints } from '../design/responsive';
+import { Route, Routes } from 'react-router-dom';
+import Home from '../components/home';
+import GameListContainer from '../components/game';
+import GameLandingContainer from '../components/game/[name]';
+import GamePlayerContainer from '../components/game/[name]/[player]';
 
-const Home: FC = () => (
-  <div className={styleContent}>
-    <div>
-      <h2>create a new game</h2>
-      <NewGameContainer />
-    </div>
-    <h2>
-      or <Link href="/game">join an existing one</Link>
-    </h2>
-  </div>
+const App = () => (
+  <Routes>
+    <Route path="/game/:name/:player" element={<GamePlayerContainer />} />
+    <Route path="/game/:name" element={<GameLandingContainer />} />
+    <Route path="/game" element={<GameListContainer />} />
+    <Route path="/" element={<Home />} />
+  </Routes>
 );
 
-const { light, blue, contrast } = Palette;
-
-export const styleContent = css`
-  background-color: ${light};
-  display: flex;
-  flex-direction: column;
-  margin: auto;
-  padding: 1rem;
-  border-radius: 1rem;
-  box-shadow: 0 0 2px 1px ${blue};
-  color: ${contrast};
-  max-width: ${Breakpoints.tabletPortrait}px;
-  text-align: center;
-  * {
-    color: ${contrast};
-  }
-`;
-
-export default Home;
+export default App;
