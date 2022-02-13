@@ -1,15 +1,15 @@
 import { FC } from 'react';
 import { css } from '@emotion/css';
 import { Link } from 'react-router-dom';
-import { NewGameContainer } from './NewGame';
+import { NewGame } from './NewGame';
 import { Palette } from '../design/color';
 import { Breakpoints } from '../design/responsive';
 
-const Home: FC = () => (
+export const Home: FC = () => (
   <div className={styleContent}>
     <div>
       <h2>create a new game</h2>
-      <NewGameContainer />
+      <NewGame />
     </div>
     <h2>
       or <Link to="/game">join an existing one</Link>
@@ -34,5 +34,3 @@ export const styleContent = css`
     color: ${contrast};
   }
 `;
-
-export default Home;

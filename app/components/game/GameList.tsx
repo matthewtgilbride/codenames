@@ -46,7 +46,7 @@ const container = css`
   }
 `;
 
-const GameListContainer = () => {
+export const GameListContainer = () => {
   const apiContext = useApiContext();
   const [games, setGames] = useState<GameListProps['games'] | null>(null);
   useFetchOnce(
@@ -57,7 +57,5 @@ const GameListContainer = () => {
     },
     true,
   );
-  return games ? <GameList games={games} /> : null;
+  return <GameList games={games ?? []} />;
 };
-
-export default GameListContainer;

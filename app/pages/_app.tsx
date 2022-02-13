@@ -4,6 +4,7 @@ import { Global } from '@emotion/react';
 import { GlobalStyle } from '../design/GlobalStyle';
 import { Layout } from '../design/layout';
 import { ApiContextProvider } from '../components/ApiContext';
+import { GameContextProvider } from '../components/game/GameContext';
 
 const App: FC<AppProps> = ({ Component, pageProps }) => (
   <div suppressHydrationWarning id="app">
@@ -12,7 +13,9 @@ const App: FC<AppProps> = ({ Component, pageProps }) => (
         <Global styles={GlobalStyle} />
         <Layout>
           <ApiContextProvider>
-            <Component {...pageProps} />
+            <GameContextProvider>
+              <Component {...pageProps} />
+            </GameContextProvider>
           </ApiContextProvider>
         </Layout>
       </>

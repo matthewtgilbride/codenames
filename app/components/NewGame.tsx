@@ -11,17 +11,22 @@ import { useFetchOnce } from '../hooks/useFetch';
 const { phone } = Breakpoints;
 const { red } = Palette;
 
-interface NewGameProps {
-  initialName: string;
-}
-
-export const NewGame: FC<NewGameProps> = ({ initialName }) => {
-  const [name, setName] = useState(initialName);
+export const NewGame: FC = () => {
+  const [name, setName] = useState('');
   const onChange = useCallback<ChangeEventHandler<HTMLInputElement>>((e) => {
     setName(e.currentTarget.value);
   }, []);
 
   const apiContext = useApiContext();
+  useFetchOnce(
+    {
+      apiContext,
+      path: '',
+      onSuccess: (r) =>
+        r.json().then((payload) => setName(payload.game_name as string)),
+    },
+    true,
+  );
 
   const navigate = useNavigate();
   const onSubmit = useCallback(() => {
@@ -63,19 +68,3 @@ const containerStyle = css`
     }
   }
 `;
-
-export const NewGameContainer = () => {
-  const apiContext = useApiContext();
-  const [gameName, setGameName] = useState<null | string>(null);
-  useFetchOnce(
-    {
-      apiContext,
-      path: '',
-      onSuccess: (r) =>
-        r.json().then((payload) => setGameName(payload.game_name as string)),
-    },
-    true,
-  );
-
-  return gameName === null ? null : <NewGame initialName={gameName} />;
-};

@@ -1,8 +1,8 @@
 import { Route, Routes } from 'react-router-dom';
-import Home from '../components/home';
-import GameListContainer from '../components/game';
-import GameLandingContainer from '../components/game/[name]';
-import GamePlayerContainer from '../components/game/[name]/[player]';
+import { GamePlayerContainer } from '../components/game/GamePlayer';
+import { GameLandingContainer } from '../components/game/GameLanding';
+import { GameListContainer } from '../components/game/GameList';
+import { Home } from '../components/Home';
 
 const App = () => (
   <Routes>
