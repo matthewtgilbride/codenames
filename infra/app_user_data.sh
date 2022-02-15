@@ -3,7 +3,7 @@ apt-get install ca-certificates y
 
 # clone codenames
 cd /home/ubuntu
-git clone --branch dynamo https://github.com/matthewtgilbride/codenames.git
+git clone https://github.com/matthewtgilbride/codenames.git
 
 cd /home/ubuntu/codenames/service
 
