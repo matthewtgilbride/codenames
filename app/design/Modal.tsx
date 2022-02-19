@@ -1,8 +1,8 @@
 import { css, Global } from '@emotion/react';
 import React, { FC, KeyboardEvent, MouseEvent, useState } from 'react';
 import ReactModal from 'react-modal';
-import { lighten, transparentize } from 'polished';
-import { Palette } from './color';
+import { lighten } from 'polished';
+import { overlayColor, Palette } from './color';
 import { Breakpoints } from './responsive';
 
 ReactModal.setAppElement('#app');
@@ -40,7 +40,7 @@ export const useModalControls = () => {
 
 const modalStyle = css`
   .ReactModal__Overlay {
-    background-color: ${transparentize(0.5, Palette.contrast)} !important;
+    background-color: ${overlayColor} !important;
   }
 
   .ReactModal__Content {

@@ -51,8 +51,7 @@ kill-local: ## kill whatever is running on port 8080
 
 LOCAL_IP = $(shell ipconfig getifaddr en0)
 
-run-local: redis-up kill-local
-run-local: export REDIS_HOST=0.0.0.0
+run-local: kill-local
 run-local: export ALLOWED_ORIGINS=http://localhost:3000
 run-local: ## run the http server locally
 	cargo build
@@ -62,10 +61,15 @@ integration-test-local: ## run integration tests locally
 	pipenv run pytest -v -s integration_tests.py
 
 .EXPORT_ALL_VARIABLES:
+AWS_ACCESS_KEY_ID = $(shell aws configure get aws_access_key_id)
+AWS_SECRET_ACCESS_KEY = $(shell aws configure get aws_secret_access_key)
 AWS_ACCOUNT = $(shell aws sts get-caller-identity | jq -r .Account)
 AWS_ECR_URL = ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com
 
-integration-test-docker: check ## check code, build newman test container, and run it
+run-docker: build-release-x86_64 ## run the dockerized service as it will run on EC2
+	docker-compose -f ../docker-compose.yml up --build service
+
+integration-test-docker: check build-release-x86_64 ## check code, build newman test container, and run it
 	docker-compose -f ../docker-compose.yml up --build --exit-code-from service-test service-test
 
 integration-test: integration-test-docker ## run docker integration tests and clean up

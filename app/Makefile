@@ -9,16 +9,18 @@ compile: ## run typescript compiler
 
 build: ## build the nextjs app
 	yarn build
+	yarn export
 
 format: ## fix lint errors
 	yarn lint --fix
 
 check: format compile build ## lint, compile, build
 
-start: export API_URL=http://${LOCAL_IP}:8080
 start: ## start dev server
 	yarn dev
 
-start-build: export API_URL=http://${LOCAL_IP}:8080
 start-build: ## start dev server
-	yarn next start
+	yarn serve -s out
+
+upload:
+	aws s3 sync out s3://codenames.mattgilbride.com --cache-control max-age=86400

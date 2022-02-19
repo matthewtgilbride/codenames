@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { useRouter } from 'next/router';
+import { useNavigate } from 'react-router';
 import { voidFetch } from '../../../../utils/fetch';
 import { actionButton, actionModal } from './Action.styles';
 import { useApiContext } from '../../../ApiContext';
@@ -11,7 +11,7 @@ export const LeaveGame: FC<{ playerName: string }> = ({ playerName }) => {
     game: { name },
   } = useGameContext();
   const apiContext = useApiContext();
-  const router = useRouter();
+  const navigate = useNavigate();
   const { isOpen, open, close } = useModalControls();
   const leave = () => {
     close();
@@ -19,7 +19,8 @@ export const LeaveGame: FC<{ playerName: string }> = ({ playerName }) => {
       apiContext,
       path: `/game/${name}/${playerName}/leave`,
       init: { method: 'PUT' },
-      onSuccess: () => router.push(`/game/${name}`),
+      onSuccess: () => navigate(`/game/${name}`),
+      remainLoadingOnSuccess: true,
     });
   };
 

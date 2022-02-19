@@ -3,7 +3,7 @@ include help.mk
 ##@ Backend (Rust REST Service)
 
 build-service: ## compile the rust REST service project
-	$(MAKE) -C service build
+	$(MAKE) -C service build-release-x86_64
 
 format-service: ## run code formatting on the rust project
 	$(MAKE) -C service format
@@ -58,9 +58,14 @@ start: ## start fully functioning stack locally via docker
 
 ##@ Infrastructure (AWS CDK)
 
-deploy-infra: ## deploy AWS infrastructure
+deploy-infra: build-service build-app ## deploy AWS infrastructure
+	cp ./service/target/x86_64-unknown-linux-musl/release/codenames-actix ./service/codenames-actix
 	${MAKE} -C infra deploy-registry
 	${MAKE} -C infra deploy-app
+	${MAKE} deploy-ui
+
+deploy-ui:
+	${MAKE} -C app upload
 
 destroy-infra: ## tear down AWS infrastructure
 	${MAKE} -C infra destroy-app
@@ -85,10 +90,3 @@ push-app-image: ## push app image
 
 push-images: push-service-image push-app-image ## push both images
 
-start-aws: export SERVICE_PORT=8080
-start-aws: export APP_PORT=3000
-start-aws: export ALLOWED_ORIGINS=https://codenames.mattgilbride.com
-start-aws: export API_URL=https://codenamesapi.mattgilbride.com
-start-aws: ## start fully functioning stack on EC2
-	docker-compose pull redis service app
-	docker-compose up -d app

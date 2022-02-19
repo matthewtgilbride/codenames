@@ -5,9 +5,13 @@ authors = ["Matthew T. Gilbride <mgilbride@chariotsolutions.com>"]
 edition = "2018"
 
 [dependencies]
+aws-config = "0.5.2"
+aws-sdk-dynamodb = "0.5.2"
+tokio = { version = "1", features = ["full"] }
 actix-cors = "0.5.4"
 actix-web = "3"
 actix-http = "2"
+chrono = "0.4.19"
 env_logger = "0.8.2"
 codenames-domain = { path = "../domain" }
 serde = { version = "1.0", features = ["derive"] }

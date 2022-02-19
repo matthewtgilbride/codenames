@@ -1,5 +1,6 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react';
 import { Modal } from '../design/Modal';
+import { API_URL } from '../constants';
 
 export interface ApiContextType {
   baseUrl: string;
@@ -11,8 +12,8 @@ export interface ApiContextType {
 
 export const ApiContext = createContext<ApiContextType | undefined>(undefined);
 
-export const ApiContextProvider: FC<{ baseUrl: string }> = ({
-  baseUrl,
+export const ApiContextProvider: FC<{ baseUrl?: string }> = ({
+  baseUrl = API_URL,
   children,
 }) => {
   const [error, setError] = useState<Error | Response | null>(null);
@@ -28,7 +29,7 @@ export const ApiContextProvider: FC<{ baseUrl: string }> = ({
   }, [error]);
   return (
     <>
-      <Modal isOpen={loading || !!error} onRequestClose={() => setError(null)}>
+      <Modal isOpen={!!error || loading} onRequestClose={() => setError(null)}>
         {loading ? 'Just a sec...' : text}
       </Modal>
       <ApiContext.Provider

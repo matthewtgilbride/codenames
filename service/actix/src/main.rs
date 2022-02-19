@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     dictionary::WordGeneratorRand,
-    game::{board::BoardGeneratorRand, dao::RedisDao, routes::routes as game_routes},
+    game::{board::BoardGeneratorRand, dao::DynamoDao, routes::routes as game_routes},
 };
 
 mod dictionary;
@@ -28,7 +28,7 @@ async fn main() -> std::io::Result<()> {
 
     let word_generator = Box::new(WordGeneratorRand);
     let board_generator = Box::new(BoardGeneratorRand);
-    let dao = Box::new(RedisDao::new().unwrap());
+    let dao = Box::new(DynamoDao::new().unwrap());
 
     let service = GameService::new(word_generator, board_generator, dao).unwrap();
 

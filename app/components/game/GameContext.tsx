@@ -10,10 +10,8 @@ export const GameContext = createContext<GameContextType | undefined>(
   undefined,
 );
 
-export const GameContextProvider: FC<{
-  game: GameState;
-}> = ({ game, children }) => {
-  const [gameState, setGameState] = useState(game);
+export const GameContextProvider: FC = ({ children }) => {
+  const [gameState, setGameState] = useState(placeHolderGame);
   return (
     <GameContext.Provider value={{ game: gameState, setGame: setGameState }}>
       {children}
@@ -24,6 +22,21 @@ export const GameContextProvider: FC<{
 export const useGameContext = () => {
   const gameContext = useContext(GameContext);
   if (!gameContext)
-    throw new Error('useApiContext must be used within a GameContextProvider');
+    throw new Error('gameContext must be used within a GameContextProvider');
   return gameContext;
+};
+
+const placeHolderGame: GameState = {
+  name: '',
+  players: {},
+  turns: [
+    {
+      type: 'Pending',
+      data: 'Blue',
+    },
+  ],
+  board: new Array(25).map((_) => ({
+    color: null,
+    word: '-',
+  })),
 };

@@ -1,5 +1,6 @@
 import { Construct } from 'constructs';
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb';
+import { RemovalPolicy } from 'aws-cdk-lib';
 
 export class DynamoConstruct extends Construct {
   constructor(scope: Construct, id: string) {
@@ -7,8 +8,9 @@ export class DynamoConstruct extends Construct {
 
     new Table(scope, `${id}-table`, {
       tableName: 'codenames',
-      partitionKey: { name: 'id', type: AttributeType.STRING },
-      timeToLiveAttribute: 'timestamp',
+      partitionKey: { name: 'key', type: AttributeType.STRING },
+      timeToLiveAttribute: 'ttl',
+      removalPolicy: RemovalPolicy.DESTROY,
     });
   }
 }
