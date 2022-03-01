@@ -4,6 +4,7 @@ extern crate serde_json;
 
 use actix_cors::Cors;
 use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::web::Data;
 use codenames_domain::{game::service::GameService, GameNameBody};
 
 use crate::{
@@ -47,12 +48,12 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .wrap(cors)
-            .data(
+            .app_data(Data::new(
                 AppData {
                     service: service.clone(),
                 }
                 .clone(),
-            )
+            ))
             .service(random_name)
             .service(game_routes("/game"))
     })
