@@ -1,5 +1,6 @@
 use std::{collections::HashSet, convert::TryInto};
 
+use async_trait::async_trait;
 use codenames_domain::{
     dictionary::{WordGenerator, MINIMUM_DICTIONARY_SIZE},
     ServiceResult,
@@ -9,8 +10,9 @@ use rand::{seq::SliceRandom, thread_rng};
 #[derive(Clone)]
 pub struct WordGeneratorRand;
 
+#[async_trait]
 impl WordGenerator for WordGeneratorRand {
-    fn random_set(&self, dictionary: HashSet<String>) -> ServiceResult<[String; 25]> {
+    async fn random_set(&self, dictionary: HashSet<String>) -> ServiceResult<[String; 25]> {
         if dictionary.len() < (MINIMUM_DICTIONARY_SIZE + 1) {
             return Err("dictionary must have at least 26 words".into());
         }
@@ -25,7 +27,7 @@ impl WordGenerator for WordGeneratorRand {
         Ok(random_subset.try_into().unwrap())
     }
 
-    fn random_pair(&self, dictionary: HashSet<String>) -> ServiceResult<(String, String)> {
+    async fn random_pair(&self, dictionary: HashSet<String>) -> ServiceResult<(String, String)> {
         if dictionary.len() < (MINIMUM_DICTIONARY_SIZE + 1) {
             return Err("dictionary must have at least 26 words".into());
         }

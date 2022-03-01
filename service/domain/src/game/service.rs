@@ -33,78 +33,78 @@ impl GameService {
         })
     }
 
-    pub fn random_name(&self) -> ServiceResult<String> {
+    pub async fn random_name(&self) -> ServiceResult<String> {
         debug!("call: game.Service.random_name");
-        let (first_name, last_name) = self.dictionary_service.new_word_pair()?;
+        let (first_name, last_name) = self.dictionary_service.new_word_pair().await?;
         Ok(format!("{}-{}", first_name, last_name))
     }
 
-    pub fn new_game(&self, game_name: String) -> ServiceResult<GameState> {
-        let words = self.dictionary_service.new_word_set()?;
-        let (board, first_team) = self.board_service.new_board(words)?;
+    pub async fn new_game(&self, game_name: String) -> ServiceResult<GameState> {
+        let words = self.dictionary_service.new_word_set().await?;
+        let (board, first_team) = self.board_service.new_board(words).await?;
 
         let game = GameData::new(game_name, board, first_team);
-        let _ = &self.clone().save(game.clone())?;
+        let _ = &self.clone().save(game.clone()).await?;
 
         Ok(game.clone().into())
     }
 
-    pub fn join(&self, key: String, player: Player) -> ServiceResult<Game> {
-        let game = &self.clone()._get(&key)?;
+    pub async fn join(&self, key: String, player: Player) -> ServiceResult<Game> {
+        let game = &self.clone()._get(&key).await?;
         let updated_game = game.clone().join(player.clone())?;
-        let _ = &self.clone().save(updated_game.clone())?;
+        let _ = &self.clone().save(updated_game.clone()).await?;
         Ok((player.clone(), updated_game).into())
     }
 
-    pub fn leave(&self, key: String, player_name: &str) -> ServiceResult<GameState> {
-        let game = &self.clone()._get(&key)?;
+    pub async fn leave(&self, key: String, player_name: &str) -> ServiceResult<GameState> {
+        let game = &self.clone()._get(&key).await?;
         println!("got game {}", game.info.name());
         let updated_game = game.clone().leave(player_name)?;
         println!("left game {}", game.info.name());
-        let _ = &self.clone().save(updated_game.clone())?;
+        let _ = &self.clone().save(updated_game.clone()).await?;
         Ok(updated_game.clone().into())
     }
 
-    pub fn guess(&self, key: String, guess: (&str, usize)) -> ServiceResult<GameState> {
-        let game = &self.clone()._get(&key)?;
+    pub async fn guess(&self, key: String, guess: (&str, usize)) -> ServiceResult<GameState> {
+        let game = &self.clone()._get(&key).await?;
         let updated_game = game.clone().guess(guess)?;
-        let _ = &self.clone().save(updated_game.clone())?;
+        let _ = &self.clone().save(updated_game.clone()).await?;
         Ok(updated_game.clone().into())
     }
 
-    pub fn start_turn(
+    pub async fn start_turn(
         &self,
         key: String,
         spymaster_name: String,
         clue: (String, usize),
     ) -> ServiceResult<GameData> {
-        let game = &self.clone()._get(&key)?;
+        let game = &self.clone()._get(&key).await?;
         let updated_game = game.clone().start_turn(spymaster_name, clue)?;
-        let _ = &self.clone().save(updated_game.clone())?;
+        let _ = &self.clone().save(updated_game.clone()).await?;
         Ok(updated_game.clone())
     }
 
-    pub fn end_turn(&self, key: String) -> ServiceResult<GameState> {
-        let game = &self.clone()._get(&key)?;
+    pub async fn end_turn(&self, key: String) -> ServiceResult<GameState> {
+        let game = &self.clone()._get(&key).await?;
         let updated_game = game.clone().end_turn();
-        let _ = &self.clone().save(updated_game.clone())?;
+        let _ = &self.clone().save(updated_game.clone()).await?;
         Ok(updated_game.clone().into())
     }
 
-    fn _get(&mut self, key: &str) -> ServiceResult<GameData> {
-        self.dao.get(Lowercase::new(key)).map_err(|e| {
+    async fn _get(&mut self, key: &str) -> ServiceResult<GameData> {
+        self.dao.get(Lowercase::new(key)).await.map_err(|e| {
             info!("{}", e);
             e.into()
         })
     }
 
-    pub fn get(
+    pub async fn get(
         &mut self,
         key: &str,
         player_name: &Option<String>,
         spymaster_secret: &Option<String>,
     ) -> ServiceResult<Game> {
-        let data = self._get(key)?;
+        let data = self._get(key).await?;
         match player_name {
             None => Ok(Game::State(data.into())),
             Some(player_name) => {
@@ -127,10 +127,11 @@ impl GameService {
         }
     }
 
-    pub fn find(&mut self) -> ServiceResult<Vec<String>> {
+    pub async fn find(&mut self) -> ServiceResult<Vec<String>> {
         let games = self
             .dao
             .keys()
+            .await
             .map(|ls| ls.iter().map(|l| l.value().to_string()).collect())
             .map_err(|e| {
                 warn!("{}", e);
@@ -141,9 +142,9 @@ impl GameService {
         Ok(games)
     }
 
-    fn save(&mut self, game: GameData) -> ServiceResult<()> {
+    async fn save(&mut self, game: GameData) -> ServiceResult<()> {
         let key = Lowercase::new(game.info.name());
-        self.dao.set(key, game).map_err(|e| {
+        self.dao.set(key, game).await.map_err(|e| {
             warn!("{}", e);
             e.into()
         })

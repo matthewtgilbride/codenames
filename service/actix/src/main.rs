@@ -4,8 +4,8 @@ extern crate serde_json;
 
 use actix_cors::Cors;
 use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
-use codenames_domain::game::service::GameService;
-use serde::{Deserialize, Serialize};
+use actix_web::web::Data;
+use codenames_domain::{game::service::GameService, GameNameBody};
 
 use crate::{
     dictionary::WordGeneratorRand,
@@ -28,7 +28,7 @@ async fn main() -> std::io::Result<()> {
 
     let word_generator = Box::new(WordGeneratorRand);
     let board_generator = Box::new(BoardGeneratorRand);
-    let dao = Box::new(DynamoDao::new().unwrap());
+    let dao = Box::new(DynamoDao::new().await.unwrap());
 
     let service = GameService::new(word_generator, board_generator, dao).unwrap();
 
@@ -48,12 +48,12 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .wrap(cors)
-            .data(
+            .app_data(Data::new(
                 AppData {
                     service: service.clone(),
                 }
                 .clone(),
-            )
+            ))
             .service(random_name)
             .service(game_routes("/game"))
     })
@@ -68,35 +68,8 @@ pub async fn random_name(data: web::Data<AppData>) -> impl Responder {
         &data
             .service
             .random_name()
+            .await
             .map(|g| GameNameBody::new(g))
             .unwrap(),
     )
-}
-
-#[derive(Serialize, Deserialize)]
-struct GameNameBody {
-    game_name: String,
-}
-
-impl GameNameBody {
-    pub fn new(game_name: String) -> Self {
-        Self { game_name }
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-struct GameListBody {
-    games: Vec<String>,
-}
-
-impl GameListBody {
-    pub fn new(games: Vec<String>) -> Self {
-        Self { games }
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-struct ClueBody {
-    word: String,
-    amount: usize,
 }

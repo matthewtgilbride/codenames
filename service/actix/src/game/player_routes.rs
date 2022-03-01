@@ -1,7 +1,8 @@
 use actix_web::{get, put, web, Responder, Scope};
+use codenames_domain::ClueBody;
 use serde::{Deserialize, Serialize};
 
-use crate::{util::respond, AppData, ClueBody};
+use crate::{util::respond, AppData};
 
 pub fn player_routes(path: &str) -> Scope {
     web::scope(path)
@@ -27,7 +28,8 @@ async fn get_player_game(
         &data
             .service
             .clone()
-            .get(&key, &Some(player_name), &query.secret),
+            .get(&key, &Some(player_name), &query.secret)
+            .await,
     )
 }
 
@@ -43,7 +45,8 @@ async fn start_turn(
         &data
             .service
             .clone()
-            .start_turn(key, player_name, (word, amount)),
+            .start_turn(key, player_name, (word, amount))
+            .await,
     )
 }
 
@@ -57,12 +60,13 @@ async fn guess(
         &data
             .service
             .clone()
-            .guess(key, (player_name.as_str(), board_index)),
+            .guess(key, (player_name.as_str(), board_index))
+            .await,
     )
 }
 
 #[put("/leave")]
 async fn leave_game(path: web::Path<(String, String)>, data: web::Data<AppData>) -> impl Responder {
     let (key, player_name) = path.clone();
-    respond(&data.service.clone().leave(key, player_name.as_str()))
+    respond(&data.service.clone().leave(key, player_name.as_str()).await)
 }
