@@ -1,9 +1,7 @@
 use actix_web::{get, post, put, web, Responder, Scope};
-use codenames_domain::game::model::Player;
+use codenames_domain::{game::model::Player, GameListBody};
 
-use crate::{
-    game::player_routes::player_routes, util::respond, AppData, GameListBody, GameNameBody,
-};
+use crate::{game::player_routes::player_routes, util::respond, AppData, GameNameBody};
 
 pub fn routes(path: &str) -> Scope {
     web::scope(path)

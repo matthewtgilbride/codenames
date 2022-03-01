@@ -1,7 +1,8 @@
 use actix_web::{get, put, web, Responder, Scope};
+use codenames_domain::ClueBody;
 use serde::{Deserialize, Serialize};
 
-use crate::{util::respond, AppData, ClueBody};
+use crate::{util::respond, AppData};
 
 pub fn player_routes(path: &str) -> Scope {
     web::scope(path)

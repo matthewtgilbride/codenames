@@ -46,11 +46,10 @@ impl Clone for DynamoDao {
 
 impl GameDao for DynamoDao {
     fn get(&mut self, key: Lowercase) -> DaoResult<GameData> {
-        let request = &self
-            .client
-            .get_item()
-            .table_name(DYNAMO_TABLE_NAME)
-            .key(DYNAMO_KEY_ATTRIBUTE, AttributeValue::S(key.value().to_string()));
+        let request = &self.client.get_item().table_name(DYNAMO_TABLE_NAME).key(
+            DYNAMO_KEY_ATTRIBUTE,
+            AttributeValue::S(key.value().to_string()),
+        );
 
         let result =
             self.runtime
@@ -92,8 +91,14 @@ impl GameDao for DynamoDao {
 
         let keys: Vec<String> = items
             .iter()
-            .map(|i| i.get(DYNAMO_KEY_ATTRIBUTE).expect(format!("No {} field in response", DYNAMO_KEY_ATTRIBUTE).as_str()))
-            .map(|a| a.as_s().expect(format!("{} field was not a string", DYNAMO_KEY_ATTRIBUTE).as_str()))
+            .map(|i| {
+                i.get(DYNAMO_KEY_ATTRIBUTE)
+                    .expect(format!("No {} field in response", DYNAMO_KEY_ATTRIBUTE).as_str())
+            })
+            .map(|a| {
+                a.as_s()
+                    .expect(format!("{} field was not a string", DYNAMO_KEY_ATTRIBUTE).as_str())
+            })
             .cloned()
             .collect();
 
@@ -105,9 +110,18 @@ impl GameDao for DynamoDao {
             .client
             .put_item()
             .table_name(DYNAMO_TABLE_NAME)
-            .item(DYNAMO_KEY_ATTRIBUTE, AttributeValue::S(key.value().to_string()))
-            .item(DYNAMO_TTL_ATTRIBUTE, AttributeValue::N(DynamoDao::get_ttl().to_string()))
-            .item(DYNAMO_GAME_ATTRIBUTE, AttributeValue::S(json!(game).to_string()));
+            .item(
+                DYNAMO_KEY_ATTRIBUTE,
+                AttributeValue::S(key.value().to_string()),
+            )
+            .item(
+                DYNAMO_TTL_ATTRIBUTE,
+                AttributeValue::N(DynamoDao::get_ttl().to_string()),
+            )
+            .item(
+                DYNAMO_GAME_ATTRIBUTE,
+                AttributeValue::S(json!(game).to_string()),
+            );
 
         match self.runtime.block_on(request.clone().send()) {
             Ok(_) => Ok(()),

@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate enum_display_derive;
+extern crate serde_json;
 
 use std::{error::Error, fmt, fmt::Formatter};
 
@@ -149,4 +150,32 @@ impl<'de> Visitor<'de> for LowercaseVisitor {
     {
         Ok(Lowercase::new(value).clone())
     }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct GameNameBody {
+    pub game_name: String,
+}
+
+impl GameNameBody {
+    pub fn new(game_name: String) -> Self {
+        Self { game_name }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct GameListBody {
+    pub games: Vec<String>,
+}
+
+impl GameListBody {
+    pub fn new(games: Vec<String>) -> Self {
+        Self { games }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ClueBody {
+    pub word: String,
+    pub amount: usize,
 }
