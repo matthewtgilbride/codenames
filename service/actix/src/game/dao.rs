@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use aws_sdk_dynamodb::{
     error::GetItemErrorKind::ResourceNotFoundException, model::AttributeValue, Client,
     SdkError::ServiceError,
@@ -10,27 +11,22 @@ use codenames_domain::{
     DaoResult, Lowercase, StdResult,
 };
 use redis::{Commands, Connection, Value};
-use tokio::runtime::Runtime;
 
 const DYNAMO_TABLE_NAME: &str = "codenames";
 const DYNAMO_KEY_ATTRIBUTE: &str = "key";
 const DYNAMO_TTL_ATTRIBUTE: &str = "ttl";
 const DYNAMO_GAME_ATTRIBUTE: &str = "game";
 
+#[derive(Clone)]
 pub struct DynamoDao {
     client: Client,
-    runtime: Runtime,
 }
 
 impl DynamoDao {
-    pub fn new() -> StdResult<DynamoDao> {
-        let runtime = tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build()
-            .unwrap();
-        let shared_config = runtime.block_on(aws_config::load_from_env());
+    pub async fn new() -> StdResult<DynamoDao> {
+        let shared_config = aws_config::load_from_env().await;
         let client = Client::new(&shared_config);
-        Ok(DynamoDao { client, runtime })
+        Ok(DynamoDao { client })
     }
 
     fn get_ttl() -> i64 {
@@ -38,29 +34,21 @@ impl DynamoDao {
     }
 }
 
-impl Clone for DynamoDao {
-    fn clone(&self) -> Self {
-        DynamoDao::new().unwrap()
-    }
-}
-
+#[async_trait]
 impl GameDao for DynamoDao {
-    fn get(&mut self, key: Lowercase) -> DaoResult<GameData> {
+    async fn get(&mut self, key: Lowercase) -> DaoResult<GameData> {
         let request = &self.client.get_item().table_name(DYNAMO_TABLE_NAME).key(
             DYNAMO_KEY_ATTRIBUTE,
             AttributeValue::S(key.value().to_string()),
         );
 
-        let result =
-            self.runtime
-                .block_on(request.clone().send())
-                .map_err(|outer| match outer {
-                    ServiceError { err, .. } => match &err.kind {
-                        ResourceNotFoundException(r) => DaoError::NotFound(r.to_string()),
-                        _ => DaoError::Unknown("unknown dynamo service error".into()),
-                    },
-                    e => DaoError::Unknown(e.to_string()),
-                })?;
+        let result = request.clone().send().await.map_err(|outer| match outer {
+            ServiceError { err, .. } => match &err.kind {
+                ResourceNotFoundException(r) => DaoError::NotFound(r.to_string()),
+                _ => DaoError::Unknown("unknown dynamo service error".into()),
+            },
+            e => DaoError::Unknown(e.to_string()),
+        })?;
 
         let item = result.item.ok_or(NotFound(key.value().to_string()))?;
         let attribute = item.get(DYNAMO_GAME_ATTRIBUTE).ok_or(DaoError::Unknown(
@@ -73,16 +61,17 @@ impl GameDao for DynamoDao {
         serde_json::from_str(game_string).map_err(|e| DaoError::Unknown(e.to_string()))
     }
 
-    fn keys(&mut self) -> DaoResult<Vec<Lowercase>> {
+    async fn keys(&mut self) -> DaoResult<Vec<Lowercase>> {
         let request = &self
             .client
             .scan()
             .table_name(DYNAMO_TABLE_NAME)
             .attributes_to_get(DYNAMO_KEY_ATTRIBUTE);
 
-        let result = self
-            .runtime
-            .block_on(request.clone().send())
+        let result = request
+            .clone()
+            .send()
+            .await
             .map_err(|e| DaoError::Unknown(e.to_string()))?;
 
         let items = result
@@ -105,7 +94,7 @@ impl GameDao for DynamoDao {
         Ok(keys.iter().map(|k| Lowercase::new(k)).collect())
     }
 
-    fn set(&mut self, key: Lowercase, game: GameData) -> DaoResult<()> {
+    async fn set(&mut self, key: Lowercase, game: GameData) -> DaoResult<()> {
         let request = &self
             .client
             .put_item()
@@ -123,7 +112,7 @@ impl GameDao for DynamoDao {
                 AttributeValue::S(json!(game).to_string()),
             );
 
-        match self.runtime.block_on(request.clone().send()) {
+        match request.clone().send().await {
             Ok(_) => Ok(()),
             Err(e) => Err(DaoError::Unknown(e.to_string())),
         }
@@ -149,8 +138,9 @@ impl RedisDao {
     }
 }
 
+#[async_trait]
 impl GameDao for RedisDao {
-    fn get(&mut self, key: Lowercase) -> DaoResult<GameData> {
+    async fn get(&mut self, key: Lowercase) -> DaoResult<GameData> {
         let value: Value = self
             .con
             .get(key.value().clone())
@@ -175,7 +165,7 @@ impl GameDao for RedisDao {
         serde_json::from_str(result.as_str()).map_err(|e| DaoError::Unknown(e.to_string()))
     }
 
-    fn keys(&mut self) -> DaoResult<Vec<Lowercase>> {
+    async fn keys(&mut self) -> DaoResult<Vec<Lowercase>> {
         let result: Vec<Lowercase> = self
             .con
             .keys("*")
@@ -184,7 +174,7 @@ impl GameDao for RedisDao {
         Ok(result)
     }
 
-    fn set(&mut self, key: Lowercase, game: GameData) -> DaoResult<()> {
+    async fn set(&mut self, key: Lowercase, game: GameData) -> DaoResult<()> {
         self.con
             .set_ex(key.value(), json!(game).to_string(), 86400)
             .map_err(|e| DaoError::Unknown(e.to_string()))

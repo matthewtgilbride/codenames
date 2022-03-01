@@ -1,5 +1,6 @@
 use std::convert::TryInto;
 
+use async_trait::async_trait;
 use codenames_domain::{
     game::{
         board_service::BoardGenerator,
@@ -21,8 +22,9 @@ impl BoardGeneratorRand {
     }
 }
 
+#[async_trait]
 impl BoardGenerator for BoardGeneratorRand {
-    fn random_board(&self, words: [String; 25]) -> ServiceResult<(Board, Team)> {
+    async fn random_board(&self, words: [String; 25]) -> ServiceResult<(Board, Team)> {
         let first_team = self.random_team();
 
         let mut indices: Vec<usize> = (0..25).collect();
@@ -81,14 +83,15 @@ mod tests {
 
     use crate::{dictionary::WordGeneratorRand, game::board::BoardGeneratorRand};
 
-    #[test]
-    fn new_board() {
+    #[tokio::test]
+    async fn new_board() {
         let test_dictionary_service =
             DictionaryService::new(Box::new(WordGeneratorRand {})).unwrap();
         let test_service = BoardService::new(Box::new(BoardGeneratorRand {}));
 
         let (board, first_team) = test_service
-            .new_board(test_dictionary_service.new_word_set().unwrap())
+            .new_board(test_dictionary_service.new_word_set().await.unwrap())
+            .await
             .unwrap();
 
         let as_vec = board.to_vec();

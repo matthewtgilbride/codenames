@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use dyn_clone::DynClone;
 
 use crate::{
@@ -15,13 +16,14 @@ impl BoardService {
         BoardService { generator }
     }
 
-    pub fn new_board(&self, words: [String; 25]) -> ServiceResult<(Board, Team)> {
-        self.generator.random_board(words)
+    pub async fn new_board(&self, words: [String; 25]) -> ServiceResult<(Board, Team)> {
+        self.generator.random_board(words).await
     }
 }
 
+#[async_trait]
 pub trait BoardGenerator: DynClone + Send + Sync {
-    fn random_board(&self, words: [String; 25]) -> ServiceResult<(Board, Team)>;
+    async fn random_board(&self, words: [String; 25]) -> ServiceResult<(Board, Team)>;
 }
 
 dyn_clone::clone_trait_object!(BoardGenerator);

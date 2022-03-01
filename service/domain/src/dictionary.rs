@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use async_trait::async_trait;
 use dyn_clone::DynClone;
 use log::debug;
 
@@ -18,21 +19,24 @@ impl DictionaryService {
         Ok(DictionaryService { words, generator })
     }
 
-    pub fn new_word_set(&self) -> ServiceResult<[String; 25]> {
+    pub async fn new_word_set(&self) -> ServiceResult<[String; 25]> {
         self.generator
             .random_set(self.words.iter().cloned().collect())
+            .await
     }
 
-    pub fn new_word_pair(&self) -> ServiceResult<(String, String)> {
+    pub async fn new_word_pair(&self) -> ServiceResult<(String, String)> {
         debug!("call: dictionary.Service.new_word_pair)");
         self.generator
             .random_pair(self.words.iter().cloned().collect())
+            .await
     }
 }
 
+#[async_trait]
 pub trait WordGenerator: DynClone + Send + Sync {
-    fn random_set(&self, dictionary: HashSet<String>) -> ServiceResult<[String; 25]>;
-    fn random_pair(&self, dictionary: HashSet<String>) -> ServiceResult<(String, String)>;
+    async fn random_set(&self, dictionary: HashSet<String>) -> ServiceResult<[String; 25]>;
+    async fn random_pair(&self, dictionary: HashSet<String>) -> ServiceResult<(String, String)>;
 }
 
 dyn_clone::clone_trait_object!(WordGenerator);

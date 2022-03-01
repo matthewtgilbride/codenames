@@ -27,7 +27,7 @@ async fn main() -> std::io::Result<()> {
 
     let word_generator = Box::new(WordGeneratorRand);
     let board_generator = Box::new(BoardGeneratorRand);
-    let dao = Box::new(DynamoDao::new().unwrap());
+    let dao = Box::new(DynamoDao::new().await.unwrap());
 
     let service = GameService::new(word_generator, board_generator, dao).unwrap();
 
@@ -67,6 +67,7 @@ pub async fn random_name(data: web::Data<AppData>) -> impl Responder {
         &data
             .service
             .random_name()
+            .await
             .map(|g| GameNameBody::new(g))
             .unwrap(),
     )

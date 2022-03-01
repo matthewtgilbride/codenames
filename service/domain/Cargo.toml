@@ -5,6 +5,7 @@ authors = ["Matthew T. Gilbride <mgilbride@chariotsolutions.com>"]
 edition = "2018"
 
 [dependencies]
+async-trait = "0.1.52"
 dyn-clone = "1.0.4"
 enum-display-derive = "0.1.0"
 log = "0.4.14"

@@ -17,13 +17,14 @@ async fn find_games(data: web::Data<AppData>) -> impl Responder {
             .service
             .clone()
             .find()
+            .await
             .map(|keys| GameListBody::new(keys)),
     )
 }
 
 #[post("")]
 async fn new_game(body: web::Json<GameNameBody>, data: web::Data<AppData>) -> impl Responder {
-    respond(&data.service.new_game(body.into_inner().game_name))
+    respond(&data.service.new_game(body.into_inner().game_name).await)
 }
 
 fn game_routes() -> Scope {
@@ -36,7 +37,7 @@ fn game_routes() -> Scope {
 
 #[get("")]
 async fn get_game(path: web::Path<String>, data: web::Data<AppData>) -> impl Responder {
-    respond(&data.service.clone().get(&path.clone(), &None, &None))
+    respond(&data.service.clone().get(&path.clone(), &None, &None).await)
 }
 
 #[put("/join")]
@@ -45,10 +46,16 @@ async fn join_game(
     body: web::Json<Player>,
     data: web::Data<AppData>,
 ) -> impl Responder {
-    respond(&data.service.clone().join(path.clone(), body.into_inner()))
+    respond(
+        &data
+            .service
+            .clone()
+            .join(path.clone(), body.into_inner())
+            .await,
+    )
 }
 
 #[put("/end-turn")]
 async fn end_turn(path: web::Path<String>, data: web::Data<AppData>) -> impl Responder {
-    respond(&data.service.clone().end_turn(path.clone()))
+    respond(&data.service.clone().end_turn(path.clone()).await)
 }
