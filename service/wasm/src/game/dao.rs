@@ -1,18 +1,35 @@
-use wasmcloud_actor_keyvalue as kv;
-
 use codenames_domain::game::dao::GameDao;
 use codenames_domain::game::model::Game;
-use codenames_domain::{DaoError, DaoResult};
+use codenames_domain::{DaoError, DaoResult, Lowercase};
+use async_trait::async_trait;
+use wasmbus_rpc::actor::prelude::WasmHost;
+use wasmbus_rpc::common::Context;
+
+use wasmcloud_interface_keyvalue::{IncrementRequest, KeyValue, KeyValueSender, ListAddRequest, SetRequest};
 
 const ALL_GAMES_KEY: &str = "GAME_KEYS";
 
 #[derive(Clone)]
-pub struct WasmKeyValueDao;
+pub struct WasmKeyValueDao {
+    ctx: Box<Context>,
+    kv: KeyValueSender<WasmHost>
+}
 
+impl WasmKeyValueDao {
+    pub fn new(ctx: &Context) -> Self {
+        Self {
+            ctx: Box::new(ctx.clone()),
+            kv: KeyValueSender::new()
+        }
+    }
+}
+
+#[async_trait]
 impl GameDao for WasmKeyValueDao {
-    fn get(&mut self, key: String) -> DaoResult<Game> {
-        let result = kv::default()
-            .get(key.clone())
+    async fn get(&mut self, key: String) -> DaoResult<Game> {
+        let result = self.kv
+            .get(self.ctx.as_ref(), &key)
+            .await
             .map_err(|_| DaoError::Unknown("kv actor interface error".into()))?;
         match result.exists {
             true => serde_json::from_str(result.value.as_str()).map_err(|_| {
@@ -24,18 +41,30 @@ impl GameDao for WasmKeyValueDao {
             false => DaoResult::Err(DaoError::NotFound(key)),
         }
     }
-    fn keys(&mut self) -> DaoResult<Vec<String>> {
-        let result = kv::default()
-            .range(ALL_GAMES_KEY.into(), 0, std::i32::MAX)
+    async fn keys(&mut self) -> DaoResult<Vec<String>> {
+        let result = self.kv
+            .list_range(self.ctx.as_ref(),ALL_GAMES_KEY.into(), 0, std::i32::MAX)
+            .await
             .map_err(|e| DaoError::Unknown(e.to_string()))?;
         Ok(result.values)
     }
-    fn set(&mut self, key: String, game: Game) -> DaoResult<()> {
-        kv::default()
-            .set(key.clone(), json!(game).to_string(), 0)
+    async fn set(&mut self, key: String, game: Game) -> DaoResult<()> {
+        let set_request = SetRequest {
+            key,
+            value: json!(game).to_string(),
+            expires: 0
+        };
+        self.kv
+            .set(self.ctx.as_ref(), &set_request)
+            .await
             .map_err(|e| DaoError::Unknown(e.to_string()))?;
-        kv::default()
-            .push(ALL_GAMES_KEY.into(), key.clone())
+        let list_add_request = ListAddRequest {
+            list_name: ALL_GAMES_KEY.into(),
+            value: key.clone()
+        };
+        self.kv
+            .list_add(self.ctx.as_ref(), &list_add_request)
+            .await
             .map_err(|e| DaoError::Unknown(e.to_string()))?;
         Ok(())
     }
