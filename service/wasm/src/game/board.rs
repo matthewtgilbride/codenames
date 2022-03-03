@@ -1,20 +1,19 @@
 use std::convert::TryInto;
 
 use log::debug;
-use wasmcloud_actor_extras as extras;
-
-use codenames_domain::game::board::{Board, BoardGenerator};
-use codenames_domain::game::card::{Card, CardColor, CardState};
-use codenames_domain::game::model::Team;
+use wasmcloud_interface_numbergen::random_in_range;
+use codenames_domain::game::model::{Board, Card, CardColor, CardState, Team};
 use codenames_domain::{ServiceError, ServiceResult};
+use codenames_domain::game::board_service::BoardGenerator;
+use async_trait::async_trait;
 
 #[derive(Clone)]
 pub struct BoardGeneratorWasmCloud;
 
 impl BoardGeneratorWasmCloud {
-    fn random_team(&self) -> ServiceResult<Team> {
-        match extras::default()
-            .request_random(0, 1)
+    async fn random_team(&self) -> ServiceResult<Team> {
+        match random_in_range(0, 1)
+            .await
             .map_err(|_| ServiceError::Unknown("could not get random number".into()))?
         {
             0 => Ok(Team::Blue),
@@ -23,15 +22,16 @@ impl BoardGeneratorWasmCloud {
     }
 }
 
+#[async_trait]
 impl BoardGenerator for BoardGeneratorWasmCloud {
-    fn random_board(&self, words: [String; 25]) -> ServiceResult<(Board, Team)> {
+    async fn random_board(&self, words: [String; 25]) -> ServiceResult<(Board, Team)> {
         debug!("call: board.BoardGenerator.random_board");
         let first_team = self.random_team()?;
 
         let mut indices: Vec<usize> = Vec::new();
         while indices.len() < 25 {
-            let rand = extras::default()
-                .request_random(0, 25)
+            let rand = random_in_range(0, 25)
+                .await
                 .map_err(|_| ServiceError::Unknown("could not get random number".into()))?
                 as usize;
 
