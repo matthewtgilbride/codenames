@@ -1,11 +1,15 @@
 use std::convert::TryInto;
 
+use async_trait::async_trait;
+use codenames_domain::{
+    game::{
+        board_service::BoardGenerator,
+        model::{Board, Card, CardColor, CardState, Team},
+    },
+    ServiceError, ServiceResult,
+};
 use log::debug;
 use wasmcloud_interface_numbergen::random_in_range;
-use codenames_domain::game::model::{Board, Card, CardColor, CardState, Team};
-use codenames_domain::{ServiceError, ServiceResult};
-use codenames_domain::game::board_service::BoardGenerator;
-use async_trait::async_trait;
 
 #[derive(Clone)]
 pub struct BoardGeneratorWasmCloud;
@@ -26,7 +30,7 @@ impl BoardGeneratorWasmCloud {
 impl BoardGenerator for BoardGeneratorWasmCloud {
     async fn random_board(&self, words: [String; 25]) -> ServiceResult<(Board, Team)> {
         debug!("call: board.BoardGenerator.random_board");
-        let first_team = self.random_team()?;
+        let first_team = self.random_team().await?;
 
         let mut indices: Vec<usize> = Vec::new();
         while indices.len() < 25 {

@@ -1,19 +1,24 @@
-use std::collections::HashSet;
-use std::convert::TryInto;
+use std::{collections::HashSet, convert::TryInto};
 
+use async_trait::async_trait;
+use codenames_domain::{
+    dictionary::{WordGenerator, MINIMUM_DICTIONARY_SIZE},
+    ServiceError, ServiceResult,
+};
 use log::debug;
 use wasmcloud_interface_numbergen::random_in_range;
-use async_trait::async_trait;
 
-use codenames_domain::dictionary::WordGenerator;
-use codenames_domain::dictionary::MINIMUM_DICTIONARY_SIZE;
-use codenames_domain::{ServiceError, ServiceResult};
+use crate::to_service_error;
 
 #[derive(Clone)]
 pub struct WordGeneratorWasmCloud;
 
 impl WordGeneratorWasmCloud {
-    async fn random_list(&self, dictionary: &HashSet<String>, size: usize) -> ServiceResult<Vec<String>> {
+    async fn random_list(
+        &self,
+        dictionary: &HashSet<String>,
+        size: usize,
+    ) -> ServiceResult<Vec<String>> {
         debug!("call: dictionary.WordGenerator.random_list");
         if dictionary.len() < (MINIMUM_DICTIONARY_SIZE + 1) {
             return Err("dictionary must have at least 26 words".into());
@@ -23,8 +28,10 @@ impl WordGeneratorWasmCloud {
 
         let mut chosen_indices: HashSet<usize> = HashSet::new();
         while chosen_indices.len() < size {
-            let rand = random_in_range(0, dictionary.len() as u32).await?;
-            chosen_indices.insert(rand);
+            let rand = random_in_range(0, dictionary.len() as u32)
+                .await
+                .map_err(|e| to_service_error(e))?;
+            chosen_indices.insert(rand as usize);
         }
         Ok(chosen_indices
             .into_iter()
