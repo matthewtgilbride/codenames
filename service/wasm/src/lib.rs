@@ -25,16 +25,6 @@ mod game;
 #[services(Actor, HttpServer)]
 struct CodenamesActor {}
 
-impl CodenamesActor {
-    pub fn path_segments<'l>(&self, req: &'l HttpRequest) -> Vec<&'l str> {
-        req.path
-            .trim_end_matches('/')
-            .split('/')
-            .skip(1)
-            .collect::<Vec<_>>()
-    }
-}
-
 /// Implementation of HttpServer trait methods
 #[async_trait]
 impl HttpServer for CodenamesActor {
@@ -48,7 +38,7 @@ impl HttpServer for CodenamesActor {
         debug!("Request received: Path is {}", req.path);
 
         let &method = &req.method.as_str();
-        let segments = self.path_segments(req);
+        let segments = path_segments(req);
 
         let routing_result: Result<Value, ServiceError> = match (method, &segments[..]) {
             // get a random game key
@@ -188,6 +178,14 @@ fn std_to_rpc_error(err: StdError) -> RpcError {
 
 fn to_rpc_error(err: ServiceError) -> RpcError {
     RpcError::Other(err.to_string())
+}
+
+pub fn path_segments(req: &HttpRequest) -> Vec<&str> {
+    req.path
+        .trim_end_matches('/')
+        .split('/')
+        .skip(1)
+        .collect::<Vec<_>>()
 }
 
 fn debug_route(msg: &str) {

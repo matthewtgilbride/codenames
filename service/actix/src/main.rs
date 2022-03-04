@@ -3,8 +3,9 @@ extern crate env_logger;
 extern crate serde_json;
 
 use actix_cors::Cors;
-use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
-use actix_web::web::Data;
+use actix_web::{
+    get, middleware::Logger, web, web::Data, App, HttpResponse, HttpServer, Responder,
+};
 use codenames_domain::{game::service::GameService, GameNameBody};
 
 use crate::{
