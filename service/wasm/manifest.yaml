@@ -5,20 +5,5 @@ actors:
   - ./codenames.wasm
 capabilities:
   - image_ref: wasmcloud.azurecr.io/redis:0.11.2
-  - image_ref: wasmcloud.azurecr.io/httpserver:0.12.1
-  - image_ref: wasmcloud.azurecr.io/logging:0.9.3
-links:
-  - actor: ${ACTOR_ID:MBYBQF7OEZPC7S5SKYSLTHHHYHUKZXM6O6K7G54QRP2JSMJ27ZFGYWKC}
-    contract_id: wasmcloud:keyvalue
-    provider_id: VAZVC4RX54J2NVCMCW7BPCAHGGG5XZXDBXFUMDUXGESTMQEJLC3YVZWB
-  - actor: ${ACTOR_ID:MBYBQF7OEZPC7S5SKYSLTHHHYHUKZXM6O6K7G54QRP2JSMJ27ZFGYWKC}
-    contract_id: wasmcloud:httpserver
-    provider_id: VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M
-    values:
-      PORT: 8080
-  - actor: ${ACTOR_ID:MBYBQF7OEZPC7S5SKYSLTHHHYHUKZXM6O6K7G54QRP2JSMJ27ZFGYWKC}
-    contract_id: wasmcloud:extras
-    provider_id: VDHPKGFKDI34Y4RN4PWWZHRYZ6373HYRSNNEM4UTDLLOGO5B37TSVREP
-  - actor: ${ACTOR_ID:MBYBQF7OEZPC7S5SKYSLTHHHYHUKZXM6O6K7G54QRP2JSMJ27ZFGYWKC}
-    contract_id: wasmcloud:logging
-    provider_id: VCCANMDC7KONJK435W6T7JFEEL7S3ZG6GUZMZ3FHTBZ32OZHJQR5MJWZ
+  - image_ref: wasmcloud.azurecr.io/httpserver:0.14.4
+  - image_ref: localhost:5000/kvdynamodb:v1
