@@ -34,7 +34,7 @@ impl BoardGenerator for BoardGeneratorWasmCloud {
 
         let mut indices: Vec<usize> = Vec::new();
         while indices.len() < 25 {
-            let rand = random_in_range(0, 25)
+            let rand = random_in_range(0, 24)
                 .await
                 .map_err(|_| ServiceError::Unknown("could not get random number".into()))?
                 as usize;
@@ -58,25 +58,23 @@ impl BoardGenerator for BoardGeneratorWasmCloud {
 
         log_stuff(String::from("built initial board")).await?;
 
-        indices
-            .iter()
-            .enumerate()
-            .for_each(|(index, &random_index)| {
-                let CardState { word, .. } = initial_board[random_index].clone();
-                let color = match index {
-                    0 => Some(CardColor::Death),
-                    i if i < 8 => Some(CardColor::Neutral),
-                    i if i < 16 => {
-                        if first_team == Team::Blue {
-                            Some(CardColor::Team(Team::Red))
-                        } else {
-                            Some(CardColor::Team(Team::Blue))
-                        }
+        for (index, &random_index) in indices.iter().enumerate() {
+            log_stuff(format!("in loop for index: {}, random: {}", index, random_index)).await?;
+            let CardState { word, .. } = initial_board[random_index].clone();
+            let color = match index {
+                0 => Some(CardColor::Death),
+                i if i < 8 => Some(CardColor::Neutral),
+                i if i < 16 => {
+                    if first_team == Team::Blue {
+                        Some(CardColor::Team(Team::Red))
+                    } else {
+                        Some(CardColor::Team(Team::Blue))
                     }
-                    _ => Some(CardColor::Team(first_team)),
-                };
-                initial_board[random_index] = CardState { word, color }
-            });
+                }
+                _ => Some(CardColor::Team(first_team)),
+            };
+            initial_board[random_index] = CardState { word, color }
+        }
 
         log_stuff(String::from("updated indices")).await?;
 
