@@ -5,10 +5,9 @@ use codenames_domain::{
     dictionary::{WordGenerator, MINIMUM_DICTIONARY_SIZE},
     ServiceError, ServiceResult,
 };
-use log::debug;
 use wasmcloud_interface_numbergen::random_in_range;
 
-use crate::to_service_error;
+use crate::{log_stuff, to_service_error};
 
 #[derive(Clone)]
 pub struct WordGeneratorWasmCloud;
@@ -19,7 +18,7 @@ impl WordGeneratorWasmCloud {
         dictionary: &HashSet<String>,
         size: usize,
     ) -> ServiceResult<Vec<String>> {
-        debug!("call: dictionary.WordGenerator.random_list");
+        log_stuff(String::from("call: dictionary.WordGenerator.random_list")).await?;
         if dictionary.len() < (MINIMUM_DICTIONARY_SIZE + 1) {
             return Err("dictionary must have at least 26 words".into());
         }
@@ -48,12 +47,12 @@ impl WordGenerator for WordGeneratorWasmCloud {
     }
 
     async fn random_pair(&self, dictionary: HashSet<String>) -> ServiceResult<(String, String)> {
-        debug!("call: dictionary.WordGenerator.random_pair");
+        log_stuff(String::from("call: dictionary.WordGenerator.random_pair")).await?;
         let result = self.random_list(&dictionary, 2).await?;
-        debug!(
+        log_stuff(format!(
             "dictionary.WordGenerator.random_pair: got random list from generator: {}",
-            result.len()
-        );
+            result.len())
+        ).await?;
         if result.len() == 2 {
             return Ok((result[0].clone(), result[1].clone()));
         }

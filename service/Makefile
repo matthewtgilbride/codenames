@@ -78,14 +78,23 @@ integration-test: integration-test-docker ## run docker integration tests and cl
 ##@ Wasmcloud
 
 wasmcloud-deps: ## start the auxiliary services needed to run wash locally
-	docker-compose -f ../docker-compose.yml up -d registry nats redis
+	docker-compose -f ../docker-compose.yml up -d registry nats
 
-rust_log = info
+rust_log = debug
+actor_id = $(shell wash claims inspect ./codenames.wasm -o json | jq -r .module)
 
 wasmcloud-actor-build: build-wasm ## compile and build wasmcloud actor mosule
 
 wasmcloud-actor-sign: wasmcloud-actor-build ## sign the built wasmcloud actor
-	wash claims sign target/wasm32-unknown-unknown/release/codenames_wasm.wasm --keyvalue --http_server --logging --cap wasmcloud:extras --name "codenames" --destination ./codenames.wasm
+	wash claims sign \
+		target/wasm32-unknown-unknown/release/codenames_wasm.wasm \
+		--http_server \
+		--cap wasmcloud:builtin:logging \
+		--cap wasmcloud:builtin:numbergen \
+		--cap aws:kvdynamodb \
+		--name "codenames" \
+		--destination ./codenames.wasm
+
 
 codenames.wasm: build-wasm wasmcloud-actor-sign
 $(wildcard ./wasm/src/**/*): codenames.wasm
@@ -99,16 +108,30 @@ wasmcloud-actor-update: wasmcloud-actor-push ## update the running actor in the 
 	wash ctl update actor $(shell wash ctl get hosts -o json | jq -r '.hosts[0].id') $(codenames_actor_id) localhost:5000/codenames:v1
 
 .PHONY: wasmcloud-up
-wasmcloud-up: export ACTOR_ID=$(shell wash claims inspect ./codenames.wasm -o json | jq -r .module)
 wasmcloud-up: export RUST_LOG=$(rust_log)
+wasmcloud-up: export TABLE_NAME=codenames
+wasmcloud-up: export KEY_ATTRIBUTE=key
+wasmcloud-up: export VALUE_ATTRIBUTE=game
 wasmcloud-up: wasmcloud-deps codenames.wasm ## start the wasmcloud actor locally
-	wasmcloud --allowed-insecure localhost:5000 -m wasm/manifest.yaml
+	wasmcloud_host foreground --allowed-insecure localhost:5000
+
+.PHONY: bootstrap
+wasmcloud-start:
+	# wash ctl start provider ../../kvdynamodb-provider/build/kvdynamodb_provider.par.gz
+	wash ctl start provider wasmcloud.azurecr.io/httpserver:0.15.0
+	wash ctl start actor localhost:5000/codenames:v1 --insecure
+
+wasmcloud-link:
+	wash ctl link put MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M wasmcloud:httpserver
+	wash ctl link put MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 VBM7ATBGFQ2ZWDECPWUTLRIIWSBPABHBL5UL5CD7LDNR5I4NKFXZJ5EA aws:kvdynamodb
+
 
 wasmcloud_process = $(shell ps | grep wasmcloud | awk '{print $$1}')
 .PHONY: wasmcloud-down
 wasmcloud-down: kill-local ## tear down wasmcloud and it's dependencies
-	docker-compose down
-	-kill $(wasmcloud_process)
+	-docker-compose down
+	-wasmcloud_host stop
+	-ps -ax | grep -i wasmcloud | awk '{print $$1}' | xargs kill -9
 
 .PHONY: wash-up ## start the wasmcloud actor in a wash REPL
 wash-up: export ACTOR_ID=$(shell wash claims inspect ./codenames.wasm -o json | jq -r .module)

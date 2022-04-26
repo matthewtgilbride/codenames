@@ -8,8 +8,8 @@ use codenames_domain::{
     },
     ServiceError, ServiceResult,
 };
-use log::debug;
 use wasmcloud_interface_numbergen::random_in_range;
+use crate::log_stuff;
 
 #[derive(Clone)]
 pub struct BoardGeneratorWasmCloud;
@@ -29,22 +29,24 @@ impl BoardGeneratorWasmCloud {
 #[async_trait]
 impl BoardGenerator for BoardGeneratorWasmCloud {
     async fn random_board(&self, words: [String; 25]) -> ServiceResult<(Board, Team)> {
-        debug!("call: board.BoardGenerator.random_board");
+        log_stuff(String::from("call: board.BoardGenerator.random_board")).await?;
         let first_team = self.random_team().await?;
 
         let mut indices: Vec<usize> = Vec::new();
         while indices.len() < 25 {
-            let rand = random_in_range(0, 25)
+            let rand = random_in_range(0, 24)
                 .await
                 .map_err(|_| ServiceError::Unknown("could not get random number".into()))?
                 as usize;
 
-            debug!("selected index: {}", rand);
+            log_stuff(format!("selected index: {}", rand)).await?;
 
             if !indices.contains(&rand) {
                 indices.push(rand)
             }
         }
+
+        log_stuff(String::from("built indices")).await?;
 
         let mut initial_board: Vec<CardState> = words
             .iter()
@@ -54,25 +56,27 @@ impl BoardGenerator for BoardGeneratorWasmCloud {
             })
             .collect();
 
-        indices
-            .iter()
-            .enumerate()
-            .for_each(|(index, &random_index)| {
-                let CardState { word, .. } = initial_board[random_index].clone();
-                let color = match index {
-                    0 => Some(CardColor::Death),
-                    i if i < 8 => Some(CardColor::Neutral),
-                    i if i < 16 => {
-                        if first_team == Team::Blue {
-                            Some(CardColor::Team(Team::Red))
-                        } else {
-                            Some(CardColor::Team(Team::Blue))
-                        }
+        log_stuff(String::from("built initial board")).await?;
+
+        for (index, &random_index) in indices.iter().enumerate() {
+            log_stuff(format!("in loop for index: {}, random: {}", index, random_index)).await?;
+            let CardState { word, .. } = initial_board[random_index].clone();
+            let color = match index {
+                0 => Some(CardColor::Death),
+                i if i < 8 => Some(CardColor::Neutral),
+                i if i < 16 => {
+                    if first_team == Team::Blue {
+                        Some(CardColor::Team(Team::Red))
+                    } else {
+                        Some(CardColor::Team(Team::Blue))
                     }
-                    _ => Some(CardColor::Team(first_team)),
-                };
-                initial_board[random_index] = CardState { word, color }
-            });
+                }
+                _ => Some(CardColor::Team(first_team)),
+            };
+            initial_board[random_index] = CardState { word, color }
+        }
+
+        log_stuff(String::from("updated indices")).await?;
 
         let board: Vec<Card> = initial_board
             .iter()
@@ -81,6 +85,8 @@ impl BoardGenerator for BoardGeneratorWasmCloud {
                 color: color.unwrap(),
             })
             .collect();
+
+        log_stuff(String::from("built board")).await?;
 
         Ok((board.try_into().unwrap(), first_team))
     }
