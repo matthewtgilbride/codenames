@@ -9,6 +9,7 @@ use codenames_domain::{
     ServiceError, ServiceResult,
 };
 use wasmcloud_interface_numbergen::random_in_range;
+
 use crate::log_stuff;
 
 #[derive(Clone)]
@@ -59,7 +60,11 @@ impl BoardGenerator for BoardGeneratorWasmCloud {
         log_stuff(String::from("built initial board")).await?;
 
         for (index, &random_index) in indices.iter().enumerate() {
-            log_stuff(format!("in loop for index: {}, random: {}", index, random_index)).await?;
+            log_stuff(format!(
+                "in loop for index: {}, random: {}",
+                index, random_index
+            ))
+            .await?;
             let CardState { word, .. } = initial_board[random_index].clone();
             let color = match index {
                 0 => Some(CardColor::Death),

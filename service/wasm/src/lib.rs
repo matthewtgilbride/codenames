@@ -3,8 +3,11 @@ extern crate serde_json;
 
 use std::fmt::Debug;
 
-use codenames_domain::{game::{model::Player, service::GameService}, GameListBody, GameNameBody, ServiceError, ServiceResult, StdError};
-
+use codenames_domain::{
+    game::{model::Player, service::GameService},
+    ClueBody, GameListBody, GameNameBody, ServiceError, ServiceResult, StdError,
+};
+use querystring::querify;
 use serde_json::Value;
 use urlencoding::decode;
 use wasmbus_rpc::actor::prelude::*;
@@ -32,13 +35,20 @@ impl CodenamesActor {
         let word_generator = Box::new(WordGeneratorWasmCloud);
         let board_generator = Box::new(BoardGeneratorWasmCloud);
         let dao = Box::new(WasmKeyValueDao::new(ctx));
-        let service = GameService::new(word_generator, board_generator, dao)
-            .map_err(|e| to_rpc_error(e))?;
+        let service =
+            GameService::new(word_generator, board_generator, dao).map_err(|e| to_rpc_error(e))?;
 
         let &method = &req.method.as_str();
         let segments = path_segments(req);
 
-        let routing_result: Result<Value, ServiceError> = do_routing(service, method, segments, req.body.as_slice()).await;
+        let routing_result: Result<Value, ServiceError> = do_routing(
+            service,
+            method,
+            segments,
+            req.body.as_slice(),
+            &req.query_string,
+        )
+        .await;
 
         routing_result
             .map(|json| HttpResponse::json(json, 200))
@@ -65,7 +75,13 @@ impl HttpServer for CodenamesActor {
     }
 }
 
-async fn do_routing(service: GameService, method: &str, segments: Vec<&str>, body_slice: &[u8]) -> Result<Value, ServiceError> {
+async fn do_routing(
+    service: GameService,
+    method: &str,
+    segments: Vec<&str>,
+    body_slice: &[u8],
+    query_string: &str,
+) -> Result<Value, ServiceError> {
     match (method, &segments[..]) {
         // get a random game key
         ("GET", []) => {
@@ -81,12 +97,10 @@ async fn do_routing(service: GameService, method: &str, segments: Vec<&str>, bod
             let body_str = std::str::from_utf8(body_slice)
                 .map_err(|_| ServiceError::Unknown("error body utf8".to_string()))?;
 
-            let body: GameNameBody = serde_json::from_str(body_str)
-                .map_err(|e| ServiceError::Unknown(e.to_string()))?;
+            let body: GameNameBody =
+                serde_json::from_str(body_str).map_err(|e| ServiceError::Unknown(e.to_string()))?;
 
-            let game = service
-                .new_game(body.game_name)
-                .await?;
+            let game = service.new_game(body.game_name).await?;
             Ok(json!(game))
         }
         //
@@ -100,10 +114,7 @@ async fn do_routing(service: GameService, method: &str, segments: Vec<&str>, bod
         // // get an existing game
         ("GET", ["game", game_key]) => {
             debug_route("get game").await?;
-            let game = service
-                .clone()
-                .get(game_key, &None, &None)
-                .await?;
+            let game = service.clone().get(game_key, &None, &None).await?;
             Ok(json!(game))
         }
         //
@@ -114,31 +125,34 @@ async fn do_routing(service: GameService, method: &str, segments: Vec<&str>, bod
                 std::str::from_utf8(body_slice)
                     .map_err(|e| ServiceError::Unknown(e.to_string()))?,
             )
-                .map_err(|e| ServiceError::Unknown(e.to_string()))?;
-            let updated_game = service
-                .join(game_key.to_string(), player)
-                .await?;
+            .map_err(|e| ServiceError::Unknown(e.to_string()))?;
+            let updated_game = service.join(game_key.to_string(), player).await?;
             Ok(json!(updated_game))
         }
         //
         // end the current team's turn
         ("PUT", ["game", game_key, "end-turn"]) => {
             debug_route("end turn").await?;
-            let updated_game = service
-                .end_turn(game_key.to_string())
-                .await?;
+            let updated_game = service.end_turn(game_key.to_string()).await?;
             Ok(json!(updated_game))
         }
-        //
+
         // get a player's view of the game
         ("GET", ["game", game_key, player_name_encoded]) => {
             debug_route("get player game").await?;
             let player_name =
                 decode(player_name_encoded).map_err(|e| ServiceError::Unknown(e.to_string()))?;
+
+            let spymaster_secret = &querify(query_string)
+                .iter()
+                .find(|(k, _)| k == &"secret")
+                .map(|(_, v)| v.to_string());
+
             let game = service
                 .clone()
-                .get(game_key, &Some(player_name), &None)
+                .get(game_key, &Some(player_name), spymaster_secret)
                 .await?;
+
             Ok(json!(game))
         }
 
@@ -169,6 +183,23 @@ async fn do_routing(service: GameService, method: &str, segments: Vec<&str>, bod
                 .leave(game_key.to_string(), player_name.as_str())
                 .await?;
             Ok(json!(updated_game))
+        }
+
+        // start a turn
+        ("PUT", ["game", game_key, player_name_encoded, "start-turn"]) => {
+            debug_route("start turn").await?;
+            let player_name =
+                decode(player_name_encoded).map_err(|e| ServiceError::Unknown(e.to_string()))?;
+            let ClueBody { word, amount } = serde_json::from_str(
+                std::str::from_utf8(body_slice)
+                    .map_err(|e| ServiceError::Unknown(e.to_string()))?,
+            )
+            .map_err(|e| ServiceError::Unknown(e.to_string()))?;
+            let game = service
+                .clone()
+                .start_turn(game_key.to_string(), player_name, (word, amount))
+                .await?;
+            Ok(json!(game))
         }
 
         _ => Err(ServiceError::NotFound("unmatched route".to_string())),
