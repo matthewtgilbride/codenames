@@ -119,7 +119,7 @@ wasmcloud-up: wasmcloud-deps codenames.wasm ## start the wasmcloud actor locally
 wasmcloud-start:
 	# wash ctl start provider ../../kvdynamodb-provider/build/kvdynamodb_provider.par.gz
 	wash ctl start provider wasmcloud.azurecr.io/httpserver:0.15.0
-	wash ctl start actor localhost:5000/codenames:v1 --insecure
+	# wash ctl start actor localhost:5000/codenames:v1 --insecure
 
 wasmcloud-link:
 	wash ctl link put MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M wasmcloud:httpserver
