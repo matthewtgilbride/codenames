@@ -3,7 +3,7 @@ extern crate serde_json;
 
 use std::fmt::Debug;
 
-use codenames_domain::{game::{model::Player, service::GameService}, GameNameBody, ServiceError, ServiceResult, StdError};
+use codenames_domain::{game::{model::Player, service::GameService}, GameListBody, GameNameBody, ServiceError, ServiceResult, StdError};
 
 use serde_json::Value;
 use urlencoding::decode;
@@ -94,7 +94,7 @@ async fn do_routing(service: GameService, method: &str, segments: Vec<&str>, bod
         ("GET", ["game"]) => {
             debug_route("get all games").await?;
             let games = service.clone().find().await?;
-            Ok(json!(games))
+            Ok(json!(GameListBody::new(games)))
         }
         //
         // // get an existing game
