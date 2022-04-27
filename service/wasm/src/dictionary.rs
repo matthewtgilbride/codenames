@@ -51,8 +51,9 @@ impl WordGenerator for WordGeneratorWasmCloud {
         let result = self.random_list(&dictionary, 2).await?;
         log_stuff(format!(
             "dictionary.WordGenerator.random_pair: got random list from generator: {}",
-            result.len())
-        ).await?;
+            result.len()
+        ))
+        .await?;
         if result.len() == 2 {
             return Ok((result[0].clone(), result[1].clone()));
         }

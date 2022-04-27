@@ -12,6 +12,7 @@ crate-type = ["cdylib", "rlib"]
 async-trait = "0.1"
 futures = "0.3"
 codenames-domain = { path = "../domain" }
+querystring = "1.1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_derive = "1.0.118"
 serde_json = "1.0"
