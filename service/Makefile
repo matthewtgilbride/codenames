@@ -42,9 +42,6 @@ check: format build test ## format, build, and test
 
 ##@ Local Development
 
-redis-up: ## bring up a local redis container
-	docker-compose -f ../docker-compose.yml up -d redis
-
 LOCAL_PID = $(shell lsof -t -i:8080)
 kill-local: ## kill whatever is running on port 8080
 	-kill $(LOCAL_PID)
@@ -83,9 +80,7 @@ wasmcloud-deps: ## start the auxiliary services needed to run wash locally
 rust_log = debug
 actor_id = $(shell wash claims inspect ./codenames.wasm -o json | jq -r .module)
 
-wasmcloud-actor-build: build-wasm ## compile and build wasmcloud actor mosule
-
-wasmcloud-actor-sign: wasmcloud-actor-build ## sign the built wasmcloud actor
+wasmcloud-actor-sign: build-wasm ## sign the built wasmcloud actor
 	wash claims sign \
 		target/wasm32-unknown-unknown/release/codenames_wasm.wasm \
 		--http_server \
@@ -96,34 +91,43 @@ wasmcloud-actor-sign: wasmcloud-actor-build ## sign the built wasmcloud actor
 		--destination ./codenames.wasm
 
 
-codenames.wasm: build-wasm wasmcloud-actor-sign
+codenames.wasm: wasmcloud-actor-sign
 $(wildcard ./wasm/src/**/*): codenames.wasm
 
 .PHONY: wasmcloud-actor-push
 wasmcloud-actor-push: codenames.wasm ## push the built wasmcloud module to a local registry
-	wash reg push localhost:5000/codenames:v1 codenames.wasm --insecure
+	wash reg push localhost:5000/codenames:0.1.0 codenames.wasm --insecure
 
 .PHONY: wasmcloud-actor-update
 wasmcloud-actor-update: wasmcloud-actor-push ## update the running actor in the wasmcloud host
 	wash ctl update actor $(shell wash ctl get hosts -o json | jq -r '.hosts[0].id') $(codenames_actor_id) localhost:5000/codenames:v1
 
-.PHONY: wasmcloud-up
-wasmcloud-up: export RUST_LOG=$(rust_log)
-wasmcloud-up: export TABLE_NAME=codenames
-wasmcloud-up: export KEY_ATTRIBUTE=key
-wasmcloud-up: export VALUE_ATTRIBUTE=game
-wasmcloud-up: wasmcloud-deps codenames.wasm ## start the wasmcloud actor locally
-	wasmcloud_host foreground --allowed-insecure localhost:5000
+.PHONY: wasmcloud-host-start
+wasmcloud-host-start: export RUST_LOG=$(rust_log)
+wasmcloud-host-start: export TABLE_NAME=codenames
+wasmcloud-host-start: export KEY_ATTRIBUTE=key
+wasmcloud-host-start: export VALUE_ATTRIBUTE=game
+wasmcloud-host-start: export WASMCLOUD_OCI_ALLOWED_INSECURE=localhost:5000
+wasmcloud-host-start: wasmcloud-deps ## start the wasmcloud actor locally
+	wasmcloud_host start
 
-.PHONY: bootstrap
-wasmcloud-start:
-	# wash ctl start provider ../../kvdynamodb-provider/build/kvdynamodb_provider.par.gz
+.PHONY: wasmcloud-start
+wasmcloud-start: wasmcloud-host-start
+	cd ../../kvdynamodb-provider && make push
+	wash ctl start provider localhost:5000/v2/kvdynamodb_provider:0.1.0
 	wash ctl start provider wasmcloud.azurecr.io/httpserver:0.15.0
-	# wash ctl start actor localhost:5000/codenames:v1 --insecure
+	wash ctl start actor localhost:5000/codenames:0.1.0
 
-wasmcloud-link:
-	wash ctl link put MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M wasmcloud:httpserver
-	wash ctl link put MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 VBM7ATBGFQ2ZWDECPWUTLRIIWSBPABHBL5UL5CD7LDNR5I4NKFXZJ5EA aws:kvdynamodb
+wasmcloud-up: wasmcloud-start
+	wash ctl link put \
+	  MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 \
+	  VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M \
+	  wasmcloud:httpserver \
+	  PORT=8080
+	wash ctl link put \
+		MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 \
+		VBM7ATBGFQ2ZWDECPWUTLRIIWSBPABHBL5UL5CD7LDNR5I4NKFXZJ5EA \
+		aws:kvdynamodb
 
 
 wasmcloud_process = $(shell ps | grep wasmcloud | awk '{print $$1}')
