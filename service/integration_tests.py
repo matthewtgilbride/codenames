@@ -103,7 +103,7 @@ def test_join_game_player_exists(host, test_state):
     )
 
     assert r.status_code == 400
-    assert r.json().get("msg") is not None
+    assert r.json().get("BadRequest") is not None
 
 
 def test_start_turn(host, test_state):
