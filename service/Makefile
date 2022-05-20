@@ -104,15 +104,12 @@ wasmcloud-actor-update: wasmcloud-actor-push ## update the running actor in the 
 
 .PHONY: wasmcloud-host-start
 wasmcloud-host-start: export RUST_LOG=$(rust_log)
-wasmcloud-host-start: export TABLE_NAME=codenames
-wasmcloud-host-start: export KEY_ATTRIBUTE=key
-wasmcloud-host-start: export VALUE_ATTRIBUTE=game
 wasmcloud-host-start: export WASMCLOUD_OCI_ALLOWED_INSECURE=localhost:5000
 wasmcloud-host-start: wasmcloud-deps ## start the wasmcloud actor locally
 	wasmcloud_host start
 
 .PHONY: wasmcloud-start
-wasmcloud-start: wasmcloud-host-start
+wasmcloud-start: wasmcloud-host-start wasmcloud-actor-push
 	cd ../../kvdynamodb-provider && make push
 	wash ctl start provider localhost:5000/v2/kvdynamodb_provider:0.1.0
 	wash ctl start provider wasmcloud.azurecr.io/httpserver:0.15.0
@@ -127,7 +124,8 @@ wasmcloud-up: wasmcloud-start
 	wash ctl link put \
 		MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 \
 		VBM7ATBGFQ2ZWDECPWUTLRIIWSBPABHBL5UL5CD7LDNR5I4NKFXZJ5EA \
-		aws:kvdynamodb
+		aws:kvdynamodb \
+		config_json='{ "table_name": "codenames", "key_attribute": "key", "value_attribute": "game" }'
 
 
 wasmcloud_process = $(shell ps | grep wasmcloud | awk '{print $$1}')
