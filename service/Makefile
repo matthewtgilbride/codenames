@@ -98,6 +98,11 @@ $(wildcard ./wasm/src/**/*): codenames.wasm
 wasmcloud-actor-push: codenames.wasm ## push the built wasmcloud module to a local registry
 	wash reg push localhost:5000/codenames:0.1.0 codenames.wasm --insecure
 
+wasmcloud-actor-push-gh: codenames.wasm ## push the built wasmcloud module to ghcr
+	wash reg push \
+	-u matthewtgilbride -p $$GH_PERSONAL_ACCESS_TOKEN \
+	ghcr.io/matthewtgilbride/codenames:0.1.0 codenames.wasm
+
 .PHONY: wasmcloud-actor-update
 wasmcloud-actor-update: wasmcloud-actor-push ## update the running actor in the wasmcloud host
 	wash ctl update actor $(shell wash ctl get hosts -o json | jq -r '.hosts[0].id') $(codenames_actor_id) localhost:5000/codenames:v1
@@ -109,23 +114,23 @@ wasmcloud-host-start: wasmcloud-deps ## start the wasmcloud actor locally
 	wasmcloud_host start
 
 .PHONY: wasmcloud-start
-wasmcloud-start: wasmcloud-host-start wasmcloud-actor-push
-	cd ../../kvdynamodb-provider && make push
-	wash ctl start provider localhost:5000/v2/kvdynamodb_provider:0.1.0
+wasmcloud-start: wasmcloud-host-start
+	wash ctl start provider ghcr.io/matthewtgilbride/kvdynamodb_provider:0.1.0
 	wash ctl start provider wasmcloud.azurecr.io/httpserver:0.15.0
-	wash ctl start actor localhost:5000/codenames:0.1.0
+	wash ctl start actor ghcr.io/matthewtgilbride/codenames:0.1.0
 
 wasmcloud-up: wasmcloud-start
 	wash ctl link put \
 	  MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 \
 	  VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M \
 	  wasmcloud:httpserver \
-	  PORT=8080
+	  PORT=8080 \
+	  allowed_origins="http://localhost:3000"
 	wash ctl link put \
-		MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 \
-		VBM7ATBGFQ2ZWDECPWUTLRIIWSBPABHBL5UL5CD7LDNR5I4NKFXZJ5EA \
-		aws:kvdynamodb \
-		config_json='{ "table_name": "codenames", "key_attribute": "key", "value_attribute": "game" }'
+	  MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 \
+	  VBM7ATBGFQ2ZWDECPWUTLRIIWSBPABHBL5UL5CD7LDNR5I4NKFXZJ5EA \
+	  aws:kvdynamodb \
+	  config_json='{ "table_name": "codenames", "key_attribute": "key", "value_attribute": "game" }'
 
 
 wasmcloud_process = $(shell ps | grep wasmcloud | awk '{print $$1}')
