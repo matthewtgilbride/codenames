@@ -34,7 +34,6 @@ export class InstanceConstruct extends Construct {
     });
 
     securityGroup.addIngressRule(Peer.ipv4(`${publicIp}/32`), Port.tcp(22));
-    securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(3000));
     securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(8080));
 
     const userData = UserData.forLinux();
