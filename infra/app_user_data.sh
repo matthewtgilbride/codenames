@@ -1,8 +1,9 @@
 apt-get update -y
 # apt-get install ca-certificates y
+apt-get install libssl-dev -y
 
 # nats
-curl -L https://github.com/nats-io/nats-server/releases/download/v2.8.4/nats-server-v2.8.4-amd64.deb -o nats-server.deb
+curl -L https://github.com/nats-io/nats-server/releases/download/v2.8.4/nats-server-v2.8.4-arm64.deb -o nats-server.deb
 apt-get install ./nats-server.deb -y
 
 # wash
@@ -10,9 +11,9 @@ curl -s https://packagecloud.io/install/repositories/wasmcloud/core/script.deb.s
 apt-get install wash -y
 
 # wasmcloud host
-wget https://github.com/wasmCloud/wasmcloud-otp/releases/download/v0.54.6/x86_64-linux.tar.gz
+wget https://github.com/wasmCloud/wasmcloud-otp/releases/download/v0.54.6/aarch64-linux.tar.gz
 mkdir -p wasmcloud
-tar -xvf x86_64-linux.tar.gz -C wasmcloud
+tar -xvf aarch64-linux.tar.gz -C wasmcloud
 
 # start nats
 nohup nats-server &
