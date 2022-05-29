@@ -43,15 +43,15 @@ export class InstanceConstruct extends Construct {
     );
     userData.addCommands(installScript);
 
-    const machineImage = MachineImage.lookup({
-      name: 'ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20210223',
+    const machineImage = MachineImage.genericLinux({
+      'us-east-1': 'ami-02ddaf75821f25213',
     });
 
     const instance = new Instance(this, 'codenames instance', {
       vpc,
       userData,
       machineImage,
-      instanceType: InstanceType.of(InstanceClass.T2, InstanceSize.NANO),
+      instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.NANO),
       availabilityZone: 'us-east-1b',
       keyName: 'aws_ssh',
       securityGroup,
@@ -63,9 +63,6 @@ export class InstanceConstruct extends Construct {
       ],
       role: new Role(this, 'ecr-role', {
         managedPolicies: [
-          ManagedPolicy.fromAwsManagedPolicyName(
-            'AmazonEC2ContainerRegistryReadOnly',
-          ),
           ManagedPolicy.fromAwsManagedPolicyName('AmazonDynamoDBFullAccess'),
         ],
         assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
