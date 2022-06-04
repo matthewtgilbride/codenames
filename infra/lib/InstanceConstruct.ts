@@ -44,14 +44,15 @@ export class InstanceConstruct extends Construct {
     userData.addCommands(installScript);
 
     const machineImage = MachineImage.genericLinux({
-      'us-east-1': 'ami-02ddaf75821f25213',
+      // ubuntu 20.04 x86
+      'us-east-1': 'ami-0c4f7023847b90238',
     });
 
     const instance = new Instance(this, 'codenames instance', {
       vpc,
       userData,
       machineImage,
-      instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.NANO),
+      instanceType: InstanceType.of(InstanceClass.T3A, InstanceSize.NANO),
       availabilityZone: 'us-east-1b',
       keyName: 'aws_ssh',
       securityGroup,
