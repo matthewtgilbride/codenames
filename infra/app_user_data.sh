@@ -21,6 +21,8 @@ nohup nats-server -js &
 # start host
 nohup wasmcloud/bin/wasmcloud_host start
 
+sleep 30
+
 # start providers and actor
 wash ctl start provider ghcr.io/matthewtgilbride/kvdynamodb_provider_x86:0.1.0
 wash ctl start provider wasmcloud.azurecr.io/httpserver:0.15.0
@@ -31,7 +33,7 @@ wash ctl link put \
   MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 \
   VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M \
   wasmcloud:httpserver \
-  PORT=8080 \
+  ADDRESS=0.0.0.0:8080 \
   allowed_origins="https://codenames.mattgilbride.com"
 
 wash ctl link put \
