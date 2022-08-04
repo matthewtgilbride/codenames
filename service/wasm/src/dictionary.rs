@@ -27,14 +27,14 @@ impl WordGeneratorWasmCloud {
 
         let mut chosen_indices: HashSet<usize> = HashSet::new();
         while chosen_indices.len() < size {
-            let rand = random_in_range(0, dictionary.len() as u32)
+            let rand = random_in_range(0, dictionary.len() as u32 - 1)
                 .await
                 .map_err(|e| to_service_error(e))?;
             chosen_indices.insert(rand as usize);
         }
         Ok(chosen_indices
             .into_iter()
-            .map(|i| as_vector[i].clone())
+            .map(|i| as_vector.get(i).unwrap_or_else())
             .collect())
     }
 }
@@ -43,7 +43,10 @@ impl WordGeneratorWasmCloud {
 impl WordGenerator for WordGeneratorWasmCloud {
     async fn random_set(&self, dictionary: HashSet<String>) -> ServiceResult<[String; 25]> {
         let words = self.random_list(&dictionary, 25).await?;
-        Ok(words.try_into().unwrap())
+        let fixed = words.try_into().map_err(|e: Vec<String>| {
+            ServiceError::Unknown(format!("weird error going form vec to arr: {}", e.len()))
+        })?;
+        Ok(fixed)
     }
 
     async fn random_pair(&self, dictionary: HashSet<String>) -> ServiceResult<(String, String)> {
