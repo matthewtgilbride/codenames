@@ -16,7 +16,7 @@ curl -s https://packagecloud.io/install/repositories/wasmcloud/core/script.deb.s
 apt-get install wash -y
 
 # start nats
-nohup nats-server -js &
+nohup nats-server -js -l nats.log &
 
 # start host
 nohup wasmcloud/bin/wasmcloud_host start
