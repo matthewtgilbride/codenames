@@ -58,9 +58,9 @@ start: ## start fully functioning stack locally via docker
 
 ##@ Infrastructure (AWS CDK)
 
-deploy-infra: build-service build-app ## deploy AWS infrastructure
-	cp ./service/target/x86_64-unknown-linux-musl/release/codenames-actix ./service/codenames-actix
-	${MAKE} -C infra deploy-registry
+deploy-infra: build-app ## deploy AWS infrastructure
+	# cp ./service/target/x86_64-unknown-linux-musl/release/codenames-actix ./service/codenames-actix
+	# ${MAKE} -C infra deploy-registry
 	${MAKE} -C infra deploy-app
 	${MAKE} deploy-ui
 

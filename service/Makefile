@@ -75,7 +75,7 @@ integration-test: integration-test-docker ## run docker integration tests and cl
 ##@ Wasmcloud
 
 wasmcloud-deps: ## start the auxiliary services needed to run wash locally
-	docker-compose -f ../docker-compose.yml up -d registry nats
+	docker-compose -f ../docker-compose.yml up -d nats
 
 rust_log = debug
 actor_id = $(shell wash claims inspect ./codenames.wasm -o json | jq -r .module)
@@ -115,7 +115,7 @@ wasmcloud-host-start: wasmcloud-deps ## start the wasmcloud actor locally
 
 .PHONY: wasmcloud-start
 wasmcloud-start: wasmcloud-host-start
-	wash ctl start provider ghcr.io/matthewtgilbride/kvdynamodb_provider:0.1.0
+	wash ctl start provider ghcr.io/matthewtgilbride/kvdynamodb_provider_arm:0.1.0
 	wash ctl start provider wasmcloud.azurecr.io/httpserver:0.15.0
 	wash ctl start actor ghcr.io/matthewtgilbride/codenames:0.1.0
 
@@ -124,7 +124,7 @@ wasmcloud-up: wasmcloud-start
 	  MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 \
 	  VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M \
 	  wasmcloud:httpserver \
-	  PORT=8080 \
+	  ADDRESS=0.0.0.0:8080 \
 	  allowed_origins="http://localhost:3000"
 	wash ctl link put \
 	  MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 \
