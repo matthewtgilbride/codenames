@@ -13,8 +13,10 @@ class TestState:
 @pytest.fixture(scope="session")
 def host() -> str:
     host_env = environ.get("TEST_HOST")
+    port_env = environ.get("TEST_PORT")
     host = "localhost" if host_env is None else host_env
-    return f"http://{host}:8080"
+    port = "8080" if port_env is None else port_env
+    return f"http://{host}:{port}"
 
 
 @pytest.fixture(scope="session")

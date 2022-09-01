@@ -26,6 +26,7 @@ deploy-app: ## deploy development EC2 instance
 
 destroy-app: export DEPLOY_TYPE=app
 destroy-app: ## destroy development EC2 instance
+	aws s3 rm s3://codenames.mattgilbride.com --recursive
 	yarn cdk destroy
 
 ##@ ECR Registry
