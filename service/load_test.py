@@ -32,12 +32,17 @@ def test_get_game(host, game_name):
     r = requests.get(f"{host}/game/{game_name}")
     status_code = r.status_code
     assert status_code == 200
-    count = 1
-    while status_code == 200:
-        time.sleep(1)
-        count += 1
-        print(f"making request {count}")
-        r = requests.get(f"{host}/game/{game_name}")
-        status_code = r.status_code
+    success_rate = 1
+    while success_rate > 0.5:
+        request_count = 0
+        success_count = 0
+        for _ in range(100):
+            r = requests.get(f"{host}/game/{game_name}")
+            request_count += 1
+            if r.status_code == 200:
+                success_count += 1
+            time.sleep(1)
+        success_rate = success_count / request_count
+        print(f"{datetime.now().isoformat()}: {success_count}/{request_count}")
     end = datetime.now()
-    assert start.timestamp() == end.timestamp()
+    assert start.isoformat() == end.isoformat()
