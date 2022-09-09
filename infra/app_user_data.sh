@@ -35,7 +35,7 @@ wash ctl link put \
   MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 \
   VAXC6ARD2NH5TQ3TQ3ZE6U2EOBE4QWD4NQWW6CH26VFLY27VZYM4UJA3 \
   aws:kvdynamodb \
-  config_json='{ "table_name": "codenames", "key_attribute": "key", "value_attribute": "game" }'
+  config_json='{ "table_name": "codenames", "key_attribute": "key", "value_attribute": "game", "ttl_attribute": "ttl" }'
 
 # start providers and actor
 wash ctl start provider ghcr.io/matthewtgilbride/kvdynamodb_provider_x86:0.1.0
