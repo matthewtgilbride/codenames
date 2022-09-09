@@ -39,5 +39,5 @@ wash ctl link put \
 
 # start providers and actor
 wash ctl start provider ghcr.io/matthewtgilbride/kvdynamodb_provider_x86:0.1.0
-wash ctl start provider wasmcloud.azurecr.io/httpserver:0.15.0
+wash ctl start provider wasmcloud.azurecr.io/httpserver:0.16.2
 wash ctl start actor ghcr.io/matthewtgilbride/codenames:0.1.0
