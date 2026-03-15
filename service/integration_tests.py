@@ -14,9 +14,12 @@ class TestState:
 def host() -> str:
     host_env = environ.get("TEST_HOST")
     port_env = environ.get("TEST_PORT")
+    scheme = environ.get("TEST_SCHEME", "http")
     host = "localhost" if host_env is None else host_env
     port = "8080" if port_env is None else port_env
-    return f"http://{host}:{port}"
+    if scheme == "https" and port == "443":
+        return f"https://{host}"
+    return f"{scheme}://{host}:{port}"
 
 
 @pytest.fixture(scope="session")
@@ -105,7 +108,7 @@ def test_join_game_player_exists(host, test_state):
     )
 
     assert r.status_code == 400
-    assert r.json().get("BadRequest") is not None
+    assert r.json().get("msg") is not None
 
 
 def test_start_turn(host, test_state):

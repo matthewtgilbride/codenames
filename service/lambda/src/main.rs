@@ -10,6 +10,7 @@ use lambda_http::{
     http::{Method, StatusCode},
     run, service_fn, Body, Request, Response,
 };
+use percent_encoding::percent_decode_str;
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -83,8 +84,13 @@ async fn router(req: Request, service: GameService) -> Response<Body> {
     // Strip trailing slash for consistency
     let path = path.trim_end_matches('/');
 
-    // Split path into segments
-    let segments: Vec<&str> = path.split('/').filter(|s| !s.is_empty()).collect();
+    // Split path into segments and URL-decode them
+    let segments: Vec<String> = path
+        .split('/')
+        .filter(|s| !s.is_empty())
+        .map(|s| percent_decode_str(s).decode_utf8_lossy().into_owned())
+        .collect();
+    let segments: Vec<&str> = segments.iter().map(|s| s.as_str()).collect();
 
     match (method, segments.as_slice()) {
         // GET / — random game name
