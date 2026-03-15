@@ -61,16 +61,14 @@ impl GameDao for DynamoDao {
             .client
             .scan()
             .table_name(DYNAMO_TABLE_NAME)
-            .projection_expression(DYNAMO_KEY_ATTRIBUTE)
+            .projection_expression("#k")
+            .expression_attribute_names("#k", DYNAMO_KEY_ATTRIBUTE)
             .send()
             .await
             .map_err(|e| DaoError::Unknown(e.to_string()))?;
 
-        let items = result
-            .items
-            .ok_or_else(|| DaoError::Unknown("no items".into()))?;
-
-        let keys: Vec<String> = items
+        let keys: Vec<String> = result
+            .items()
             .iter()
             .map(|i| {
                 i.get(DYNAMO_KEY_ATTRIBUTE)
