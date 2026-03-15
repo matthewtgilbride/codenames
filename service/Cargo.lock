@@ -816,6 +816,7 @@ dependencies = [
  "codenames-domain",
  "lambda_http",
  "lambda_runtime",
+ "percent-encoding",
  "serde",
  "serde_json",
  "tokio",
