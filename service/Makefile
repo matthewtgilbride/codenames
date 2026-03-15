@@ -27,11 +27,6 @@ build-release-aarch64: export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aar
 build-release-aarch64: ## build a release for 64 bit ARM architectures (e.g. Mac M1)
 	cargo build --release --target aarch64-unknown-linux-musl
 
-build-wasm: ## compile and build wasm subproject
-	cargo build -p codenames-wasm --release --target wasm32-unknown-unknown
-
-build-all: build build-wasm ## compile and build all projects
-
 format: ## format code
 	cargo +nightly fmt
 
@@ -76,76 +71,3 @@ integration-test-docker: check build-release-x86_64 ## check code, build newman 
 integration-test: integration-test-docker ## run docker integration tests and clean up
 	docker-compose -f ../docker-compose.yml down
 
-##@ Wasmcloud
-
-wasmcloud-deps: ## start the auxiliary services needed to run wash locally
-	docker-compose -f ../docker-compose.yml up -d nats
-
-rust_log = debug
-actor_id = $(shell wash claims inspect ./codenames.wasm -o json | jq -r .module)
-
-wasmcloud-actor-sign: build-wasm ## sign the built wasmcloud actor
-	wash claims sign \
-		target/wasm32-unknown-unknown/release/codenames_wasm.wasm \
-		--http_server \
-		--cap wasmcloud:builtin:logging \
-		--cap wasmcloud:builtin:numbergen \
-		--cap aws:kvdynamodb \
-		--name "codenames" \
-		--destination ./codenames.wasm
-
-
-codenames.wasm: wasmcloud-actor-sign
-$(wildcard ./wasm/src/**/*): codenames.wasm
-
-.PHONY: wasmcloud-actor-push
-wasmcloud-actor-push: codenames.wasm ## push the built wasmcloud module to a local registry
-	wash reg push localhost:5000/codenames:0.1.0 codenames.wasm --insecure
-
-wasmcloud-actor-push-gh: codenames.wasm ## push the built wasmcloud module to ghcr
-	wash reg push \
-	-u matthewtgilbride -p $$GH_PERSONAL_ACCESS_TOKEN \
-	ghcr.io/matthewtgilbride/codenames:0.1.0 codenames.wasm
-
-.PHONY: wasmcloud-actor-update
-wasmcloud-actor-update: wasmcloud-actor-push ## update the running actor in the wasmcloud host
-	wash ctl update actor $(shell wash ctl get hosts -o json | jq -r '.hosts[0].id') $(codenames_actor_id) localhost:5000/codenames:v1
-
-.PHONY: wasmcloud-host-start
-wasmcloud-host-start: export RUST_LOG=$(rust_log)
-wasmcloud-host-start: export WASMCLOUD_OCI_ALLOWED_INSECURE=localhost:5000
-wasmcloud-host-start: wasmcloud-deps ## start the wasmcloud actor locally
-	wasmcloud_host start
-
-.PHONY: wasmcloud-start
-wasmcloud-start: wasmcloud-host-start
-	wash ctl start provider ghcr.io/matthewtgilbride/kvdynamodb_provider_arm:0.1.0
-	wash ctl start provider wasmcloud.azurecr.io/httpserver:0.15.0
-	wash ctl start actor ghcr.io/matthewtgilbride/codenames:0.1.0
-
-wasmcloud-up: wasmcloud-start
-	wash ctl link put \
-	  MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 \
-	  VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M \
-	  wasmcloud:httpserver \
-	  ADDRESS=0.0.0.0:8080 \
-	  allowed_origins="http://localhost:3000"
-	wash ctl link put \
-	  MBBVDZJTLOX3O5XUHZB2BLG3GKGU4AOWVOVKWN5CH4AUPYHDSSABC454 \
-	  VBM7ATBGFQ2ZWDECPWUTLRIIWSBPABHBL5UL5CD7LDNR5I4NKFXZJ5EA \
-	  aws:kvdynamodb \
-	  config_json='{ "table_name": "codenames", "key_attribute": "key", "value_attribute": "game" }'
-
-
-wasmcloud_process = $(shell ps | grep wasmcloud | awk '{print $$1}')
-.PHONY: wasmcloud-down
-wasmcloud-down: kill-local ## tear down wasmcloud and it's dependencies
-	-docker-compose down
-	-wasmcloud_host stop
-	-ps -ax | grep -i wasmcloud | awk '{print $$1}' | xargs kill -9
-
-.PHONY: wash-up ## start the wasmcloud actor in a wash REPL
-wash-up: export ACTOR_ID=$(shell wash claims inspect ./codenames.wasm -o json | jq -r .module)
-wash-up: export RUST_LOG=$(rust_log)
-wash-up: codenames.wasm
-	wash up -m wasm/manifest.yaml

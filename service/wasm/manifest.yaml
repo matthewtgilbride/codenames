@@ -1,9 +1,0 @@
----
-labels:
-  name: codenames
-actors:
-  - ./codenames.wasm
-capabilities:
-  - image_ref: wasmcloud.azurecr.io/redis:0.11.2
-  - image_ref: wasmcloud.azurecr.io/httpserver:0.14.4
-  - image_ref: localhost:5000/kvdynamodb:v1

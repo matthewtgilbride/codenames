@@ -33,9 +33,6 @@ chmod +x /usr/local/bin/docker-compose
 # rust
 su - ubuntu -c \
   'curl https://sh.rustup.rs -sSf | sh -s -- -y'
-su - ubuntu -c \
-  'rustup target add wasm32-unknown-unknown'
-
 # make
 apt-get install make -y
 
@@ -52,10 +49,6 @@ apt-get install net-tools -y
 apt-get install nodejs -y
 apt-get install npm -y
 npm install --global yarn
-
-# wash and wasmcloud
-curl -s https://packagecloud.io/install/repositories/wasmcloud/core/script.deb.sh | bash
-apt-get install wasmcloud wash -y
 
 # clone codenames
 cd /home/ubuntu

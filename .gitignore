@@ -12,6 +12,3 @@ infra/.cdk.staging
 infra/cdk.out
 infra/cdk.context.json
 
-*.nk
-
-service/*.wasm
