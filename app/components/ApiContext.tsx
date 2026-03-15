@@ -1,4 +1,10 @@
-import { createContext, FC, useContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { Modal } from '../design/Modal';
 import { API_URL } from '../constants';
 
@@ -12,10 +18,10 @@ export interface ApiContextType {
 
 export const ApiContext = createContext<ApiContextType | undefined>(undefined);
 
-export const ApiContextProvider: FC<{ baseUrl?: string }> = ({
+export const ApiContextProvider = ({
   baseUrl = API_URL,
   children,
-}) => {
+}: PropsWithChildren<{ baseUrl?: string }>) => {
   const [error, setError] = useState<Error | Response | null>(null);
   const [loading, setLoading] = useState(false);
   const [text, setText] = useState('');

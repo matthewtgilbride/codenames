@@ -1,5 +1,5 @@
 import React from 'react';
-import { Meta, Story } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { PlayerList, PlayerListProps } from './PlayerList';
 
 export default {
@@ -7,7 +7,7 @@ export default {
   component: PlayerList,
 } as Meta;
 
-const Template: Story<PlayerListProps> = (args) => <PlayerList {...args} />;
+const Template: StoryFn<PlayerListProps> = (args) => <PlayerList {...args} />;
 
 export const Empty = Template.bind({});
 Empty.args = {

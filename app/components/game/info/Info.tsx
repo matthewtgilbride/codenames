@@ -43,8 +43,9 @@ const PlayerListHeader: FC<{ game: GameState; team: Team }> = ({
 }) => {
   const firstTeam = getFirstTeam(game);
 
-  const count = getGuesses(game).filter((i) => game.board[i].color === team)
-    .length;
+  const count = getGuesses(game).filter(
+    (i) => game.board[i].color === team,
+  ).length;
 
   return (
     <div

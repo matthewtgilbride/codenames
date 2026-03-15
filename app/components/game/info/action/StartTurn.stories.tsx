@@ -1,5 +1,5 @@
 import React from 'react';
-import { Meta, Story } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { StartTurn, ClueProps } from './StartTurn';
 
 export default {
@@ -7,7 +7,7 @@ export default {
   component: StartTurn,
 } as Meta;
 
-const Template: Story<ClueProps> = (args) => <StartTurn {...args} />;
+const Template: StoryFn<ClueProps> = (args) => <StartTurn {...args} />;
 
 export const Default = Template.bind({});
 Default.args = {};
