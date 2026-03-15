@@ -9,7 +9,6 @@ compile: ## run typescript compiler
 
 build: ## build the nextjs app
 	yarn build
-	yarn export
 
 format: ## fix lint errors
 	yarn lint --fix

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Meta, Story } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { Game, GameProps } from './Game';
 
 export default {
@@ -7,7 +7,7 @@ export default {
   component: Game,
 } as Meta;
 
-const Template: Story<GameProps> = (args) => <Game {...args} />;
+const Template: StoryFn<GameProps> = (args) => <Game {...args} />;
 
 export const EmptyGame = Template.bind({});
 EmptyGame.args = {};

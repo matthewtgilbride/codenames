@@ -1,21 +1,26 @@
 import { css, Global } from '@emotion/react';
-import React, { FC, KeyboardEvent, MouseEvent, useState } from 'react';
+import React, { KeyboardEvent, MouseEvent, PropsWithChildren, useState } from 'react';
 import ReactModal from 'react-modal';
+
+// react-modal's class component types are incompatible with React 18's stricter JSX types
+const StyledModal = ReactModal as unknown as React.FC<ReactModal.Props>;
 import { lighten } from 'polished';
 import { overlayColor, Palette } from './color';
 import { Breakpoints } from './responsive';
 
-ReactModal.setAppElement('#app');
+if (typeof window !== 'undefined') {
+  ReactModal.setAppElement('#app');
+}
 
 export interface ModalProps {
   isOpen: boolean;
   onRequestClose: (event: MouseEvent | KeyboardEvent) => void;
 }
 
-export const Modal: FC<ModalProps> = ({ isOpen, onRequestClose, children }) => (
+export const Modal = ({ isOpen, onRequestClose, children }: PropsWithChildren<ModalProps>) => (
   <>
     <Global styles={modalStyle} />
-    <ReactModal
+    <StyledModal
       isOpen={isOpen}
       closeTimeoutMS={500}
       onRequestClose={onRequestClose}
@@ -23,7 +28,7 @@ export const Modal: FC<ModalProps> = ({ isOpen, onRequestClose, children }) => (
       shouldCloseOnEsc
     >
       {children}
-    </ReactModal>
+    </StyledModal>
   </>
 );
 

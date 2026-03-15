@@ -29,9 +29,9 @@ export const usePoll = <T>(config: PollConfig<T>) => {
           setError(true);
           onErrorWithContext(result, apiContext, config.onError);
         }
-      } catch (e) {
+      } catch (e: unknown) {
         setError(true);
-        onErrorWithContext(e, apiContext, config.onError);
+        onErrorWithContext(e as Error | Response, apiContext, config.onError);
       }
     };
     const i = setInterval(() => {

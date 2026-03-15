@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { PropsWithChildren } from 'react';
 import { css } from '@emotion/css';
 import { lighten } from 'polished';
 import { BrowserRouter as Router, Link } from 'react-router-dom';
@@ -7,7 +7,7 @@ import { beginAt, Breakpoints } from './responsive';
 
 const { phoneMd, phoneLg, tabletPortrait } = Breakpoints;
 
-export const Layout: FC = ({ children }) => (
+export const Layout = ({ children }: PropsWithChildren) => (
   <Router>
     <div className={container}>
       <h1 className={title}>

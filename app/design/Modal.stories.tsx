@@ -1,5 +1,5 @@
 import React from 'react';
-import { Meta, Story } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { Modal, ModalProps } from './Modal';
 
 export default {
@@ -7,7 +7,7 @@ export default {
   component: Modal,
 } as Meta;
 
-const Template: Story<ModalProps & { contentHeight?: number }> = (args) => (
+const Template: StoryFn<ModalProps & { contentHeight?: number }> = (args) => (
   <div style={{ height: args.contentHeight ?? '100%' }}>
     <Modal {...args} />
   </div>

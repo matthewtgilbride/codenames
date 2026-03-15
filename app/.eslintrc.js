@@ -5,10 +5,7 @@ module.exports = {
   },
   extends: [
     'plugin:react/recommended',
-    'airbnb-typescript',
     'prettier',
-    'prettier/@typescript-eslint',
-    'prettier/react',
     'plugin:react-hooks/recommended',
   ],
   parser: '@typescript-eslint/parser',
@@ -22,11 +19,8 @@ module.exports = {
   },
   plugins: ['prettier', 'react', 'react-hooks', '@typescript-eslint'],
   settings: {
-    'import/resolver': {
-      node: {
-        extensions: ['.js', '.ts'],
-      },
-      typescript: {},
+    react: {
+      version: 'detect',
     },
   },
   rules: {
@@ -37,12 +31,8 @@ module.exports = {
     'react/prop-types': 'off',
     'react/jsx-props-no-spreading': 'off',
     'react/react-in-jsx-scope': 'off',
-    'react/jsx-no-bind': 'error',
+    'react/jsx-no-bind': 'warn',
     'import/prefer-default-export': 'off',
-    'import/no-extraneous-dependencies': [
-      'error',
-      { devDependencies: ['**/*.stories.tsx'] },
-    ],
     '@typescript-eslint/no-use-before-define': ['off', { functions: false }],
     '@typescript-eslint/naming-convention': 'off',
     '@typescript-eslint/no-unused-vars': [
