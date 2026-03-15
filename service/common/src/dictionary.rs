@@ -42,6 +42,6 @@ impl WordGenerator for WordGeneratorRand {
         let first = random_subset.get(0).unwrap().clone();
         let second = random_subset.get(1).unwrap().clone();
 
-        return Ok((first, second));
+        Ok((first, second))
     }
 }

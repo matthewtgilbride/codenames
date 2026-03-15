@@ -1,4 +1,4 @@
-import { Duration, RemovalPolicy } from 'aws-cdk-lib';
+import { Duration, Fn, RemovalPolicy } from 'aws-cdk-lib';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import {
   HostedZone,
@@ -19,9 +19,10 @@ import {
 import { HttpOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { Construct } from 'constructs';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
+import { FunctionUrl } from 'aws-cdk-lib/aws-lambda';
 
 export class CloudfrontConstruct extends Construct {
-  constructor(scope: Construct, id: string, instanceDnsName: string) {
+  constructor(scope: Construct, id: string, functionUrl: FunctionUrl) {
     super(scope, id);
 
     const domainName = StringParameter.valueFromLookup(this, 'domainName');
@@ -48,11 +49,7 @@ export class CloudfrontConstruct extends Construct {
       websiteIndexDocument: 'index.html',
       websiteErrorDocument: 'index.html',
       publicReadAccess: true,
-
-      // The default removal policy is RETAIN, which means that cdk destroy will not attempt to delete
-      // the new bucket, and it will remain in your account until manually deleted. By setting the policy to
-      // DESTROY, cdk destroy will attempt to delete the bucket, but will error if the bucket is not empty.
-      removalPolicy: RemovalPolicy.DESTROY, // NOT recommended for production code
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
     const appDist = new Distribution(this, 'AppDist', {
@@ -66,12 +63,14 @@ export class CloudfrontConstruct extends Construct {
       domainNames: [appDnsRecord],
     });
 
+    // Extract hostname from Lambda Function URL token: "https://abc123.lambda-url.us-east-1.on.aws/"
+    const lambdaOriginDomain = Fn.select(2, Fn.split('/', functionUrl.url));
+
     const serviceDist = new Distribution(this, 'ServiceDist', {
       certificate,
       defaultBehavior: {
-        origin: new HttpOrigin(instanceDnsName, {
-          protocolPolicy: OriginProtocolPolicy.HTTP_ONLY,
-          httpPort: 8080,
+        origin: new HttpOrigin(lambdaOriginDomain, {
+          protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
         }),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: AllowedMethods.ALLOW_ALL,
@@ -93,7 +92,6 @@ export class CloudfrontConstruct extends Construct {
       zone,
       recordName: appDnsRecord,
       recordType: RecordType.CNAME,
-      // todo: make longer once stable
       ttl: Duration.seconds(60),
       target: RecordTarget.fromValues(appDist.distributionDomainName),
     });
@@ -102,7 +100,6 @@ export class CloudfrontConstruct extends Construct {
       zone,
       recordName: serviceDnsRecord,
       recordType: RecordType.CNAME,
-      // todo: make longer once stable
       ttl: Duration.seconds(60),
       target: RecordTarget.fromValues(serviceDist.distributionDomainName),
     });

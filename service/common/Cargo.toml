@@ -1,0 +1,18 @@
+[package]
+name = "codenames-common"
+version = "0.1.0"
+authors = ["Matthew T. Gilbride <mgilbride@chariotsolutions.com>"]
+edition = "2021"
+
+[dependencies]
+async-trait = "0.1.52"
+aws-config = { version = "1", features = ["behavior-version-latest"] }
+aws-sdk-dynamodb = "1"
+chrono = "0.4.19"
+codenames-domain = { path = "../domain" }
+rand = "0.8.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
