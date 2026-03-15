@@ -9,11 +9,11 @@ import {
   FunctionUrlAuthType,
   HttpMethod,
 } from 'aws-cdk-lib/aws-lambda';
-import { Table } from 'aws-cdk-lib/aws-dynamodb';
+import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import * as path from 'path';
 
 export interface LambdaConstructProps {
-  table: Table;
+  table: ITable;
   allowedOrigins: string[];
 }
 
@@ -49,7 +49,6 @@ export class LambdaConstruct extends Construct {
           HttpMethod.POST,
           HttpMethod.PUT,
           HttpMethod.DELETE,
-          HttpMethod.OPTIONS,
         ],
         allowedHeaders: ['*'],
       },

@@ -1,18 +1,13 @@
 import { Construct } from 'constructs';
-import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb';
-import { RemovalPolicy } from 'aws-cdk-lib';
+import { ITable, Table } from 'aws-cdk-lib/aws-dynamodb';
 
 export class DynamoConstruct extends Construct {
-  public readonly table: Table;
+  public readonly table: ITable;
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    this.table = new Table(scope, `${id}-table`, {
-      tableName: 'codenames',
-      partitionKey: { name: 'key', type: AttributeType.STRING },
-      timeToLiveAttribute: 'ttl',
-      removalPolicy: RemovalPolicy.DESTROY,
-    });
+    // Import the existing table created by the previous stack
+    this.table = Table.fromTableName(this, `${id}-table`, 'codenames');
   }
 }

@@ -1,5 +1,4 @@
 import { Duration, Fn, RemovalPolicy } from 'aws-cdk-lib';
-import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import {
   HostedZone,
   RecordSet,
@@ -13,26 +12,30 @@ import {
   CachePolicy,
   Distribution,
   OriginProtocolPolicy,
+  OriginRequestHeaderBehavior,
   OriginRequestPolicy,
+  OriginRequestQueryStringBehavior,
   ViewerProtocolPolicy,
 } from 'aws-cdk-lib/aws-cloudfront';
 import { HttpOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { Construct } from 'constructs';
-import { Bucket } from 'aws-cdk-lib/aws-s3';
+import { BlockPublicAccess, Bucket } from 'aws-cdk-lib/aws-s3';
 import { FunctionUrl } from 'aws-cdk-lib/aws-lambda';
 
+export interface CloudfrontConstructProps {
+  functionUrl: FunctionUrl;
+  domainName: string;
+  certificateArn: string;
+}
+
 export class CloudfrontConstruct extends Construct {
-  constructor(scope: Construct, id: string, functionUrl: FunctionUrl) {
+  constructor(scope: Construct, id: string, props: CloudfrontConstructProps) {
     super(scope, id);
 
-    const domainName = StringParameter.valueFromLookup(this, 'domainName');
+    const { functionUrl, domainName, certificateArn } = props;
     const zone = HostedZone.fromLookup(this, `${id}-HostedZone`, {
       domainName,
     });
-    const certificateArn = StringParameter.valueFromLookup(
-      this,
-      'certificateArn',
-    );
 
     const certificate = Certificate.fromCertificateArn(
       this,
@@ -44,11 +47,14 @@ export class CloudfrontConstruct extends Construct {
     const serviceDnsRecord = `codenamesapi.${domainName}`;
 
     // Content bucket
+    // Skip bucketName during initial synth pass when SSM returns dummy values
+    const isDummyValue = domainName.includes('dummy-value');
     const siteBucket = new Bucket(this, `${id}-AppBucket`, {
-      bucketName: appDnsRecord,
+      ...(!isDummyValue && { bucketName: appDnsRecord }),
       websiteIndexDocument: 'index.html',
       websiteErrorDocument: 'index.html',
       publicReadAccess: true,
+      blockPublicAccess: BlockPublicAccess.BLOCK_ACLS,
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
@@ -83,7 +89,14 @@ export class CloudfrontConstruct extends Construct {
           minTtl: Duration.seconds(0),
           defaultTtl: Duration.seconds(0),
         }),
-        originRequestPolicy: OriginRequestPolicy.ALL_VIEWER,
+        originRequestPolicy: new OriginRequestPolicy(this, 'Codenames-Api-Origin-Request-Policy', {
+          headerBehavior: OriginRequestHeaderBehavior.allowList(
+            'Origin',
+            'Access-Control-Request-Method',
+            'Access-Control-Request-Headers',
+          ),
+          queryStringBehavior: OriginRequestQueryStringBehavior.all(),
+        }),
       },
       domainNames: [serviceDnsRecord],
     });

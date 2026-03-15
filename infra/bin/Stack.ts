@@ -17,7 +17,10 @@ class CodenamesStack extends Stack {
       stackName: 'Codenames',
     });
 
+    // valueFromLookup resolves at synth-time (needed for HostedZone.fromLookup)
     const domainName = StringParameter.valueFromLookup(this, 'domainName');
+    // valueForStringParameter resolves at deploy-time (avoids ARN validation issues)
+    const certificateArn = StringParameter.valueForStringParameter(this, 'certificateArn');
 
     const { table } = new DynamoConstruct(this, `${id}-Dynamo`);
 
@@ -29,7 +32,11 @@ class CodenamesStack extends Stack {
       ],
     });
 
-    new CloudfrontConstruct(this, `${id}-Cloudfront`, functionUrl);
+    new CloudfrontConstruct(this, `${id}-Cloudfront`, {
+      functionUrl,
+      domainName,
+      certificateArn,
+    });
   }
 }
 
