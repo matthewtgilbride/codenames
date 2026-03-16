@@ -12,3 +12,4 @@ infra/.cdk.staging
 infra/cdk.out
 infra/cdk.context.json
 
+service/__pycache__/
