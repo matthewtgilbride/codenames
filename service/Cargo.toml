@@ -3,13 +3,11 @@ resolver = "2"
 default-members = [
     "domain",
     "common",
-    "actix",
     "lambda",
 ]
 members = [
     "domain",
     "common",
-    "actix",
     "lambda",
 ]
 
