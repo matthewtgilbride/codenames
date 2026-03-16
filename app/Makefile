@@ -1,7 +1,5 @@
 include ../help.mk
 
-LOCAL_IP = $(shell ipconfig getifaddr en0)
-
 ##@ Yarn commands
 
 compile: ## run typescript compiler

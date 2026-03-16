@@ -14,11 +14,11 @@ test-service: ## run unit tests on the rust project
 check-service: ## check the rust project (format, build, and unit test)
 	$(MAKE) -C service check
 
-start-service: ## start the rust service locally using actix
-	$(MAKE) -C service run-local
-
-start-lambda: ## start the lambda function locally using cargo-lambda
+start-service: ## start the lambda function locally using cargo-lambda
 	$(MAKE) -C service run-lambda-local
+
+integration-test: ## run integration tests against the service
+	$(MAKE) -C service integration-test
 
 ##@ Frontend (Typescript/NextJS Web App)
 
