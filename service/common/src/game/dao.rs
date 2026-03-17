@@ -1,12 +1,23 @@
 use async_trait::async_trait;
 use aws_sdk_dynamodb::{types::AttributeValue, Client};
 use chrono::{Duration, Utc};
-use codenames_domain::{
-    game::{dao::GameDao, model::GameData},
+use dyn_clone::DynClone;
+
+use crate::{
+    game::model::GameData,
     DaoError,
     DaoError::NotFound,
     DaoResult, Lowercase, StdResult,
 };
+
+#[async_trait]
+pub trait GameDao: DynClone + Send + Sync {
+    async fn get(&mut self, key: Lowercase) -> DaoResult<GameData>;
+    async fn keys(&mut self) -> DaoResult<Vec<Lowercase>>;
+    async fn set(&mut self, key: Lowercase, game: GameData) -> DaoResult<()>;
+}
+
+dyn_clone::clone_trait_object!(GameDao);
 
 const DYNAMO_TABLE_NAME: &str = "codenames";
 const DYNAMO_KEY_ATTRIBUTE: &str = "key";

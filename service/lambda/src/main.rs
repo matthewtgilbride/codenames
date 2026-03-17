@@ -1,9 +1,6 @@
 use codenames_common::{
     dictionary::WordGeneratorRand,
-    game::{board::BoardGeneratorRand, dao::DynamoDao},
-};
-use codenames_domain::{
-    game::{model::Player, service::GameService},
+    game::{board::BoardGeneratorRand, dao::DynamoDao, model::Player, service::GameService},
     ClueBody, GameListBody, GameNameBody, ServiceError,
 };
 use lambda_http::{
