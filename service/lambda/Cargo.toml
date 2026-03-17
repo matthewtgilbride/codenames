@@ -10,7 +10,6 @@ path = "src/main.rs"
 
 [dependencies]
 codenames-common = { path = "../common" }
-codenames-domain = { path = "../domain" }
 lambda_http = "0.13"
 lambda_runtime = "0.13"
 percent-encoding = "2"

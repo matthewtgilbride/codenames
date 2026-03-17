@@ -490,7 +490,9 @@ dependencies = [
  "aws-config",
  "aws-sdk-dynamodb",
  "chrono",
- "codenames-domain",
+ "dyn-clone",
+ "enum-display-derive",
+ "log",
  "rand",
  "serde",
  "serde_json",
@@ -498,23 +500,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "codenames-domain"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "dyn-clone",
- "enum-display-derive",
- "log",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "codenames-lambda"
 version = "0.1.0"
 dependencies = [
  "codenames-common",
- "codenames-domain",
  "lambda_http",
  "lambda_runtime",
  "percent-encoding",

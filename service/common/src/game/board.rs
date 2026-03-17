@@ -1,7 +1,7 @@
 use std::convert::TryInto;
 
 use async_trait::async_trait;
-use codenames_domain::{
+use crate::{
     game::{
         board_service::BoardGenerator,
         model::{Board, Card, CardColor, CardState, Team},
@@ -73,15 +73,15 @@ impl BoardGenerator for BoardGeneratorRand {
 #[cfg(test)]
 mod tests {
 
-    use codenames_domain::{
+    use crate::{
         dictionary::DictionaryService,
         game::{
             board_service::{card_color_count, BoardService},
             model::{CardColor, Team},
         },
+        dictionary::WordGeneratorRand,
+        game::board::BoardGeneratorRand,
     };
-
-    use crate::{dictionary::WordGeneratorRand, game::board::BoardGeneratorRand};
 
     #[tokio::test]
     async fn new_board() {
