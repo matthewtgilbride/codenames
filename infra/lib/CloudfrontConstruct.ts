@@ -19,7 +19,7 @@ import {
 } from 'aws-cdk-lib/aws-cloudfront';
 import { HttpOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { Construct } from 'constructs';
-import { BlockPublicAccess, Bucket } from 'aws-cdk-lib/aws-s3';
+import { BlockPublicAccess, Bucket, ObjectOwnership } from 'aws-cdk-lib/aws-s3';
 import { FunctionUrl } from 'aws-cdk-lib/aws-lambda';
 
 export interface CloudfrontConstructProps {
@@ -58,8 +58,16 @@ export class CloudfrontConstruct extends Construct {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
+    // Access log bucket for CloudFront
+    const logBucket = new Bucket(this, `${id}-CfLogsBucket`, {
+      objectOwnership: ObjectOwnership.BUCKET_OWNER_PREFERRED,
+      removalPolicy: RemovalPolicy.DESTROY,
+    });
+
     const appDist = new Distribution(this, 'AppDist', {
       certificate,
+      logBucket,
+      logFilePrefix: 'app-logs/',
       defaultBehavior: {
         origin: new HttpOrigin(siteBucket.bucketWebsiteDomainName, {
           protocolPolicy: OriginProtocolPolicy.HTTP_ONLY,
@@ -74,6 +82,8 @@ export class CloudfrontConstruct extends Construct {
 
     const serviceDist = new Distribution(this, 'ServiceDist', {
       certificate,
+      logBucket,
+      logFilePrefix: 'api-logs/',
       defaultBehavior: {
         origin: new HttpOrigin(lambdaOriginDomain, {
           protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
